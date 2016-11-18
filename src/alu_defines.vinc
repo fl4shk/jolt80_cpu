@@ -1,0 +1,70 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef alu_defines_vinc
+`define alu_defines_vinc
+
+
+`include "src/global_macros.vinc"
+
+// ALU constants
+
+// ALU operation number of bits and most significant bit position
+`define const_alu_oper_width 4
+`define const_alu_oper_msb_pos (`width_to_msb_pos(`const_alu_oper_width))
+
+// ALU input/output number of bits and most significant bit position
+//`define const_alu_inout_width 8
+`define const_alu_inout_width 4
+`define const_alu_inout_msb_pos (`width_to_msb_pos(`const_alu_inout_width))
+
+
+
+// ALU operation enum values
+
+
+
+// Arithmetic operations
+
+// Addition operations, starting with 4'h0
+`define enum_alu_oper_add `const_alu_oper_width'h0
+`define enum_alu_oper_adc (`enum_alu_oper_add + `const_alu_oper_width'h1)
+// Subtraction operations, starting with 4'h2
+`define enum_alu_oper_sub (`enum_alu_oper_adc + `const_alu_oper_width'h1)
+`define enum_alu_oper_sbc (`enum_alu_oper_sub + `const_alu_oper_width'h1)
+`define enum_alu_oper_cmp (`enum_alu_oper_sbc + `const_alu_oper_width'h1)
+
+
+
+// Bitwise operations
+
+// Operations analogous to logic gates (none of these affect carry),
+// starting with 4'h5
+`define enum_alu_oper_and (`enum_alu_oper_cmp + `const_alu_oper_width'h1)
+`define enum_alu_oper_or (`enum_alu_oper_and + `const_alu_oper_width'h1)
+`define enum_alu_oper_xor (`enum_alu_oper_or + `const_alu_oper_width'h1)
+//`define enum_alu_oper_inv (`enum_alu_oper_xor + `const_alu_oper_width'h1)
+
+// Bitshifting operations (one bit at a time), starting with 4'h8
+`define enum_alu_oper_lsl (`enum_alu_oper_xor + `const_alu_oper_width'h1)
+`define enum_alu_oper_lsr (`enum_alu_oper_lsl + `const_alu_oper_width'h1)
+////`define enum_alu_oper_asr (`enum_alu_oper_lsr + `const_alu_oper_width'h1)
+//`define enum_alu_oper_rol (`enum_alu_oper_lsr + `const_alu_oper_width'h1)
+//`define enum_alu_oper_ror (`enum_alu_oper_rol + `const_alu_oper_width'h1)
+
+
+`endif		// alu_defines_vinc

@@ -1,0 +1,32 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef global_macros_vinc
+`define global_macros_vinc
+
+
+// This will probably be used in lots of places
+`define width_to_msb_pos( some_width ) ( some_width - 1 )
+
+//`define whole_range( some_width ) ( `convert_width_to_msb_pos(some_width):0 )
+`define whole_range( some_msb_pos ) ( some_msb_pos:0 )
+
+
+`define indirect( stuff ) stuff \
+
+
+`endif		// global_macros_vinc

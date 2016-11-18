@@ -1,0 +1,33 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef proc_flags_defines_vinc
+`define proc_flags_defines_vinc
+
+
+`include "src/global_macros.vinc"
+
+`define const_proc_flags_width 2
+`define const_proc_flags_msb_pos \
+	(`width_to_msb_pos(`const_proc_flags_width))
+
+// Two processor flags (for simplicity):  carry (c) and zero (z)
+`define enum_proc_flag_z `const_proc_flags_width'h0
+`define enum_proc_flag_c `const_proc_flags_width'h1
+
+
+`endif		// proc_flags_defines_vinc
