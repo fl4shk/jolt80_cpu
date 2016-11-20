@@ -55,16 +55,14 @@
 // Operations analogous to logic gates (none of these affect carry),
 // starting with 4'h5
 `define enum_alu_oper_and (`enum_alu_oper_cmp + `const_alu_oper_width'h1)
-`define enum_alu_oper_or (`enum_alu_oper_and + `const_alu_oper_width'h1)
-`define enum_alu_oper_xor (`enum_alu_oper_or + `const_alu_oper_width'h1)
+`define enum_alu_oper_orr (`enum_alu_oper_and + `const_alu_oper_width'h1)
+`define enum_alu_oper_xor (`enum_alu_oper_orr + `const_alu_oper_width'h1)
 //`define enum_alu_oper_inv (`enum_alu_oper_xor + `const_alu_oper_width'h1)
 
 // Bitshifting operations (one bit at a time), starting with 4'h8
-`define enum_alu_oper_lsl (`enum_alu_oper_xor + `const_alu_oper_width'h1)
-`define enum_alu_oper_lsr (`enum_alu_oper_lsl + `const_alu_oper_width'h1)
-////`define enum_alu_oper_asr (`enum_alu_oper_lsr + `const_alu_oper_width'h1)
-//`define enum_alu_oper_rol (`enum_alu_oper_lsr + `const_alu_oper_width'h1)
-//`define enum_alu_oper_ror (`enum_alu_oper_rol + `const_alu_oper_width'h1)
+////`define enum_alu_oper_lsl (`enum_alu_oper_xor + `const_alu_oper_width'h1)
+//`define enum_alu_oper_lsr (`enum_alu_oper_lsl + `const_alu_oper_width'h1)
+`define enum_alu_oper_lsr (`enum_alu_oper_xor + `const_alu_oper_width'h1)
 
 
 `endif		// alu_defines_vinc

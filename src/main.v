@@ -42,6 +42,8 @@ module alu_test_bench;
 	
 	initial
 	begin
+		alu_oper = `const_alu_oper_width'h0;
+		
 		master_clk = 1'b0;
 		dummy = 1'b0;
 		
@@ -52,9 +54,8 @@ module alu_test_bench;
 		//alu_oper = `enum_alu_oper_cmp;
 		
 		//alu_oper = `enum_alu_oper_and;
-		//alu_oper = `enum_alu_oper_or;
+		//alu_oper = `enum_alu_oper_orr;
 		//alu_oper = `enum_alu_oper_xor;
-		//alu_oper = `enum_alu_oper_lsl;
 		//alu_oper = `enum_alu_oper_lsr;
 		
 		{ alu_a_in, alu_b_in } = { `const_alu_inout_width'h0,

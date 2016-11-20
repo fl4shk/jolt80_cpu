@@ -78,7 +78,7 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 					proc_flags_in[`enum_proc_flag_c] };
 			end
 			
-			`enum_alu_oper_or:
+			`enum_alu_oper_orr:
 			begin
 				out = a_in | b_in;
 				{ temp_out, proc_flags_out[`enum_proc_flag_c] } = { out,
@@ -94,12 +94,12 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 			
 			// Bitshifting operations (one bit at a time), starting with
 			// 4'h8
-			`enum_alu_oper_lsl:
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], out } = { 1'b0, a_in } 
-					<< 1'b1;
-				temp_out = out;
-			end
+			//`enum_alu_oper_lsl:
+			//begin
+			//	{ proc_flags_out[`enum_proc_flag_c], out } = { 1'b0, a_in } 
+			//		<< 1'b1;
+			//	temp_out = out;
+			//end
 			
 			`enum_alu_oper_lsr:
 			begin
