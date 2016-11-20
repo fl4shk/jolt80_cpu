@@ -41,7 +41,7 @@ Type 2:  10oo oooo aaaa bbbb
       and, orr, xor, 
     Bitshifting (and rotating) instructions that use the value of (rB % 8)
     as the number of bits to shift by:
-      lsl, lsr, rol, ror
+      lsl, lsr, asr, rol, ror
     Copy instructions:
       cpy (CoPY from one register to another register)
 
