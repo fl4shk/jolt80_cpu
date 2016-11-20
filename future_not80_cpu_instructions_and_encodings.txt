@@ -135,6 +135,7 @@ Type 4:  1110 oooo Daaa Dbbb
 Type 5:  1111 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
     Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
+      bra (branch always), bnv (branch never, a form of NOP)
       bne (branch when Z == 0), beq (branch when Z == 1), 
       bcc (branch when C == 0), bcs (branch when C == 1)
 
