@@ -52,6 +52,10 @@ Type 2:  10oo oooo aaaa bbbb
     Bitshifting (and rotating) instructions that use the value of rB as the
     number of bits to shift by:
       lsl, lsr, asr, rol, ror
+    Bitshifting (and rotating) instructions that use carry as an extra bit
+    (either bit 8 or bit 0) and that use the value of rB as the number of
+    bits to shift by:
+      lslc, lsrc, asrc, rolc, rorc
     Copy instructions:
       cpy (CoPY from one register to another register)
 

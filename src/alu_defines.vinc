@@ -67,5 +67,8 @@
 `define enum_alu_oper_rol ( `enum_alu_oper_asr + 1 )
 `define enum_alu_oper_ror ( `enum_alu_oper_rol + 1 )
 
+// Bitshifting operations that use carry as bit 8 or bit 0 (number of bits
+// to shift by specified by 
+
 
 `endif		// alu_defines_vinc

@@ -33,11 +33,14 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 	
 	wire [`const_alu_inout_width:0] rotate_max_shift_thing;
 	wire [`const_alu_inout_msb_pos:0] rotate_mod_thing;
+	wire [`const_alu_inout_width + `const_alu_inout_width - 1:0]
+		rotate_temp;
 	
 	assign rotate_max_shift_thing = 1 << `const_alu_inout_width;
 	assign rotate_mod_thing = ( `const_alu_inout_width'h1 
 		<< `const_alu_inout_width ) - `const_alu_inout_width'h1;
 	
+	assign rotate_temp = { a_in, a_in };
 	
 	always @ ( oper, a_in, b_in, proc_flags_in )
 	begin
@@ -150,14 +153,15 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 		begin
 			if ( b_in == `const_alu_inout_width'h0 )
 			begin
-				{ proc_flags_out[`enum_proc_flag_c],
-					do_not_change_z_flag }
-					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
+				{ proc_flags_out[`enum_proc_flag_c], do_not_change_z_flag, 
+					out } = { proc_flags_in[`enum_proc_flag_c], 1'b1, 
+					a_in };
 			end
 			
 			else
 			begin
-				//out = a_in;
+				out = rotate_temp[ ( `const_alu_inout_width - ( b_in 
+					& rotate_mod_thing ) ) +: `const_alu_inout_width ];
 			end
 		end
 		
@@ -165,14 +169,15 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 		begin
 			if ( b_in == `const_alu_inout_width'h0 )
 			begin
-				{ proc_flags_out[`enum_proc_flag_c],
-					do_not_change_z_flag }
-					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
+				{ proc_flags_out[`enum_proc_flag_c], do_not_change_z_flag, 
+					out } = { proc_flags_in[`enum_proc_flag_c], 1'b1, 
+					a_in };
 			end
 			
 			else
 			begin
-				out = a_in;
+				out = rotate_temp[ ( b_in & rotate_mod_thing ) 
+					+: `const_alu_inout_width ];
 			end
 		end
 		
