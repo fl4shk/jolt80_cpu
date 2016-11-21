@@ -13,10 +13,10 @@ Special register pairs:
   in the register pair r12:r13.  If there is ever an assembler for this
   CPU, "sp" (without quotes) will be an alias for "r12:r13" (without
   quotes).
-  3)  As an ASSEMBLER CONVENTION, the link register's two bytes are stored
-  in the register pair r10:r11.  If there is ever an assembler for this
-  CPU, "lr" (without quotes) will be an alias for "r10:r11" (without
-  quotes).
+  3)  The link register's two bytes are stored in the register pair r10:r11
+  (enforced by the hardware, but only relevant to the call instruction).
+  If there is ever an assembler for this CPU, "lr" (without quotes) will be
+  an alias for "r10:r11" (without quotes).
 
 
 
@@ -25,20 +25,30 @@ Instruction encodings:
 Type 1:  0ooo aaaa iiii iiii
   Encoding description:  op (o); rA (a); immediate value (i)
   Instructions:  
-    Arithmetic instructions:  
-      addi, adci, subi (ASSEMBLER ALIAS for addi with the negative of the
-      immediate value), sbci (ASSEMBLER ALIAS for adci with the negative of
-      the immediate value), cmpi
-    Copy instructions:  
+    Arithmetic instructions:
+      addi, adci, 
+      
+      subi (ASSEMBLER ALIAS for addi with the negative of the immediate
+      value), 
+      
+      sbci (ASSEMBLER ALIAS for adci with the complement of the immediate
+      value), 
+      
+      cmpi
+    Copy instructions:
       cpyi (CoPY Immediate)
 
 Type 2:  10oo oooo aaaa bbbb
   Encoding description:  op (o); rA (a); rB (b)
   Instructions:  
-    Arithmetic instructions:  
-      add, adc, sub, sbc, cmp,
-    Bitwise instructions with two register operands:  
-      and, orr, xor, 
+    Arithmetic instructions:
+      add, adc, 
+      
+      sub, sbc, 
+      
+      cmp
+    Bitwise instructions with two register operands:
+      and, orr, xor,
     Bitshifting (and rotating) instructions that use the value of (rB % 8)
     as the number of bits to shift by:
       lsl, lsr, asr, rol, ror
@@ -57,14 +67,26 @@ Type 4:  1110 oooo Daaa Dbbb
   Encoding description:  op (o); reg pair starting with (aaa << 1) (a); 
     reg pair starting with (bbb << 1) (b); don't care (D)
   Instructions:  
-    Swap instructions:  
-      swp (SWap register Pair, also used as a combined "call" and "jump"
-      instruction by swapping some other register pair with the "pc"
-      (r14:r15) register pair)
+    Swap instructions:
+      swp (SWap register Pair, also can be used as a combined "call",
+      "jump", and "return" instruction by swapping some other register pair
+      with the "pc" [r14:r15] register pair)
+    Copy instructions:
+      cpyp (CoPY from reg Pair rA:r(A+1) to reg Pair rB:r(B+1) [can also be
+      used as a "jump" instruction])
+    Call instruction (Description:  sets the link register to the return
+    address, then sets the program counter to the address contained in
+    the reg pair rA:r(A+1)):
+      call (CALL subroutine at address in reg pair rA:r(A+1))
 
 Type 5:  1111 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
     Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
       bra (branch always), bnv (branch never, a form of NOP)
       bne (branch when Z == 0), beq (branch when Z == 1), 
-      bcc (branch when C == 0), bcs (branch when C == 1)
+      bcc (branch when C == 0 [unsigned less than]), 
+      bcs (branch when C == 1 [unsigned greater than or equal]),
+      bhi (branch when C == 1 and Z == 0 [unsigned greater than])
+      bls (branch when C == 0 and Z == 1 [unsigned less than or equal])
+
+

@@ -13,10 +13,10 @@ Special register pairs:
   in the register pair r12:r13.  If there is ever an assembler for this
   CPU, "sp" (without quotes) will be an alias for "r12:r13" (without
   quotes).
-  3)  As an ASSEMBLER CONVENTION, the link register's two bytes are stored
-  in the register pair r10:r11.  If there is ever an assembler for this
-  CPU, "lr" (without quotes) will be an alias for "r10:r11" (without
-  quotes).
+  3)  The link register's two bytes are stored in the register pair r10:r11
+  (enforced by the hardware, but only relevant to the calli and call
+  instructions).  If there is ever an assembler for this CPU, "lr" (without
+  quotes) will be an alias for "r10:r11" (without quotes).
 
 
 
@@ -25,19 +25,56 @@ Instruction encodings:
 Type 1:  0ooo aaaa iiii iiii
   Encoding description:  op (o); rA (a); immediate value (i)
   Instructions:  
-    Arithmetic instructions:  
-      addi, adci, subi (ASSEMBLER ALIAS for addi with the negative of the
-      immediate value), sbci (ASSEMBLER ALIAS for adci with the negative of
-      the immediate value), cmpi
-    Copy instructions:  
+    Arithmetic instructions:
+      addi, adci, 
+      addpi (ADd 8-bit Immediate value to register Pair),
+      
+      subi (ASSEMBLER ALIAS for addi with the negative of the immediate
+      value), 
+      
+      sbci (ASSEMBLER ALIAS for adci with the complement of the immediate
+      value), 
+      
+      subpi (SuBtract 8-bit Immediate value from register Pair [NOT an
+      assembler alias for addpi]),
+      
+      cmpi
+    Copy instructions:
       cpyi (CoPY Immediate)
+    Call instructions (each of which is 4 bytes long):
+      Call Instructions Second Half Encoding:  jjjj jjjj DDDD DDDD
+      Encoding description:  second byte of immediate value (j) (low byte
+        of destination address); don't care (D)
+      Description:  sets the link register to the return address, then sets
+      the program counter to the destination address
+      Instructions:  
+        calli (CALL Immediate, using iiii iiii as the high byte of the
+        destination address and jjjj jjjj as the low byte of the
+        destination address)
+    Jump instructions (each of which is 4 bytes long):
+      Jump Instructions Second Half Encoding:  jjjj jjjj DDDD DDDD
+      Encoding description:  second byte of immediate value (j) (low byte
+        of destination address); don't care (D)
+      Description:  sets the program counter to the destination address
+      Instructions:  
+        jumpi (JUMP Immediate, using iiii iiii as the high byte of the
+        destination address and jjjj jjjj as the low byte of the
+        destination address)
 
 Type 2:  10oo oooo aaaa bbbb
   Encoding description:  op (o); rA (a); rB (b)
   Instructions:  
-    Arithmetic instructions:  
-      add, adc, sub, sbc, cmp,
-    Bitwise instructions with two register operands:  
+    Arithmetic instructions:
+      add, adc, 
+      addp (ADd 8-bit register to reg Pair r(bbbb/2):r((bbbb/2)+1) [so
+      least significant b bit is ignored]), 
+      
+      sub, sbc, 
+      subp (SuBtract 8-bit register from reg Pair r(bbbb/2):r((bbbb/2)+1)
+      [so least significant b bit is ignored]),
+      
+      cmp
+    Bitwise instructions with two register operands:
       and, orr, xor, 
     Bitshifting (and rotating) instructions that use the value of (rB % 8)
     as the number of bits to shift by:
@@ -85,10 +122,16 @@ Type 4:  1110 oooo Daaa Dbbb
   Encoding description:  op (o); reg pair starting with (aaa << 1) (a); 
     reg pair starting with (bbb << 1) (b); don't care (D)
   Instructions:  
-    Swap instructions:  
-      swp (SWap register Pair, also used as a combined "call" and "jump"
-      instruction by swapping some other register pair with the "pc"
-      (r14:r15) register pair)
+    Swap instructions:
+      swp (SWap register Pair, also can be used as a combined "call",
+      "jump", and "return" instruction by swapping some other register pair
+      with the "pc" [r14:r15] register pair)
+    Copy instructions:
+      cpyp (CoPY from reg Pair rA:r(A+1) to reg Pair rB:r(B+1))
+    Call instruction (Description:  sets the link register to the return
+    address, then sets the program counter to the address contained in
+    the reg pair rA:r(A+1)):
+      call (CALL subroutine at address in reg pair rA:r(A+1))
     Load/store instructions:
       ldp (LoaD 16-bit contents [big endian] into reg Pair rA:r(A+1) from
       memory at address contained in reg pair rB:r(B+1)), 
@@ -131,12 +174,17 @@ Type 4:  1110 oooo Daaa Dbbb
       stpdb (Add 2 to the reg pair rB:r(B+1), then STore 16-bit contents
       [big endian] of reg Pair rA:r(A+1) to memory at address contained in
       reg pair rB:r(B+1))
-      
+
 Type 5:  1111 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
     Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
       bra (branch always), bnv (branch never, a form of NOP)
       bne (branch when Z == 0), beq (branch when Z == 1), 
-      bcc (branch when C == 0), bcs (branch when C == 1)
+      bcc (branch when C == 0 [unsigned less than]), 
+      bcs (branch when C == 1 [unsigned greater than or equal]),
+      bhi (branch when C == 1 and Z == 0 [unsigned greater than])
+      bls (branch when C == 0 and Z == 1 [unsigned less than or equal])
+      bvc (branch when V == 0), bvs (branch when V == 1),
+      bpl (branch when N == 0), bmi (branch when N == 1),
 
 
