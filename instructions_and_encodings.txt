@@ -28,11 +28,11 @@ Type 1:  0ooo aaaa iiii iiii
     Arithmetic instructions:
       addi, adci, 
       
-      subi (ASSEMBLER ALIAS for addi with the negative of the immediate
-      value), 
+      subi (ASSEMBLER ALIAS for addi with the two's complement of the
+      immediate value), 
       
-      sbci (ASSEMBLER ALIAS for adci with the complement of the immediate
-      value), 
+      sbci (ASSEMBLER ALIAS for adci with the one's complement of the
+      immediate value), 
       
       cmpi
     Copy instructions:
@@ -49,8 +49,8 @@ Type 2:  10oo oooo aaaa bbbb
       cmp
     Bitwise instructions with two register operands:
       and, orr, xor,
-    Bitshifting (and rotating) instructions that use the value of (rB % 8)
-    as the number of bits to shift by:
+    Bitshifting (and rotating) instructions that use the value of rB as the
+    number of bits to shift by:
       lsl, lsr, asr, rol, ror
     Copy instructions:
       cpy (CoPY from one register to another register)

@@ -39,6 +39,15 @@ module alu_test_bench;
 		.proc_flags_in(alu_proc_flags_in), .out(alu_out),
 		.proc_flags_out(alu_proc_flags_out) );
 	
+	wire alu_oper_type;
+	
+	//assign alu_oper_type = ( ( alu_oper == `enum_alu_oper_adc )
+	//	|| ( alu_oper == `enum_alu_oper_sbc )
+	//	|| ( alu_oper == `enum_alu_oper_rol )
+	//	|| ( alu_oper == `enum_alu_oper_ror ) );
+	
+	assign alu_oper_type = ( ( alu_oper == `enum_alu_oper_adc )
+		|| ( alu_oper == `enum_alu_oper_sbc ) );
 	
 	initial
 	begin
@@ -56,7 +65,11 @@ module alu_test_bench;
 		//alu_oper = `enum_alu_oper_and;
 		//alu_oper = `enum_alu_oper_orr;
 		//alu_oper = `enum_alu_oper_xor;
+		//alu_oper = `enum_alu_oper_lsl;
 		//alu_oper = `enum_alu_oper_lsr;
+		//alu_oper = `enum_alu_oper_asr;
+		alu_oper = `enum_alu_oper_rol;
+		//alu_oper = `enum_alu_oper_ror;
 		
 		{ alu_a_in, alu_b_in } = { `const_alu_inout_width'h0,
 			`const_alu_inout_width'h0 };
@@ -67,27 +80,40 @@ module alu_test_bench;
 	always
 	begin
 		#1
-		master_clk <= !master_clk;
+		master_clk = !master_clk;
 	end
 	
 	always @ ( posedge master_clk )
 	begin
-		//{ dummy, alu_a_in, alu_b_in } <= { dummy, alu_a_in, alu_b_in } + 1;
-		//$display( "%h %h\t\t%h %b", alu_a_in, alu_b_in, alu_out,
-		//	alu_proc_flags_out );
+		if (!alu_oper_type)
+		begin
+			$display( "%h %h\t\t%h %b", alu_a_in, alu_b_in, alu_out,
+				alu_proc_flags_out );
+		end
 		
+		else // if (alu_oper_type)
+		begin
+			$display( "%h %h %b\t\t%h %b", alu_a_in, alu_b_in,
+				alu_proc_flags_in[`enum_proc_flag_c], alu_out, 
+				alu_proc_flags_out );
+		end
+	end
+	
+	always @ ( posedge master_clk )
+	begin
+		if (!alu_oper_type)
+		begin
+			{ dummy, alu_a_in, alu_b_in } = { dummy, alu_a_in, alu_b_in } 
+				+ 1;
+		end
 		
-		//{ dummy, alu_a_in, alu_b_in, alu_proc_flags_in[`enum_proc_flag_c] } 
-		//	<= { dummy, alu_a_in, alu_b_in, 
-		//	alu_proc_flags_in[`enum_proc_flag_c] } + 1;
-		//$display( "%d %d %b\t\t%d %b", alu_a_in, alu_b_in,
-		//	alu_proc_flags_in[`enum_proc_flag_c], alu_out, 
-		//	alu_proc_flags_out );
-		
-		
-		{ dummy, alu_a_in } <= { dummy, alu_a_in } + 1;
-		$display( "%h\t\t%h %b", alu_a_in, alu_out, alu_proc_flags_out );
-		
+		else // if (alu_oper_type)
+		begin
+			{ dummy, alu_a_in, alu_b_in, 
+				alu_proc_flags_in[`enum_proc_flag_c] } 
+				= { dummy, alu_a_in, alu_b_in, 
+				alu_proc_flags_in[`enum_proc_flag_c] } + 1;
+		end
 		
 		if (dummy)
 		begin

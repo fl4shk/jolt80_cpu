@@ -25,93 +25,174 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 	output reg [`const_alu_inout_msb_pos:0] out,
 	output reg [`const_proc_flags_msb_pos:0] proc_flags_out );
 	
-	reg [`const_alu_inout_msb_pos:0] temp_out;
+	//reg [`const_alu_inout_msb_pos:0] temp_out;
 	reg [`const_proc_flags_msb_pos:0] temp_proc_flags_out;
 	
-	always @ ( a_in, b_in, proc_flags_in )
+	reg do_not_change_z_flag;
+	
+	
+	wire [`const_alu_inout_width:0] rotate_max_shift_thing;
+	wire [`const_alu_inout_msb_pos:0] rotate_mod_thing;
+	
+	assign rotate_max_shift_thing = 1 << `const_alu_inout_width;
+	assign rotate_mod_thing = ( `const_alu_inout_width'h1 
+		<< `const_alu_inout_width ) - `const_alu_inout_width'h1;
+	
+	
+	always @ ( oper, a_in, b_in, proc_flags_in )
 	begin
-		case (oper)
+		do_not_change_z_flag = 1'b0;
+		
 		// Arithmetic operations
-			// Addition operations
-			`enum_alu_oper_add:
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in;
-				temp_out = out;
-			end
-			
-			`enum_alu_oper_adc:
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in 
-					+ proc_flags_in[`enum_proc_flag_c];
-				temp_out = out;
-			end
-			
-			// Subtraction operations
-			`enum_alu_oper_sub:
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], out } = a_in 
-					+ (~b_in) + 1'b1;
-				temp_out = out;
-			end
-			
-			`enum_alu_oper_sbc:
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], out } = a_in + (~b_in)
-					+ proc_flags_in[`enum_proc_flag_c];
-				temp_out = out;
-			end
-			
-			`enum_alu_oper_cmp:
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], temp_out } = a_in 
-					+ (~b_in) + 1'b1;
-				out = `const_alu_inout_width'hx;
-			end
+		// Addition operations
+		if ( oper == `enum_alu_oper_add )
+		begin
+			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in;
+		end
+		
+		else if ( oper == `enum_alu_oper_adc )
+		begin
+			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in 
+				+ proc_flags_in[`enum_proc_flag_c];
+		end
+		
+		// Subtraction operations
+		else if ( oper == `enum_alu_oper_sub )
+		begin
+			{ proc_flags_out[`enum_proc_flag_c], out } = a_in 
+				+ (~b_in) + 1'b1;
+		end
+		
+		else if ( oper == `enum_alu_oper_sbc )
+		begin
+			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + (~b_in)
+				+ proc_flags_in[`enum_proc_flag_c];
+		end
+		
+		else if ( oper == `enum_alu_oper_cmp )
+		begin
+			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + (~b_in)
+				+ 1'b1;
+		end
 		
 		// Bitwise operations
-			// Operations analogous to logic gates (none of these affect
-			// carry)
-			`enum_alu_oper_and:
+		// Operations analogous to logic gates (none of these affect
+		// carry)
+		else if ( oper == `enum_alu_oper_and )
+		begin
+			{ out, proc_flags_out[`enum_proc_flag_c] } 
+				= { a_in & b_in, proc_flags_in[`enum_proc_flag_c] };
+		end
+		
+		else if ( oper == `enum_alu_oper_orr )
+		begin
+			{ out, proc_flags_out[`enum_proc_flag_c] }
+				= { a_in | b_in, proc_flags_in[`enum_proc_flag_c] };
+		end
+		
+		else if ( oper == `enum_alu_oper_xor )
+		begin
+			{ out, proc_flags_out[`enum_proc_flag_c] }
+				= { a_in ^ b_in, proc_flags_in[`enum_proc_flag_c] };
+		end
+		
+		// Bitshifting operations (number of bits specified by b_in),
+		// starting with 4'h8
+		else if ( oper == `enum_alu_oper_lsl )
+		begin
+			if ( b_in == `const_alu_inout_width'h0 )
 			begin
-				out = a_in & b_in;
-				{ temp_out, proc_flags_out[`enum_proc_flag_c] } = { out,
-					proc_flags_in[`enum_proc_flag_c] };
+				{ proc_flags_out[`enum_proc_flag_c], 
+					do_not_change_z_flag }
+					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
 			end
 			
-			`enum_alu_oper_orr:
+			else
 			begin
-				out = a_in | b_in;
-				{ temp_out, proc_flags_out[`enum_proc_flag_c] } = { out,
-					proc_flags_in[`enum_proc_flag_c] };
+				{ proc_flags_out[`enum_proc_flag_c], out } 
+					= { 1'b0, a_in } << b_in;
+			end
+		end
+		
+		else if ( oper == `enum_alu_oper_lsr )
+		begin
+			if ( b_in == `const_alu_inout_width'h0 )
+			begin
+				{ proc_flags_out[`enum_proc_flag_c], 
+					do_not_change_z_flag } 
+					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
 			end
 			
-			`enum_alu_oper_xor:
+			else
 			begin
-				out = a_in ^ b_in;
-				{ temp_out, proc_flags_out[`enum_proc_flag_c] } = { out,
-					proc_flags_in[`enum_proc_flag_c] };
+				{ out, proc_flags_out[`enum_proc_flag_c] } 
+					= { a_in, 1'b0 } >> b_in;
+			end
+		end
+		
+		else if ( oper == `enum_alu_oper_asr )
+		begin
+			if ( b_in == `const_alu_inout_width'h0 )
+			begin
+				{ proc_flags_out[`enum_proc_flag_c],
+					do_not_change_z_flag }
+					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
 			end
 			
-			// Bitshifting operations (one bit at a time), starting with
-			// 4'h8
-			//`enum_alu_oper_lsl:
-			//begin
-			//	{ proc_flags_out[`enum_proc_flag_c], out } = { 1'b0, a_in } 
-			//		<< 1'b1;
-			//	temp_out = out;
-			//end
-			
-			`enum_alu_oper_lsr:
+			else
 			begin
 				{ out, proc_flags_out[`enum_proc_flag_c] }
-					= { a_in, 1'b0 } >> 1'b1;
-				temp_out = out;
+					= $signed({ a_in, 1'b0 }) >>> b_in;
 			end
+		end
 		
-		endcase
+		else if ( oper == `enum_alu_oper_rol )
+		begin
+			if ( b_in == `const_alu_inout_width'h0 )
+			begin
+				{ proc_flags_out[`enum_proc_flag_c],
+					do_not_change_z_flag }
+					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
+			end
+			
+			else
+			begin
+				//out = a_in;
+			end
+		end
 		
-		proc_flags_out[`enum_proc_flag_z] 
-			= ( temp_out == `const_alu_inout_width'h0 );
+		else if ( oper == `enum_alu_oper_ror )
+		begin
+			if ( b_in == `const_alu_inout_width'h0 )
+			begin
+				{ proc_flags_out[`enum_proc_flag_c],
+					do_not_change_z_flag }
+					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
+			end
+			
+			else
+			begin
+				out = a_in;
+			end
+		end
+		
+		else
+		begin
+			out = a_in;
+		end
+		
+		
+		if (!do_not_change_z_flag)
+		begin
+			proc_flags_out[`enum_proc_flag_z] 
+				= ( out == `const_alu_inout_width'h0 );
+		end
+		
+		else
+		begin
+			proc_flags_out[`enum_proc_flag_z] 
+				= proc_flags_in[`enum_proc_flag_z];
+		end
 	end
 	
 	

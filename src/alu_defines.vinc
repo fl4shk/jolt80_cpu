@@ -25,13 +25,13 @@
 
 // ALU operation number of bits and most significant bit position
 `define const_alu_oper_width 4
-`define const_alu_oper_msb_pos (`width_to_msb_pos(`const_alu_oper_width))
+`define const_alu_oper_msb_pos ( `width_to_msb_pos(`const_alu_oper_width) )
 
 // ALU input/output number of bits and most significant bit position
 //`define const_alu_inout_width 8
 `define const_alu_inout_width 4
-`define const_alu_inout_msb_pos (`width_to_msb_pos(`const_alu_inout_width))
-
+`define const_alu_inout_msb_pos \
+	( `width_to_msb_pos(`const_alu_inout_width) )
 
 
 // ALU operation enum values
@@ -42,11 +42,11 @@
 
 // Addition operations, starting with 4'h0
 `define enum_alu_oper_add `const_alu_oper_width'h0
-`define enum_alu_oper_adc (`enum_alu_oper_add + `const_alu_oper_width'h1)
+`define enum_alu_oper_adc ( `enum_alu_oper_add + 1 )
 // Subtraction operations, starting with 4'h2
-`define enum_alu_oper_sub (`enum_alu_oper_adc + `const_alu_oper_width'h1)
-`define enum_alu_oper_sbc (`enum_alu_oper_sub + `const_alu_oper_width'h1)
-`define enum_alu_oper_cmp (`enum_alu_oper_sbc + `const_alu_oper_width'h1)
+`define enum_alu_oper_sub ( `enum_alu_oper_adc + 1 )
+`define enum_alu_oper_sbc ( `enum_alu_oper_sub + 1 )
+`define enum_alu_oper_cmp ( `enum_alu_oper_sbc + 1 )
 
 
 
@@ -54,15 +54,18 @@
 
 // Operations analogous to logic gates (none of these affect carry),
 // starting with 4'h5
-`define enum_alu_oper_and (`enum_alu_oper_cmp + `const_alu_oper_width'h1)
-`define enum_alu_oper_orr (`enum_alu_oper_and + `const_alu_oper_width'h1)
-`define enum_alu_oper_xor (`enum_alu_oper_orr + `const_alu_oper_width'h1)
+`define enum_alu_oper_and ( `enum_alu_oper_cmp + 1 )
+`define enum_alu_oper_orr ( `enum_alu_oper_and + 1 )
+`define enum_alu_oper_xor ( `enum_alu_oper_orr + 1 )
 //`define enum_alu_oper_inv (`enum_alu_oper_xor + `const_alu_oper_width'h1)
 
-// Bitshifting operations (one bit at a time), starting with 4'h8
-////`define enum_alu_oper_lsl (`enum_alu_oper_xor + `const_alu_oper_width'h1)
-//`define enum_alu_oper_lsr (`enum_alu_oper_lsl + `const_alu_oper_width'h1)
-`define enum_alu_oper_lsr (`enum_alu_oper_xor + `const_alu_oper_width'h1)
+// Bitshifting operations (number of bits specified by [b_in %
+// inout_width]), starting with 4'h8
+`define enum_alu_oper_lsl ( `enum_alu_oper_xor + 1 )
+`define enum_alu_oper_lsr ( `enum_alu_oper_lsl + 1 )
+`define enum_alu_oper_asr ( `enum_alu_oper_lsr + 1 )
+`define enum_alu_oper_rol ( `enum_alu_oper_asr + 1 )
+`define enum_alu_oper_ror ( `enum_alu_oper_rol + 1 )
 
 
 `endif		// alu_defines_vinc
