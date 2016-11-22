@@ -31,160 +31,235 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 	reg do_not_change_z_flag;
 	
 	
-	wire [`const_alu_inout_width:0] rotate_max_shift_thing;
-	wire [`const_alu_inout_msb_pos:0] rotate_mod_thing;
+	wire [`const_alu_inout_msb_pos:0] rotate_no_carry_mod_thing;
+	wire [`const_alu_inout_width:0] rotate_with_carry_mod_thing;
 	wire [`const_alu_inout_width + `const_alu_inout_width - 1:0]
-		rotate_temp;
+		rotate_no_carry_temp;
+	wire [`const_alu_inout_width + `const_alu_inout_width + 1:0]
+		rolc_temp, rorc_temp;
 	
-	assign rotate_max_shift_thing = 1 << `const_alu_inout_width;
-	assign rotate_mod_thing = ( `const_alu_inout_width'h1 
+	
+	assign rotate_no_carry_mod_thing = ( `const_alu_inout_width'h1 
 		<< `const_alu_inout_width ) - `const_alu_inout_width'h1;
+	assign rotate_with_carry_mod_thing = ( 1 
+		<< `const_alu_inout_and_carry_width ) - 1;
 	
-	assign rotate_temp = { a_in, a_in };
+	assign rotate_no_carry_temp = { a_in, a_in };
+	
+	assign rolc_temp = { a_in, proc_flags_in[`enum_proc_flag_c], a_in,
+		proc_flags_in[`enum_proc_flag_c] };
+	assign rorc_temp = { proc_flags_in[`enum_proc_flag_c], a_in,
+		proc_flags_in[`enum_proc_flag_c], a_in };
 	
 	always @ ( oper, a_in, b_in, proc_flags_in )
 	begin
 		do_not_change_z_flag = 1'b0;
 		
+		case (oper)
 		// Arithmetic operations
-		// Addition operations
-		if ( oper == `enum_alu_oper_add )
-		begin
-			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in;
-		end
-		
-		else if ( oper == `enum_alu_oper_adc )
-		begin
-			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in 
-				+ proc_flags_in[`enum_proc_flag_c];
-		end
-		
-		// Subtraction operations
-		else if ( oper == `enum_alu_oper_sub )
-		begin
-			{ proc_flags_out[`enum_proc_flag_c], out } = a_in 
-				+ (~b_in) + 1'b1;
-		end
-		
-		else if ( oper == `enum_alu_oper_sbc )
-		begin
-			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + (~b_in)
-				+ proc_flags_in[`enum_proc_flag_c];
-		end
-		
-		else if ( oper == `enum_alu_oper_cmp )
-		begin
-			{ proc_flags_out[`enum_proc_flag_c], out } = a_in + (~b_in)
-				+ 1'b1;
-		end
-		
+			// Addition operations, starting with 4'h0
+			`enum_alu_oper_add:
+			begin
+				{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in;
+			end
+			
+			`enum_alu_oper_adc:
+			begin
+				{ proc_flags_out[`enum_proc_flag_c], out } = a_in + b_in 
+					+ proc_flags_in[`enum_proc_flag_c];
+			end
+			
+			// Subtraction operations, starting with 4'h2
+			`enum_alu_oper_sub:
+			begin
+				{ proc_flags_out[`enum_proc_flag_c], out } = a_in 
+					+ (~b_in) + 1'b1;
+			end
+			
+			`enum_alu_oper_sbc:
+			begin
+				{ proc_flags_out[`enum_proc_flag_c], out } = a_in + (~b_in)
+					+ proc_flags_in[`enum_proc_flag_c];
+			end
+			
+			`enum_alu_oper_cmp:
+			begin
+				{ proc_flags_out[`enum_proc_flag_c], out } = a_in + (~b_in)
+					+ 1'b1;
+			end
+			
 		// Bitwise operations
-		// Operations analogous to logic gates (none of these affect
-		// carry)
-		else if ( oper == `enum_alu_oper_and )
-		begin
-			{ out, proc_flags_out[`enum_proc_flag_c] } 
-				= { a_in & b_in, proc_flags_in[`enum_proc_flag_c] };
-		end
-		
-		else if ( oper == `enum_alu_oper_orr )
-		begin
-			{ out, proc_flags_out[`enum_proc_flag_c] }
-				= { a_in | b_in, proc_flags_in[`enum_proc_flag_c] };
-		end
-		
-		else if ( oper == `enum_alu_oper_xor )
-		begin
-			{ out, proc_flags_out[`enum_proc_flag_c] }
-				= { a_in ^ b_in, proc_flags_in[`enum_proc_flag_c] };
-		end
-		
-		// Bitshifting operations (number of bits specified by b_in),
-		// starting with 4'h8
-		else if ( oper == `enum_alu_oper_lsl )
-		begin
-			if ( b_in == `const_alu_inout_width'h0 )
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], 
-					do_not_change_z_flag }
-					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
-			end
-			
-			else
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], out } 
-					= { 1'b0, a_in } << b_in;
-			end
-		end
-		
-		else if ( oper == `enum_alu_oper_lsr )
-		begin
-			if ( b_in == `const_alu_inout_width'h0 )
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], 
-					do_not_change_z_flag } 
-					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
-			end
-			
-			else
+			// Operations analogous to logic gates (none of these affect
+			// carry), starting with 4'h5
+			`enum_alu_oper_and:
 			begin
 				{ out, proc_flags_out[`enum_proc_flag_c] } 
-					= { a_in, 1'b0 } >> b_in;
-			end
-		end
-		
-		else if ( oper == `enum_alu_oper_asr )
-		begin
-			if ( b_in == `const_alu_inout_width'h0 )
-			begin
-				{ proc_flags_out[`enum_proc_flag_c],
-					do_not_change_z_flag }
-					= { proc_flags_in[`enum_proc_flag_c], 1'b1 };
+					= { a_in & b_in, proc_flags_in[`enum_proc_flag_c] };
 			end
 			
-			else
+			`enum_alu_oper_orr:
 			begin
 				{ out, proc_flags_out[`enum_proc_flag_c] }
-					= $signed({ a_in, 1'b0 }) >>> b_in;
-			end
-		end
-		
-		else if ( oper == `enum_alu_oper_rol )
-		begin
-			if ( b_in == `const_alu_inout_width'h0 )
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], do_not_change_z_flag, 
-					out } = { proc_flags_in[`enum_proc_flag_c], 1'b1, 
-					a_in };
+					= { a_in | b_in, proc_flags_in[`enum_proc_flag_c] };
 			end
 			
-			else
+			`enum_alu_oper_xor:
 			begin
-				out = rotate_temp[ ( `const_alu_inout_width - ( b_in 
-					& rotate_mod_thing ) ) +: `const_alu_inout_width ];
-			end
-		end
-		
-		else if ( oper == `enum_alu_oper_ror )
-		begin
-			if ( b_in == `const_alu_inout_width'h0 )
-			begin
-				{ proc_flags_out[`enum_proc_flag_c], do_not_change_z_flag, 
-					out } = { proc_flags_in[`enum_proc_flag_c], 1'b1, 
-					a_in };
+				{ out, proc_flags_out[`enum_proc_flag_c] }
+					= { a_in ^ b_in, proc_flags_in[`enum_proc_flag_c] };
 			end
 			
-			else
+			// Bitshifting operations (number of bits specified by b_in),
+			// starting with 4'h8
+			`enum_alu_oper_lsl:
 			begin
-				out = rotate_temp[ ( b_in & rotate_mod_thing ) 
-					+: `const_alu_inout_width ];
+				if ( b_in == `const_alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ out, proc_flags_out[`enum_proc_flag_c], 
+						do_not_change_z_flag }
+						= { a_in, proc_flags_in[`enum_proc_flag_c], 1'b1 };
+				end
+				
+				else
+				begin
+					{ proc_flags_out[`enum_proc_flag_c], out } 
+						= { 1'b0, a_in } << b_in;
+				end
 			end
-		end
+			
+			`enum_alu_oper_lsr:
+			begin
+				if ( b_in == `const_alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ out, proc_flags_out[`enum_proc_flag_c], 
+						do_not_change_z_flag } 
+						= { a_in, proc_flags_in[`enum_proc_flag_c], 1'b1 };
+				end
+				
+				else
+				begin
+					{ out, proc_flags_out[`enum_proc_flag_c] } 
+						= { a_in, 1'b0 } >> b_in;
+				end
+			end
+			
+			`enum_alu_oper_asr:
+			begin
+				if ( b_in == `const_alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ out, proc_flags_out[`enum_proc_flag_c],
+						do_not_change_z_flag }
+						= { a_in, proc_flags_in[`enum_proc_flag_c], 1'b1 };
+				end
+				
+				else
+				begin
+					{ out, proc_flags_out[`enum_proc_flag_c] }
+						= $signed({ a_in, 1'b0 }) >>> b_in;
+				end
+			end
+			
+			// Bit rotation operations (number of bits specified by [b_in %
+			// inout_width]), starting with 4'ha
+			`enum_alu_oper_rol:
+			begin
+				if ( b_in == `const_alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[`enum_proc_flag_c], 
+						do_not_change_z_flag, out } 
+						= { proc_flags_in[`enum_proc_flag_c], 1'b1, a_in };
+				end
+				
+				else
+				begin
+					// Don't change carry
+					{ out, proc_flags_out[`enum_proc_flag_c] } 
+						= { rotate_no_carry_temp[ ( `const_alu_inout_width 
+						- ( b_in & rotate_no_carry_mod_thing ) ) 
+						+: `const_alu_inout_width ],
+						proc_flags_in[`enum_proc_flag_c] };
+				end
+			end
+			
+			`enum_alu_oper_ror:
+			begin
+				if ( b_in == `const_alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[`enum_proc_flag_c], 
+						do_not_change_z_flag, out } 
+						= { proc_flags_in[`enum_proc_flag_c], 1'b1, a_in };
+				end
+				
+				else
+				begin
+					// Don't change carry
+					{ out, proc_flags_out[`enum_proc_flag_c] }
+						= { rotate_no_carry_temp[ ( b_in 
+						& rotate_no_carry_mod_thing ) 
+						+: `const_alu_inout_width ],
+						proc_flags_in[`enum_proc_flag_c] };
+				end
+			end
+			
+			`enum_alu_oper_rolc:
+			begin
+				if ( b_in == `const_alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[`enum_proc_flag_c], 
+						do_not_change_z_flag, out } 
+						= { proc_flags_in[`enum_proc_flag_c], 1'b1, a_in };
+				end
+				
+				else
+				begin
+					//{ out } 
+					//	= { rotate_no_carry_temp[ ( `const_alu_inout_width 
+					//	- ( b_in & rotate_no_carry_mod_thing ) ) 
+					//	+: `const_alu_inout_width ] };
+					{ proc_flags_out[`enum_proc_flag_c], out }
+						= rolc_temp[ ( `const_alu_inout_and_carry_width 
+						- ( b_in & rotate_with_carry_mod_thing ) )
+						+: `const_alu_inout_and_carry_width ];
+				end
+			end
+			
+			`enum_alu_oper_rorc:
+			begin
+				if ( b_in == `const_alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[`enum_proc_flag_c], 
+						do_not_change_z_flag, out } 
+						= { proc_flags_in[`enum_proc_flag_c], 1'b1, a_in };
+				end
+				
+				else
+				begin
+					//{ out }
+					//	= { rotate_no_carry_temp[ ( b_in 
+					//	& rotate_no_carry_mod_thing ) 
+					//	+: `const_alu_inout_width + 1 ] };
+					{ proc_flags_out[`enum_proc_flag_c], out }
+						= rorc_temp[ ( b_in & rotate_with_carry_mod_thing )
+						+: `const_alu_inout_and_carry_width + 1 ];
+				end
+			end
+			
+			default:
+			begin
+				// Don't change ANYTHING
+				{ proc_flags_out[`enum_proc_flag_c], 
+					do_not_change_z_flag, out } 
+					= { proc_flags_in[`enum_proc_flag_c], 1'b1, a_in };
+			end
 		
-		else
-		begin
-			out = a_in;
-		end
+		endcase
 		
 		
 		if (!do_not_change_z_flag)
@@ -193,7 +268,7 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 				= ( out == `const_alu_inout_width'h0 );
 		end
 		
-		else
+		else // if (do_not_change_z_flag)
 		begin
 			proc_flags_out[`enum_proc_flag_z] 
 				= proc_flags_in[`enum_proc_flag_z];
@@ -202,3 +277,5 @@ module alu( input wire [`const_alu_oper_msb_pos:0] oper,
 	
 	
 endmodule
+
+

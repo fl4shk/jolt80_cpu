@@ -25,7 +25,7 @@
 ////end
 
 module alu_test_bench;
-	reg master_clk;
+	reg master_clk, ready;
 	
 	reg dummy;
 	// ALU inputs and outputs
@@ -41,19 +41,17 @@ module alu_test_bench;
 	
 	wire alu_oper_type;
 	
-	//assign alu_oper_type = ( ( alu_oper == `enum_alu_oper_adc )
-	//	|| ( alu_oper == `enum_alu_oper_sbc )
-	//	|| ( alu_oper == `enum_alu_oper_rol )
-	//	|| ( alu_oper == `enum_alu_oper_ror ) );
-	
 	assign alu_oper_type = ( ( alu_oper == `enum_alu_oper_adc )
-		|| ( alu_oper == `enum_alu_oper_sbc ) );
+		|| ( alu_oper == `enum_alu_oper_sbc )
+		|| ( alu_oper == `enum_alu_oper_rolc )
+		|| ( alu_oper == `enum_alu_oper_rorc ) );
 	
 	initial
 	begin
 		alu_oper = `const_alu_oper_width'h0;
 		
 		master_clk = 1'b0;
+		ready = 1'b0;
 		dummy = 1'b0;
 		
 		//alu_oper = `enum_alu_oper_add;
@@ -68,19 +66,29 @@ module alu_test_bench;
 		//alu_oper = `enum_alu_oper_lsl;
 		//alu_oper = `enum_alu_oper_lsr;
 		//alu_oper = `enum_alu_oper_asr;
-		alu_oper = `enum_alu_oper_rol;
+		//alu_oper = `enum_alu_oper_rol;
 		//alu_oper = `enum_alu_oper_ror;
+		alu_oper = `enum_alu_oper_rolc;
+		//alu_oper = `enum_alu_oper_rorc;
+		
 		
 		{ alu_a_in, alu_b_in } = { `const_alu_inout_width'h0,
 			`const_alu_inout_width'h0 };
 		alu_proc_flags_in = `const_proc_flags_width'h0;
+		
+		#1
+		ready = 1'b1;
 	end
 	
 	// Clock generation
 	always
 	begin
 		#1
-		master_clk = !master_clk;
+		
+		if (ready)
+		begin
+			master_clk = !master_clk;
+		end
 	end
 	
 	always @ ( posedge master_clk )
@@ -103,26 +111,27 @@ module alu_test_bench;
 		
 		else // if (alu_oper_type)
 		begin
-			//$display( "%d %d %b\t\t%d %b", alu_a_in, alu_b_in,
-			//	alu_proc_flags_in[`enum_proc_flag_c], alu_out, 
+			//$display( "%d %b %d\t\t%d %b", alu_a_in, 
+			//	alu_proc_flags_in[`enum_proc_flag_c], alu_b_in, alu_out,
 			//	alu_proc_flags_out );
-			//$display( "%h %h %b\t\t%h %b", alu_a_in, alu_b_in,
-			//	alu_proc_flags_in[`enum_proc_flag_c], alu_out, 
+			//$display( "%h %b %d\t\t%h %b", alu_a_in, 
+			//	alu_proc_flags_in[`enum_proc_flag_c], alu_b_in, alu_out,
 			//	alu_proc_flags_out );
-			//$display( "%b %b %b\t\t%b %b", alu_a_in, alu_b_in,
-			//	alu_proc_flags_in[`enum_proc_flag_c], alu_out, 
+			//$display( "%b %b %d\t\t%b %b", alu_a_in, 
+			//	alu_proc_flags_in[`enum_proc_flag_c], alu_b_in, alu_out,
 			//	alu_proc_flags_out );
-			$display( "%b %d %b\t\t%b %b", alu_a_in, alu_b_in[1:0],
-				alu_proc_flags_in[`enum_proc_flag_c], alu_out, 
-				alu_proc_flags_out );
+			$display( "%b %b %d\t\t%b %b", alu_a_in, 
+				alu_proc_flags_in[`enum_proc_flag_c], alu_b_in[1:0],
+				alu_out, alu_proc_flags_out );
+			
 			//{ dummy, alu_a_in, alu_b_in, 
 			//	alu_proc_flags_in[`enum_proc_flag_c] } 
-			//	= { dummy, alu_a_in, alu_b_in, 
-			//	alu_proc_flags_in[`enum_proc_flag_c] } + 1;
-			{ dummy, alu_a_in, alu_b_in[1:0], 
-				alu_proc_flags_in[`enum_proc_flag_c] } 
-				= { dummy, alu_a_in, alu_b_in[1:0], 
-				alu_proc_flags_in[`enum_proc_flag_c] } + 1;
+			//	= { dummy, alu_a_in, alu_proc_flags_in[`enum_proc_flag_c],
+			//	alu_b_in } + 1;
+			{ dummy, alu_a_in, alu_proc_flags_in[`enum_proc_flag_c], 
+				alu_b_in[1:0] }
+				= { dummy, alu_a_in, alu_proc_flags_in[`enum_proc_flag_c],
+				alu_b_in[1:0] } + 1;
 		end
 		
 		if (dummy)

@@ -32,6 +32,7 @@
 `define const_alu_inout_width 4
 `define const_alu_inout_msb_pos \
 	( `width_to_msb_pos(`const_alu_inout_width) )
+`define const_alu_inout_and_carry_width (`const_alu_inout_width + 1)
 
 
 // ALU operation enum values
@@ -59,16 +60,23 @@
 `define enum_alu_oper_xor ( `enum_alu_oper_orr + 1 )
 //`define enum_alu_oper_inv (`enum_alu_oper_xor + `const_alu_oper_width'h1)
 
-// Bitshifting operations (number of bits specified by [b_in %
-// inout_width]), starting with 4'h8
+// Bitshifting operations (number of bits specified by b_in), starting with
+// 4'h8
 `define enum_alu_oper_lsl ( `enum_alu_oper_xor + 1 )
 `define enum_alu_oper_lsr ( `enum_alu_oper_lsl + 1 )
+
+// Bit rotation operations (number of bits specified by [b_in %
+// inout_width]), starting with 4'ha
 `define enum_alu_oper_asr ( `enum_alu_oper_lsr + 1 )
 `define enum_alu_oper_rol ( `enum_alu_oper_asr + 1 )
 `define enum_alu_oper_ror ( `enum_alu_oper_rol + 1 )
 
-// Bitshifting operations that use carry as bit 8 or bit 0 (number of bits
-// to shift by specified by 
+
+// Bit rotating operations that use carry as bit 8 or bit 0 (number of bits
+// to rotate by specified by [b_in % inout_width]), starting with 4'hd
+`define enum_alu_oper_rolc ( `enum_alu_oper_ror + 1 )
+`define enum_alu_oper_rorc ( `enum_alu_oper_rolc + 1 )
+
 
 
 `endif		// alu_defines_vinc

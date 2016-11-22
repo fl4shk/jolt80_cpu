@@ -2,21 +2,22 @@ Note that register pairs are fixed to have their high byte stored in a
 register rX and their low byte stored in another register r(X + 1) such
 that X is an even number.  
 
-Here are some example register pairs:  r0:r1, r2:r3, r4:r5, etc.
+Here are some example register pairs:  r0p (high byte r0, low byte r1), 
+  r2p (high byte r2, low byte r3), r4p (high byte r4, low byte r5), etc.
 
 
 Special register pairs:  
   1)  The program counter's two bytes are stored in the register pair
-  r14:r15.  If there is ever an assembler for this CPU, "pc" (without
-  quotes) will be an alias for "r14:r15" (without quotes).
-  2)  As an ASSEMBLER CONVENTION, the stack pointer's two bytes are stored
-  in the register pair r12:r13.  If there is ever an assembler for this
-  CPU, "sp" (without quotes) will be an alias for "r12:r13" (without
-  quotes).
-  3)  The link register's two bytes are stored in the register pair r10:r11
+  r14p.  If there is ever an assembler for this CPU, "pc" (without
+  quotes) will be an alias for "r14p" (without quotes).
+  2)  The link register's two bytes are stored in the register pair r12p
   (enforced by the hardware, but only relevant to the call instruction).
   If there is ever an assembler for this CPU, "lr" (without quotes) will be
-  an alias for "r10:r11" (without quotes).
+  an alias for "r12p" (without quotes).
+  3)  As an ASSEMBLER CONVENTION, the stack pointer's two bytes are stored
+  in the register pair r10p.  If there is ever an assembler for this
+  CPU, "sp" (without quotes) will be an alias for "r10p" (without
+  quotes).
 
 
 
@@ -52,36 +53,34 @@ Type 2:  10oo oooo aaaa bbbb
     Bitshifting (and rotating) instructions that use the value of rB as the
     number of bits to shift by:
       lsl, lsr, asr, rol, ror
-    Bitshifting (and rotating) instructions that use carry as an extra bit
+    Bit rotating instructions that use carry as an extra bit
     (either bit 8 or bit 0) and that use the value of rB as the number of
-    bits to shift by:
-      lslc, lsrc, asrc, rolc, rorc
+    bits to rotate by:
+      rolc, rorc
     Copy instructions:
       cpy (CoPY from one register to another register)
 
-Type 3:  110o oooo aaaa Dbbb
-  Encoding description:  op (o); rA (a); 
-    reg pair starting with (bbb << 1) (b); don't care (D)
-  Instructions:  
-    Load/store instructions:
-      ldr (LoaD contents into Register rA from memory), 
-      str (STore Register rA contents to memory),
-
-Type 4:  1110 oooo Daaa Dbbb
-  Encoding description:  op (o); reg pair starting with (aaa << 1) (a); 
-    reg pair starting with (bbb << 1) (b); don't care (D)
+Type 3:  111o oooo aaa0 bbb0
+  Encoding description:  op (o); reg pair rAp (a); reg pair rBp (b);
   Instructions:  
     Swap instructions:
       swp (SWap register Pair, also can be used as a combined "call",
       "jump", and "return" instruction by swapping some other register pair
-      with the "pc" [r14:r15] register pair)
+      with the "pc" [r14p] register pair)
     Copy instructions:
-      cpyp (CoPY from reg Pair rA:r(A+1) to reg Pair rB:r(B+1) [can also be
+      cpyp (CoPY from reg Pair rAp to reg Pair rBp [can also be
       used as a "jump" instruction])
     Call instruction (Description:  sets the link register to the return
     address, then sets the program counter to the address contained in
-    the reg pair rA:r(A+1)):
-      call (CALL subroutine at address in reg pair rA:r(A+1))
+    the reg pair rAp):
+      call (CALL subroutine at address in reg pair rAp)
+
+Type 4:  1110 oooo aaaa bbb0
+  Encoding description:  op (o); rA (a); reg pair rBp (b);
+  Instructions:  
+    Load/store instructions:
+      ldr (LoaD contents into Register rA from memory), 
+      str (STore Register rA contents to memory),
 
 Type 5:  1111 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
@@ -90,7 +89,7 @@ Type 5:  1111 oooo iiii iiii
       bne (branch when Z == 0), beq (branch when Z == 1), 
       bcc (branch when C == 0 [unsigned less than]), 
       bcs (branch when C == 1 [unsigned greater than or equal]),
+      bls (branch when C == 0 and Z == 1 [unsigned less than or equal]),
       bhi (branch when C == 1 and Z == 0 [unsigned greater than])
-      bls (branch when C == 0 and Z == 1 [unsigned less than or equal])
 
 

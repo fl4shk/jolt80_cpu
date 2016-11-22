@@ -2,21 +2,22 @@ Note that register pairs are fixed to have their high byte stored in a
 register rX and their low byte stored in another register r(X + 1) such
 that X is an even number.  
 
-Here are some example register pairs:  r0:r1, r2:r3, r4:r5, etc.
+Here are some example register pairs:  r0p (high byte r0, low byte r1), 
+  r2p (high byte r2, low byte r3), r4p (high byte r4, low byte r5), etc.
 
 
 Special register pairs:  
   1)  The program counter's two bytes are stored in the register pair
-  r14:r15.  If there is ever an assembler for this CPU, "pc" (without
-  quotes) will be an alias for "r14:r15" (without quotes).
-  2)  As an ASSEMBLER CONVENTION, the stack pointer's two bytes are stored
-  in the register pair r12:r13.  If there is ever an assembler for this
-  CPU, "sp" (without quotes) will be an alias for "r12:r13" (without
+  r14p.  If there is ever an assembler for this CPU, "pc" (without
+  quotes) will be an alias for "r14p" (without quotes).
+  2)  The link register's two bytes are stored in the register pair r12p
+  (enforced by the hardware, but only relevant to the call instruction).
+  If there is ever an assembler for this CPU, "lr" (without quotes) will be
+  an alias for "r12p" (without quotes).
+  3)  As an ASSEMBLER CONVENTION, the stack pointer's two bytes are stored
+  in the register pair r10p.  If there is ever an assembler for this
+  CPU, "sp" (without quotes) will be an alias for "r10p" (without
   quotes).
-  3)  The link register's two bytes are stored in the register pair r10:r11
-  (enforced by the hardware, but only relevant to the calli and call
-  instructions).  If there is ever an assembler for this CPU, "lr" (without
-  quotes) will be an alias for "r10:r11" (without quotes).
 
 
 
@@ -41,23 +42,26 @@ Type 1:  0ooo aaaa iiii iiii
       cmpi
     Copy instructions:
       cpyi (CoPY Immediate)
-    Call instructions (each of which is 4 bytes long):
-      Call Instructions Second Half Encoding:  jjjj jjjj DDDD DDDD
+    Extended copy instructions (each of which is 4 bytes long):
+      Jump Instructions Second Half Encoding:  jjjj jjjj 0aaa 0000
       Encoding description:  second byte of immediate value (j) (low byte
-        of destination address); don't care (D)
+        of destination address);
+      Description:  sets the a register pair rAp to a 16-bit value in one
+      instruction (can be used a as a jump immediate)
+      Instructions:  
+        cpypi (COPY Pair Immediate, using iiii iiii as the high byte of the
+        16-bit value and jjjj jjjj as the low byte of the 16-bit value
+        [this instruction ONLY has an advantage over using two successive
+        cpyi instructions when used to copy a 16-bit immediate value to the
+        pc])
+    Call instructions (each of which is 4 bytes long):
+      Call Instructions Second Half Encoding:  jjjj jjjj 0000 0000
+      Encoding description:  second byte of immediate value (j) (low byte
+        of destination address);
       Description:  sets the link register to the return address, then sets
       the program counter to the destination address
       Instructions:  
         calli (CALL Immediate, using iiii iiii as the high byte of the
-        destination address and jjjj jjjj as the low byte of the
-        destination address)
-    Jump instructions (each of which is 4 bytes long):
-      Jump Instructions Second Half Encoding:  jjjj jjjj DDDD DDDD
-      Encoding description:  second byte of immediate value (j) (low byte
-        of destination address); don't care (D)
-      Description:  sets the program counter to the destination address
-      Instructions:  
-        jumpi (JUMP Immediate, using iiii iiii as the high byte of the
         destination address and jjjj jjjj as the low byte of the
         destination address)
 
@@ -66,29 +70,106 @@ Type 2:  10oo oooo aaaa bbbb
   Instructions:  
     Arithmetic instructions:
       add, adc, 
-      addp (ADd 8-bit register to reg Pair r(bbbb/2):r((bbbb/2)+1) [so
-      least significant b bit is ignored]), 
+      addp (ADd 8-bit register to reg Pair r(bbbb/2)p [so the least
+      significant bit of bbbb is ignored]), 
       
       sub, sbc, 
-      subp (SuBtract 8-bit register from reg Pair r(bbbb/2):r((bbbb/2)+1)
-      [so least significant b bit is ignored]),
+      subp (SuBtract 8-bit register from reg Pair r(bbbb/2)p [so the least
+      significant bit of bbbb is ignored]),
       
-      cmp
+      cmp,
+      
+      umul (Unsigned MULtiply rA by rB, storing results in r0p [16-bit, big
+      endian]),
+      smul (Signed MULtiply rA by rB, storing results in r0p [16-bit, big
+      endian]),
+    
     Bitwise instructions with two register operands:
       and, orr, xor, 
+    
     Bitshifting (and rotating) instructions that use the value of rB as the
     number of bits to shift by:
       lsl, lsr, asr, rol, ror
-    Bitshifting (and rotating) instructions that use carry as an extra bit
+    
+    Bit rotating instructions that use carry as an extra bit
     (either bit 8 or bit 0) and that use the value of rB as the number of
-    bits to shift by:
-      lslc, lsrc, asrc, rolc, rorc
+    bits to rotate by:
+      rolc, rorc
+    
+    Bitshifting (and rotating) instructions that do a 16-bit shift or
+    rotate on the reg pair r(aaaa/2)+ [so the least significant bit of aaaa
+    is ignored], using rB as the number of bits to shift by:
+      lslp, lsrp, asrp, rol, rorp
+    
+    Bit rotating instructions that use carry as an extra bit
+    (either bit 16 or bit 0) for a 16-bit rotate of the reg pair r(aaaa/2)+
+    [so the least significant bit of aaaa is ignored], using rB as the
+    number of bits to rotate by:
+      rolpc, rorpc
+    
     Copy instructions:
       cpy (CoPY from one register to another register)
 
-Type 3:  110o oooo aaaa Dbbb
+
+Type 3:  110o oooo aaa0 bbb0
+  Encoding description:  op (o); reg pair rAp (a); reg pair rBp (b);
+  Instructions:  
+    Swap instructions:
+      swp (SWap register Pair, also can be used as a combined "call",
+      "jump", and "return" instruction by swapping some other register pair
+      with the "pc" [r14] register pair)
+    Copy instructions:
+      cpyp (CoPY from reg Pair rAp to reg Pair rBp)
+    Call instruction (Description:  sets the link register to the return
+    address, then sets the program counter to the address contained in
+    the reg pair rAp):
+      call (CALL subroutine at address in reg pair rAp)
+    Load/store instructions:
+      ldp (LoaD 16-bit contents [big endian] into reg Pair rAp from
+      memory at address contained in reg pair rBp), 
+      
+      stp (Store 16-bit contents [big endian] of reg Pair rAp to
+      memory at address contained in reg pair rBp),
+      
+      
+      ldpia (LoaD 16-bit contents [big endian] into reg Pair rAp from
+      memory at address contained in reg pair rBp, then add 2 to the
+      reg pair rBp),
+      
+      stpia (STore 16-bit contents [big endian] of reg Pair rAp to
+      memory at address contained in reg pair rBp, then add 2 to the
+      reg pair rBp),
+      
+      
+      ldpib (Add 2 to the reg pair rBp, then LoaD 16-bit contents
+      [big endian] into reg Pair rAp from memory at address contained
+      in reg pair rBp),
+      
+      stpib (Add 2 to the reg pair rBp, then STore 16-bit contents
+      [big endian] of reg Pair rAp to memory at address contained in
+      reg pair rBp),
+      
+      
+      ldpda (LoaD 16-bit contents [big endian] into reg Pair rAp from
+      memory at address contained in reg pair rBp, then subtract 2
+      from the reg pair rBp),
+      
+      stpda (STore 16-bit contents [big endian] of reg Pair rAp to
+      memory at address contained in reg pair rBp, then subtract 2
+      from the reg pair rBp),
+      
+      
+      ldpdb (Add 2 to the reg pair rBp, then LoaD 16-bit contents
+      [big endian] into reg Pair rAp from memory at address contained
+      in reg pair rBp),
+      
+      stpdb (Add 2 to the reg pair rBp, then STore 16-bit contents
+      [big endian] of reg Pair rAp to memory at address contained in
+      reg pair rBp)
+
+Type 4:  1110 oooo aaaa bbb0
   Encoding description:  op (o); rA (a); 
-    reg pair starting with (bbb << 1) (b); don't care (D)
+    reg pair rBp (b);
   Instructions:  
     Load/store instructions:
       ldr (LoaD contents into Register rA from memory), 
@@ -96,88 +177,31 @@ Type 3:  110o oooo aaaa Dbbb
       
       
       ldria (LoaD contents into Register rA from memory at address contained
-      in reg pair rB:r(B+1), then add 1 to the reg pair rB:r(B+1)), 
+      in reg pair rBp, then add 1 to the reg pair rBp), 
       
       stria (STore Register rA contents to memory at address contained in
-      reg pair rB:r(B+1), then add 1 to the reg pair rB:r(B+1)), 
+      reg pair rBp, then add 1 to the reg pair rBp), 
       
       
-      ldrib (add 1 to the reg pair rB:r(B+1), then LoaD contents into
-      Register rA from memory at address contained in reg pair rB:r(B+1)), 
+      ldrib (add 1 to the reg pair rBp, then LoaD contents into
+      Register rA from memory at address contained in reg pair rBp), 
       
-      strib (add 1 to the reg pair rB:r(B+1), then STore Register rA
-      contents to memory at address contained in reg pair rB:r(B+1)), 
+      strib (add 1 to the reg pair rBp, then STore Register rA
+      contents to memory at address contained in reg pair rBp), 
       
       
       ldrda (LoaD contents into Register rA from memory at address contained
-      in reg pair rB:r(B+1), then subtract 1 from the reg pair rB:r(B+1)), 
+      in reg pair rBp, then subtract 1 from the reg pair rBp), 
       
       strda (STore Register rA contents to memory at address contained in
-      reg pair rB:r(B+1), then subtract 1 from the reg pair rB:r(B+1)), 
+      reg pair rBp, then subtract 1 from the reg pair rBp), 
       
       
-      ldrdb (subtract 1 from the reg pair rB:r(B+1), then LoaD contents into
-      Register rA from memory at address contained in reg pair rB:r(B+1)), 
+      ldrdb (subtract 1 from the reg pair rBp, then LoaD contents into
+      Register rA from memory at address contained in reg pair rBp), 
       
-      strdb (subtract 1 from the reg pair rB:r(B+1), then STore Register rA
-      contents to memory at address contained in reg pair rB:r(B+1))
-
-Type 4:  1110 oooo Daaa Dbbb
-  Encoding description:  op (o); reg pair starting with (aaa << 1) (a); 
-    reg pair starting with (bbb << 1) (b); don't care (D)
-  Instructions:  
-    Swap instructions:
-      swp (SWap register Pair, also can be used as a combined "call",
-      "jump", and "return" instruction by swapping some other register pair
-      with the "pc" [r14:r15] register pair)
-    Copy instructions:
-      cpyp (CoPY from reg Pair rA:r(A+1) to reg Pair rB:r(B+1))
-    Call instruction (Description:  sets the link register to the return
-    address, then sets the program counter to the address contained in
-    the reg pair rA:r(A+1)):
-      call (CALL subroutine at address in reg pair rA:r(A+1))
-    Load/store instructions:
-      ldp (LoaD 16-bit contents [big endian] into reg Pair rA:r(A+1) from
-      memory at address contained in reg pair rB:r(B+1)), 
-      
-      stp (Store 16-bit contents [big endian] of reg Pair rA:r(A+1) to
-      memory at address contained in reg pair rB:r(B+1)),
-      
-      
-      ldpia (LoaD 16-bit contents [big endian] into reg Pair rA:r(A+1) from
-      memory at address contained in reg pair rB:r(B+1), then add 2 to the
-      reg pair rB:r(B+1)),
-      
-      stpia (STore 16-bit contents [big endian] of reg Pair rA:r(A+1) to
-      memory at address contained in reg pair rB:r(B+1), then add 2 to the
-      reg pair rB:r(B+1)),
-      
-      
-      ldpib (Add 2 to the reg pair rB:r(B+1), then LoaD 16-bit contents
-      [big endian] into reg Pair rA:r(A+1) from memory at address contained
-      in reg pair rB:r(B+1)),
-      
-      stpib (Add 2 to the reg pair rB:r(B+1), then STore 16-bit contents
-      [big endian] of reg Pair rA:r(A+1) to memory at address contained in
-      reg pair rB:r(B+1)),
-      
-      
-      ldpda (LoaD 16-bit contents [big endian] into reg Pair rA:r(A+1) from
-      memory at address contained in reg pair rB:r(B+1), then subtract 2
-      from the reg pair rB:r(B+1)),
-      
-      stpda (STore 16-bit contents [big endian] of reg Pair rA:r(A+1) to
-      memory at address contained in reg pair rB:r(B+1), then subtract 2
-      from the reg pair rB:r(B+1)),
-      
-      
-      ldpdb (Add 2 to the reg pair rB:r(B+1), then LoaD 16-bit contents
-      [big endian] into reg Pair rA:r(A+1) from memory at address contained
-      in reg pair rB:r(B+1)),
-      
-      stpdb (Add 2 to the reg pair rB:r(B+1), then STore 16-bit contents
-      [big endian] of reg Pair rA:r(A+1) to memory at address contained in
-      reg pair rB:r(B+1))
+      strdb (subtract 1 from the reg pair rBp, then STore Register rA
+      contents to memory at address contained in reg pair rBp)
 
 Type 5:  1111 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
@@ -186,8 +210,8 @@ Type 5:  1111 oooo iiii iiii
       bne (branch when Z == 0), beq (branch when Z == 1), 
       bcc (branch when C == 0 [unsigned less than]), 
       bcs (branch when C == 1 [unsigned greater than or equal]),
-      bhi (branch when C == 1 and Z == 0 [unsigned greater than])
-      bls (branch when C == 0 and Z == 1 [unsigned less than or equal])
+      bls (branch when C == 0 and Z == 1 [unsigned less than or equal]),
+      bhi (branch when C == 1 and Z == 0 [unsigned greater than]),
       bvc (branch when V == 0), bvs (branch when V == 1),
       bpl (branch when N == 0), bmi (branch when N == 1),
 
