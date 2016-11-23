@@ -15,11 +15,11 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
-`ifndef alu_defines_vinc
-`define alu_defines_vinc
+`ifndef alu_defines_svinc
+`define alu_defines_svinc
 
 
-`include "src/global_macros.vinc"
+`include "src/global_macros.svinc"
 
 // ALU constants
 
@@ -79,4 +79,4 @@
 
 
 
-`endif		// alu_defines_vinc
+`endif		// alu_defines_svinc

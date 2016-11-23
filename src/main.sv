@@ -16,8 +16,8 @@
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 
-`include "src/alu_defines.vinc"
-`include "src/proc_flags_defines.vinc"
+`include "src/alu_defines.svinc"
+`include "src/proc_flags_defines.svinc"
 
 ////initial
 ////begin
@@ -25,21 +25,21 @@
 ////end
 
 module alu_test_bench;
-	reg master_clk, ready;
+	logic master_clk, ready;
 	
-	reg dummy;
+	logic dummy;
 	// ALU inputs and outputs
-	reg [`const_alu_oper_msb_pos:0] alu_oper;
-	reg [`const_alu_inout_msb_pos:0] alu_a_in, alu_b_in;
-	reg [`const_proc_flags_msb_pos:0] alu_proc_flags_in;
-	wire [`const_alu_inout_msb_pos:0] alu_out;
-	wire [`const_proc_flags_msb_pos:0] alu_proc_flags_out;
+	logic [`const_alu_oper_msb_pos:0] alu_oper;
+	logic [`const_alu_inout_msb_pos:0] alu_a_in, alu_b_in;
+	logic [`const_proc_flags_msb_pos:0] alu_proc_flags_in;
+	logic [`const_alu_inout_msb_pos:0] alu_out;
+	logic [`const_proc_flags_msb_pos:0] alu_proc_flags_out;
 	
 	alu test_alu( .oper(alu_oper), .a_in(alu_a_in), .b_in(alu_b_in),
 		.proc_flags_in(alu_proc_flags_in), .out(alu_out),
 		.proc_flags_out(alu_proc_flags_out) );
 	
-	wire alu_oper_type;
+	logic alu_oper_type;
 	
 	assign alu_oper_type = ( ( alu_oper == `enum_alu_oper_adc )
 		|| ( alu_oper == `enum_alu_oper_sbc )
@@ -112,25 +112,25 @@ module alu_test_bench;
 		else // if (alu_oper_type)
 		begin
 			//$display( "%d %b %d\t\t%d %b", alu_a_in, 
-			//	alu_proc_flags_in[`enum_proc_flag_c], alu_b_in, alu_out,
+			//	alu_proc_flags_in[pf_slot_c], alu_b_in, alu_out,
 			//	alu_proc_flags_out );
 			//$display( "%h %b %d\t\t%h %b", alu_a_in, 
-			//	alu_proc_flags_in[`enum_proc_flag_c], alu_b_in, alu_out,
+			//	alu_proc_flags_in[pf_slot_c], alu_b_in, alu_out,
 			//	alu_proc_flags_out );
 			//$display( "%b %b %d\t\t%b %b", alu_a_in, 
-			//	alu_proc_flags_in[`enum_proc_flag_c], alu_b_in, alu_out,
+			//	alu_proc_flags_in[pf_slot_c], alu_b_in, alu_out,
 			//	alu_proc_flags_out );
 			$display( "%b %b %d\t\t%b %b", alu_a_in, 
-				alu_proc_flags_in[`enum_proc_flag_c], alu_b_in[1:0],
+				alu_proc_flags_in[pf_slot_c], alu_b_in[1:0],
 				alu_out, alu_proc_flags_out );
 			
 			//{ dummy, alu_a_in, alu_b_in, 
-			//	alu_proc_flags_in[`enum_proc_flag_c] } 
-			//	= { dummy, alu_a_in, alu_proc_flags_in[`enum_proc_flag_c],
+			//	alu_proc_flags_in[pf_slot_c] } 
+			//	= { dummy, alu_a_in, alu_proc_flags_in[pf_slot_c],
 			//	alu_b_in } + 1;
-			{ dummy, alu_a_in, alu_proc_flags_in[`enum_proc_flag_c], 
+			{ dummy, alu_a_in, alu_proc_flags_in[pf_slot_c], 
 				alu_b_in[1:0] }
-				= { dummy, alu_a_in, alu_proc_flags_in[`enum_proc_flag_c],
+				= { dummy, alu_a_in, alu_proc_flags_in[pf_slot_c],
 				alu_b_in[1:0] } + 1;
 		end
 		

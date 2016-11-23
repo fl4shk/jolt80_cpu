@@ -39,6 +39,7 @@ Type 1:  0ooo aaaa iiii iiii
     Copy instructions:
       cpyi (CoPY Immediate)
 
+
 Type 2:  10oo oooo aaaa bbbb
   Encoding description:  op (o); rA (a); rB (b)
   Instructions:  
@@ -60,29 +61,27 @@ Type 2:  10oo oooo aaaa bbbb
     Copy instructions:
       cpy (CoPY from one register to another register)
 
-Type 3:  111o oooo aaa0 bbb0
-  Encoding description:  op (o); reg pair rAp (a); reg pair rBp (b);
-  Instructions:  
-    Swap instructions:
-      swp (SWap register Pair, also can be used as a combined "call",
-      "jump", and "return" instruction by swapping some other register pair
-      with the "pc" [r14p] register pair)
-    Copy instructions:
-      cpyp (CoPY from reg Pair rAp to reg Pair rBp [can also be
-      used as a "jump" instruction])
-    Call instruction (Description:  sets the link register to the return
-    address, then sets the program counter to the address contained in
-    the reg pair rAp):
-      call (CALL subroutine at address in reg pair rAp)
 
-Type 4:  1110 oooo aaaa bbb0
-  Encoding description:  op (o); rA (a); reg pair rBp (b);
-  Instructions:  
-    Load/store instructions:
-      ldr (LoaD contents into Register rA from memory), 
-      str (STore Register rA contents to memory),
+Type 3 (four bytes):  110o aaao iiii iiii   jjjj jjjj 0000 0000
+  Encoding description:  op (o); reg pair rAp (a); 
+  high byte of 16-bit immediate value (i);
+  low byte of 16-bit immediate value (j);
+  Instructions
+    Extended copy instructions:
+      Instructions:  
+        cpypi (COPY Pair Immediate, which sets the a register pair rAp to a
+        16-bit value in one instruction, but in twice the number of cycles
+        due to using more than two bytes [can be used a as a jump immediate
+        by copying a 16-bit immediate value to the pc] [this instruction
+        ONLY has an advantage over using two successive cpyi instructions
+        when used to copy a 16-bit immediate value to the pc])
+    Call instructions
+      Instructions:  
+        calli (CALL Immediate, which sets the link register to the return
+        address, then sets the program counter to the destination address)
 
-Type 5:  1111 oooo iiii iiii
+
+Type 4:  1110 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
     Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
       bra (branch always), bnv (branch never, a form of NOP)
@@ -90,6 +89,63 @@ Type 5:  1111 oooo iiii iiii
       bcc (branch when C == 0 [unsigned less than]), 
       bcs (branch when C == 1 [unsigned greater than or equal]),
       bls (branch when C == 0 and Z == 1 [unsigned less than or equal]),
-      bhi (branch when C == 1 and Z == 0 [unsigned greater than])
+      bhi (branch when C == 1 and Z == 0 [unsigned greater than]),
+
+
+Type 5:  1111 oooo aaaa bbb0
+  Encoding description:  op (o); rA (a); reg pair rBp (b);
+  Instructions:  
+    Load/store instructions:
+      ldr (LoaD contents into Register rA from memory), 
+      str (STore Register rA contents to memory),
+
+
+Type 6:  1111 oooo aaa0 bbb1
+  Encoding description:  op (o); reg pair rAp (a); reg pair rBp (b);
+  Instructions:  
+    Swap instructions:
+      swp (SWap register Pair, also can be used as a combined "call",
+      "jump", and "return" instruction by swapping some other register pair
+      with the "pc" [r14] register pair)
+    Copy instructions:
+      cpyp (CoPY from reg Pair rAp to reg Pair rBp)
+    Call instruction (Description:  sets the link register to the return
+    address, then sets the program counter to the address contained in
+    the reg pair rAp):
+      call (CALL subroutine at address in reg pair rAp)
+
+
+
+//Type 4:  111o oooo aaa0 bbb0
+//  Encoding description:  op (o); reg pair rAp (a); reg pair rBp (b);
+//  Instructions:  
+//    Swap instructions:
+//      swp (SWap register Pair, also can be used as a combined "call",
+//      "jump", and "return" instruction by swapping some other register pair
+//      with the "pc" [r14p] register pair)
+//    Copy instructions:
+//      cpyp (CoPY from reg Pair rAp to reg Pair rBp [can also be
+//      used as a "jump" instruction])
+//    Call instruction (Description:  sets the link register to the return
+//    address, then sets the program counter to the address contained in
+//    the reg pair rAp):
+//      call (CALL subroutine at address in reg pair rAp)
+//
+//Type 5:  1110 oooo aaaa bbb0
+//  Encoding description:  op (o); rA (a); reg pair rBp (b);
+//  Instructions:  
+//    Load/store instructions:
+//      ldr (LoaD contents into Register rA from memory), 
+//      str (STore Register rA contents to memory),
+//
+//Type 6:  1111 oooo iiii iiii
+//  Encoding description:  op (o); immediate value (i)
+//    Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
+//      bra (branch always), bnv (branch never, a form of NOP)
+//      bne (branch when Z == 0), beq (branch when Z == 1), 
+//      bcc (branch when C == 0 [unsigned less than]), 
+//      bcs (branch when C == 1 [unsigned greater than or equal]),
+//      bls (branch when C == 0 and Z == 1 [unsigned less than or equal]),
+//      bhi (branch when C == 1 and Z == 0 [unsigned greater than])
 
 

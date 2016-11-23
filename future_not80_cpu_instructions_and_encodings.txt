@@ -42,28 +42,7 @@ Type 1:  0ooo aaaa iiii iiii
       cmpi
     Copy instructions:
       cpyi (CoPY Immediate)
-    Extended copy instructions (each of which is 4 bytes long):
-      Jump Instructions Second Half Encoding:  jjjj jjjj 0aaa 0000
-      Encoding description:  second byte of immediate value (j) (low byte
-        of destination address);
-      Description:  sets the a register pair rAp to a 16-bit value in one
-      instruction (can be used a as a jump immediate)
-      Instructions:  
-        cpypi (COPY Pair Immediate, using iiii iiii as the high byte of the
-        16-bit value and jjjj jjjj as the low byte of the 16-bit value
-        [this instruction ONLY has an advantage over using two successive
-        cpyi instructions when used to copy a 16-bit immediate value to the
-        pc])
-    Call instructions (each of which is 4 bytes long):
-      Call Instructions Second Half Encoding:  jjjj jjjj 0000 0000
-      Encoding description:  second byte of immediate value (j) (low byte
-        of destination address);
-      Description:  sets the link register to the return address, then sets
-      the program counter to the destination address
-      Instructions:  
-        calli (CALL Immediate, using iiii iiii as the high byte of the
-        destination address and jjjj jjjj as the low byte of the
-        destination address)
+
 
 Type 2:  10oo oooo aaaa bbbb
   Encoding description:  op (o); rA (a); rB (b)
@@ -111,7 +90,75 @@ Type 2:  10oo oooo aaaa bbbb
       cpy (CoPY from one register to another register)
 
 
-Type 3:  110o oooo aaa0 bbb0
+Type 3 (four bytes):  110o aaao iiii iiii   jjjj jjjj 0000 0000
+  Encoding description:  op (o); reg pair rAp (a); 
+  high byte of 16-bit immediate value (i);
+  low byte of 16-bit immediate value (j);
+  Instructions
+    Extended copy instructions:
+      Instructions:  
+        cpypi (COPY Pair Immediate, which sets the a register pair rAp to a
+        16-bit value in one instruction, but in twice the number of cycles
+        due to using more than two bytes [can be used a as a jump immediate
+        by copying a 16-bit immediate value to the pc] [this instruction
+        ONLY has an advantage over using two successive cpyi instructions
+        when used to copy a 16-bit immediate value to the pc])
+    Call instructions
+      Instructions:  
+        calli (CALL Immediate, which sets the link register to the return
+        address, then sets the program counter to the destination address)
+
+
+Type 4:  1110 oooo iiii iiii
+  Encoding description:  op (o); immediate value (i)
+    Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
+      bra (branch always), bnv (branch never, a form of NOP)
+      bne (branch when Z == 0), beq (branch when Z == 1), 
+      bcc (branch when C == 0 [unsigned less than]), 
+      bcs (branch when C == 1 [unsigned greater than or equal]),
+      bls (branch when C == 0 and Z == 1 [unsigned less than or equal]),
+      bhi (branch when C == 1 and Z == 0 [unsigned greater than]),
+      bvc (branch when V == 0), bvs (branch when V == 1),
+      bpl (branch when N == 0), bmi (branch when N == 1),
+
+
+Type 5:  1111 oooo aaaa bbb0
+  Encoding description:  op (o); rA (a); reg pair rBp (b);
+  Instructions:  
+    Load/store instructions:
+      ldr (LoaD contents into Register rA from memory), 
+      str (STore Register rA contents to memory),
+      
+      
+      ldria (LoaD contents into Register rA from memory at address contained
+      in reg pair rBp, then add 1 to the reg pair rBp), 
+      
+      stria (STore Register rA contents to memory at address contained in
+      reg pair rBp, then add 1 to the reg pair rBp), 
+      
+      
+      ldrib (add 1 to the reg pair rBp, then LoaD contents into
+      Register rA from memory at address contained in reg pair rBp), 
+      
+      strib (add 1 to the reg pair rBp, then STore Register rA
+      contents to memory at address contained in reg pair rBp), 
+      
+      
+      ldrda (LoaD contents into Register rA from memory at address contained
+      in reg pair rBp, then subtract 1 from the reg pair rBp), 
+      
+      strda (STore Register rA contents to memory at address contained in
+      reg pair rBp, then subtract 1 from the reg pair rBp), 
+      
+      
+      ldrdb (subtract 1 from the reg pair rBp, then LoaD contents into
+      Register rA from memory at address contained in reg pair rBp), 
+      
+      strdb (subtract 1 from the reg pair rBp, then STore Register rA
+      contents to memory at address contained in reg pair rBp)
+
+
+Type 6:  1111 oooo aaa0 bbb1
   Encoding description:  op (o); reg pair rAp (a); reg pair rBp (b);
   Instructions:  
     Swap instructions:
@@ -167,52 +214,5 @@ Type 3:  110o oooo aaa0 bbb0
       [big endian] of reg Pair rAp to memory at address contained in
       reg pair rBp)
 
-Type 4:  1110 oooo aaaa bbb0
-  Encoding description:  op (o); rA (a); 
-    reg pair rBp (b);
-  Instructions:  
-    Load/store instructions:
-      ldr (LoaD contents into Register rA from memory), 
-      str (STore Register rA contents to memory),
-      
-      
-      ldria (LoaD contents into Register rA from memory at address contained
-      in reg pair rBp, then add 1 to the reg pair rBp), 
-      
-      stria (STore Register rA contents to memory at address contained in
-      reg pair rBp, then add 1 to the reg pair rBp), 
-      
-      
-      ldrib (add 1 to the reg pair rBp, then LoaD contents into
-      Register rA from memory at address contained in reg pair rBp), 
-      
-      strib (add 1 to the reg pair rBp, then STore Register rA
-      contents to memory at address contained in reg pair rBp), 
-      
-      
-      ldrda (LoaD contents into Register rA from memory at address contained
-      in reg pair rBp, then subtract 1 from the reg pair rBp), 
-      
-      strda (STore Register rA contents to memory at address contained in
-      reg pair rBp, then subtract 1 from the reg pair rBp), 
-      
-      
-      ldrdb (subtract 1 from the reg pair rBp, then LoaD contents into
-      Register rA from memory at address contained in reg pair rBp), 
-      
-      strdb (subtract 1 from the reg pair rBp, then STore Register rA
-      contents to memory at address contained in reg pair rBp)
-
-Type 5:  1111 oooo iiii iiii
-  Encoding description:  op (o); immediate value (i)
-    Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
-      bra (branch always), bnv (branch never, a form of NOP)
-      bne (branch when Z == 0), beq (branch when Z == 1), 
-      bcc (branch when C == 0 [unsigned less than]), 
-      bcs (branch when C == 1 [unsigned greater than or equal]),
-      bls (branch when C == 0 and Z == 1 [unsigned less than or equal]),
-      bhi (branch when C == 1 and Z == 0 [unsigned greater than]),
-      bvc (branch when V == 0), bvs (branch when V == 1),
-      bpl (branch when N == 0), bmi (branch when N == 1),
 
 

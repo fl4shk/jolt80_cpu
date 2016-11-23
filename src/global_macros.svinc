@@ -15,19 +15,18 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
-`ifndef proc_flags_defines_vinc
-`define proc_flags_defines_vinc
+`ifndef global_macros_svinc
+`define global_macros_svinc
 
 
-`include "src/global_macros.vinc"
+// This will probably be used in lots of places
+`define width_to_msb_pos( some_width ) ( some_width - 1 )
 
-`define const_proc_flags_width 2
-`define const_proc_flags_msb_pos \
-	(`width_to_msb_pos(`const_proc_flags_width))
-
-// Two processor flags (for simplicity):  carry (c) and zero (z)
-`define enum_proc_flag_z `const_proc_flags_width'h0
-`define enum_proc_flag_c `const_proc_flags_width'h1
+//`define whole_range( some_width ) ( `convert_width_to_msb_pos(some_width):0 )
+`define whole_range( some_msb_pos ) ( some_msb_pos:0 )
 
 
-`endif		// proc_flags_defines_vinc
+`define indirect( stuff ) stuff \
+
+
+`endif		// global_macros_svinc
