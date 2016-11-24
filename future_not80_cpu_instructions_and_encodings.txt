@@ -97,17 +97,16 @@ Type 2:  10oo oooo aaaa bbbb
       2. rorc
     
     Bitshifting (and rotating) instructions that do a 16-bit shift or
-    rotate on the reg pair r(aaaa/2)+ [so the least significant bit of aaaa
-    is ignored], using rB as the number of bits to shift by:
+    rotate on the reg pair rAp, using rB as the number of bits to shift by:
       1. lslp
       2. lsrp
       3. asrp
       4. rolp
       5. rorp
     
-    Bit rotating instructions that use carry as an extra bit
-    (either bit 16 or bit 0) for a 16-bit rotate of the reg pair rAp, using
-    rB as the number of bits to rotate by:
+    Bit rotating instructions that use carry as an extra bit (either bit 16
+    or bit 0) for a 16-bit rotate of the reg pair rAp, using rB as the
+    number of bits to rotate by:
       1. rolcp
       2. rorcp
     
@@ -148,7 +147,7 @@ Type 2:  10oo oooo aaaa bbbb
       5. ldrsa (LoaD contents into Register rA from memory at address
       contained in reg pair rBp, then Subtract 1 from the reg pair rBp)
       
-      6. strsa (STore Register rA contents to memory at address contained
+      6. strsa ([STore Register, Subtract After] STore Register rA contents to memory at address contained
       in reg pair rBp, then Subtract 1 from the reg pair rBp)
       
       

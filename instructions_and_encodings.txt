@@ -86,17 +86,16 @@ Type 2:  10oo oooo aaaa bbbb
       2. rorc
     
     Bitshifting (and rotating) instructions that do a 16-bit shift or
-    rotate on the reg pair r(aaaa/2)+ [so the least significant bit of aaaa
-    is ignored], using rB as the number of bits to shift by:
+    rotate on the reg pair rAp, using rB as the number of bits to shift by:
       1. lslp
       2. lsrp
       3. asrp
       4. rolp
       5. rorp
     
-    Bit rotating instructions that use carry as an extra bit
-    (either bit 16 or bit 0) for a 16-bit rotate of the reg pair rAp, using
-    rB as the number of bits to rotate by:
+    Bit rotating instructions that use carry as an extra bit (either bit 16
+    or bit 0) for a 16-bit rotate of the reg pair rAp, using rB as the
+    number of bits to rotate by:
       1. rolcp
       2. rorcp
     
@@ -149,6 +148,11 @@ Type 4 (four bytes):  1101 aaaa bbbo oo00   iiii iiii jjjj jjjj
       1. calli (CALL Immediate, which sets the link register to the
       return address, then sets the program counter to the destination
       address)
+    Indexed Load/store instructions:
+      1. ldrxi (Load 8-bit value from memory at address [rBp + 16-bit
+      Immediate value] into rA)
+      2. strxi (Store rA to memory at address [rBp + 16-bit Immediate
+      value])
 
 
 Type 5:  1110 oooo iiii iiii

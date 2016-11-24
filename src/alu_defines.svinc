@@ -24,15 +24,17 @@
 // ALU constants
 
 // ALU operation number of bits and most significant bit position
-`define alu_op_width 4
+`define alu_op_width 5
 `define alu_op_msb_pos ( `width_to_msb_pos(`alu_op_width) )
 
 // ALU input/output number of bits and most significant bit position
 //`define alu_inout_width 8
 `define alu_inout_width 4
-`define alu_inout_msb_pos \
-	( `width_to_msb_pos(`alu_inout_width) )
-`define alu_inout_and_carry_width (`alu_inout_width + 1)
+`define alu_inout_msb_pos ( `width_to_msb_pos(`alu_inout_width) )
+`define alu_inout_and_carry_width ( `alu_inout_width + 1 )
 
+`define alu_inout_pair_width ( `alu_inout_width + `alu_inout_width )
+`define alu_inout_pair_msb_pos ( `width_to_msb_pos(`alu_inout_pair_width) )
+`define alu_inout_pair_and_carry_width ( `alu_inout_pair_width + 1 )
 
 `endif		// alu_defines_svinc
