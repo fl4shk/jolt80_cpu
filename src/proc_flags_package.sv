@@ -15,24 +15,17 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
-`ifndef alu_defines_svinc
-`define alu_defines_svinc
+`include "src/proc_flags_defines.svinc"
+
+package pkg_pflags;
+	
+	// Two processor flags (for simplicity):  carry (c) and zero (z)
+	typedef enum logic [`proc_flags_msb_pos:0] 
+	{
+		pf_slot_z,
+		pf_slot_c
+	} proc_flag_slot;
+	
+endpackage
 
 
-`include "src/global_macros.svinc"
-
-// ALU constants
-
-// ALU operation number of bits and most significant bit position
-`define alu_op_width 4
-`define alu_op_msb_pos ( `width_to_msb_pos(`alu_op_width) )
-
-// ALU input/output number of bits and most significant bit position
-//`define alu_inout_width 8
-`define alu_inout_width 4
-`define alu_inout_msb_pos \
-	( `width_to_msb_pos(`alu_inout_width) )
-`define alu_inout_and_carry_width (`alu_inout_width + 1)
-
-
-`endif		// alu_defines_svinc

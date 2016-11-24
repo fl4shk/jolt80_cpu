@@ -21,16 +21,9 @@
 
 `include "src/global_macros.svinc"
 
-`define const_proc_flags_width 2
-`define const_proc_flags_msb_pos \
-	(`width_to_msb_pos(`const_proc_flags_width))
-
-// Two processor flags (for simplicity):  carry (c) and zero (z)
-typedef enum logic [`const_proc_flags_msb_pos:0] 
-{
-	pf_slot_z,
-	pf_slot_c
-} proc_flag_slot;
+`define proc_flags_width 2
+`define proc_flags_msb_pos \
+	(`width_to_msb_pos(`proc_flags_width))
 
 
 `endif		// proc_flags_defines_svinc

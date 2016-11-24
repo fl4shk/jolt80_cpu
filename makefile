@@ -12,7 +12,8 @@ VC=iverilog
 
 
 #BUILD=$(VC) -o $(PROJ).vvp
-BUILD=$(VC) -g2005-sv -o $(PROJ).vvp
+#BUILD=$(VC) -g2005-sv -o $(PROJ).vvp
+BUILD=$(VC) -g2009 -o $(PROJ).vvp
 
 
 #SRCFILES		:=	$(foreach DIR,$(SRCDIRS),$(notdir $(wildcard $(DIR)/*.v)))

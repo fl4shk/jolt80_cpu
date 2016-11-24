@@ -19,62 +19,59 @@
 `include "src/alu_defines.svinc"
 `include "src/proc_flags_defines.svinc"
 
-////initial
-////begin
-////	//$display(`__LINE__);
-////end
 
 module alu_test_bench;
+	
 	logic master_clk, ready;
 	
 	logic dummy;
-	// ALU inputs and outputs
-	logic [`const_alu_oper_msb_pos:0] alu_oper;
-	logic [`const_alu_inout_msb_pos:0] alu_a_in, alu_b_in;
-	logic [`const_proc_flags_msb_pos:0] alu_proc_flags_in;
-	logic [`const_alu_inout_msb_pos:0] alu_out;
-	logic [`const_proc_flags_msb_pos:0] alu_proc_flags_out;
 	
-	alu test_alu( .oper(alu_oper), .a_in(alu_a_in), .b_in(alu_b_in),
+	// ALU inputs and outputs
+	pkg_alu::alu_op the_alu_op;
+	logic [`alu_inout_msb_pos:0] alu_a_in, alu_b_in;
+	logic [`proc_flags_msb_pos:0] alu_proc_flags_in;
+	logic [`alu_inout_msb_pos:0] alu_out;
+	logic [`proc_flags_msb_pos:0] alu_proc_flags_out;
+	
+	alu test_alu( .oper(the_alu_op), .a_in(alu_a_in), .b_in(alu_b_in),
 		.proc_flags_in(alu_proc_flags_in), .out(alu_out),
 		.proc_flags_out(alu_proc_flags_out) );
 	
-	logic alu_oper_type;
-	
-	assign alu_oper_type = ( ( alu_oper == `enum_alu_oper_adc )
-		|| ( alu_oper == `enum_alu_oper_sbc )
-		|| ( alu_oper == `enum_alu_oper_rolc )
-		|| ( alu_oper == `enum_alu_oper_rorc ) );
+	logic alu_op_type;
+	assign alu_op_type = ( ( the_alu_op == pkg_alu::alu_op_adc )
+		|| ( the_alu_op == pkg_alu::alu_op_sbc )
+		|| ( the_alu_op == pkg_alu::alu_op_rolc )
+		|| ( the_alu_op == pkg_alu::alu_op_rorc ) );
 	
 	initial
 	begin
-		alu_oper = `const_alu_oper_width'h0;
+		the_alu_op = `alu_op_width'h0;
 		
 		master_clk = 1'b0;
 		ready = 1'b0;
 		dummy = 1'b0;
 		
-		//alu_oper = `enum_alu_oper_add;
-		//alu_oper = `enum_alu_oper_adc;
-		//alu_oper = `enum_alu_oper_sub;
-		//alu_oper = `enum_alu_oper_sbc;
-		//alu_oper = `enum_alu_oper_cmp;
+		//the_alu_op = pkg_alu::alu_op_add;
+		//the_alu_op = pkg_alu::alu_op_adc;
+		//the_alu_op = pkg_alu::alu_op_sub;
+		//the_alu_op = pkg_alu::alu_op_sbc;
+		//the_alu_op = pkg_alu::alu_op_cmp;
 		
-		//alu_oper = `enum_alu_oper_and;
-		//alu_oper = `enum_alu_oper_orr;
-		//alu_oper = `enum_alu_oper_xor;
-		//alu_oper = `enum_alu_oper_lsl;
-		//alu_oper = `enum_alu_oper_lsr;
-		//alu_oper = `enum_alu_oper_asr;
-		//alu_oper = `enum_alu_oper_rol;
-		//alu_oper = `enum_alu_oper_ror;
-		alu_oper = `enum_alu_oper_rolc;
-		//alu_oper = `enum_alu_oper_rorc;
+		//the_alu_op = pkg_alu::alu_op_and;
+		//the_alu_op = pkg_alu::alu_op_orr;
+		//the_alu_op = pkg_alu::alu_op_xor;
+		//the_alu_op = pkg_alu::alu_op_lsl;
+		//the_alu_op = pkg_alu::alu_op_lsr;
+		//the_alu_op = pkg_alu::alu_op_asr;
+		//the_alu_op = pkg_alu::alu_op_rol;
+		//the_alu_op = pkg_alu::alu_op_ror;
+		the_alu_op = pkg_alu::alu_op_rolc;
+		//the_alu_op = pkg_alu::alu_op_rorc;
 		
 		
-		{ alu_a_in, alu_b_in } = { `const_alu_inout_width'h0,
-			`const_alu_inout_width'h0 };
-		alu_proc_flags_in = `const_proc_flags_width'h0;
+		{ alu_a_in, alu_b_in } = { `alu_inout_width'h0,
+			`alu_inout_width'h0 };
+		alu_proc_flags_in = `proc_flags_width'h0;
 		
 		#1
 		ready = 1'b1;
@@ -93,7 +90,7 @@ module alu_test_bench;
 	
 	always @ ( posedge master_clk )
 	begin
-		if (!alu_oper_type)
+		if (!alu_op_type)
 		begin
 			//$display( "%d %d\t\t%d %b", alu_a_in, alu_b_in, alu_out,
 			//	alu_proc_flags_out );
@@ -109,29 +106,30 @@ module alu_test_bench;
 				= { dummy, alu_a_in, alu_b_in[1:0] } + 1;
 		end
 		
-		else // if (alu_oper_type)
+		else // if (alu_op_type)
 		begin
 			//$display( "%d %b %d\t\t%d %b", alu_a_in, 
-			//	alu_proc_flags_in[pf_slot_c], alu_b_in, alu_out,
-			//	alu_proc_flags_out );
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	alu_out, alu_proc_flags_out );
 			//$display( "%h %b %d\t\t%h %b", alu_a_in, 
-			//	alu_proc_flags_in[pf_slot_c], alu_b_in, alu_out,
-			//	alu_proc_flags_out );
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	alu_out, alu_proc_flags_out );
 			//$display( "%b %b %d\t\t%b %b", alu_a_in, 
-			//	alu_proc_flags_in[pf_slot_c], alu_b_in, alu_out,
-			//	alu_proc_flags_out );
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	alu_out, alu_proc_flags_out );
 			$display( "%b %b %d\t\t%b %b", alu_a_in, 
-				alu_proc_flags_in[pf_slot_c], alu_b_in[1:0],
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[1:0],
 				alu_out, alu_proc_flags_out );
 			
 			//{ dummy, alu_a_in, alu_b_in, 
-			//	alu_proc_flags_in[pf_slot_c] } 
-			//	= { dummy, alu_a_in, alu_proc_flags_in[pf_slot_c],
-			//	alu_b_in } + 1;
-			{ dummy, alu_a_in, alu_proc_flags_in[pf_slot_c], 
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } 
+			//	= { dummy, alu_a_in, 
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in } + 1;
+			{ dummy, alu_a_in, alu_proc_flags_in[pkg_pflags::pf_slot_c], 
 				alu_b_in[1:0] }
-				= { dummy, alu_a_in, alu_proc_flags_in[pf_slot_c],
-				alu_b_in[1:0] } + 1;
+				= { dummy, alu_a_in, 
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[1:0] } 
+				+ 1;
 		end
 		
 		if (dummy)
