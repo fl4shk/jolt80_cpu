@@ -48,6 +48,7 @@ package pkg_alu;
 		alu_op_negp,
 		
 		
+		
 		// 8-bit Bitshifting operations (number of bits specified by b_in)
 		alu_op_lsl,
 		alu_op_lsr,
@@ -58,9 +59,8 @@ package pkg_alu;
 		alu_op_rol,
 		alu_op_ror,
 		
-		
-		// 8-bit Bit rotating operations (with carry as bit 8 or bit 0)
-		// that rotate by [b_in % inout_width] bits
+		// 8-bit Bit rotating operations (with carry as bit 8)
+		// that rotate by [b_in % [inout_width + 1]] bits
 		alu_op_rolc,
 		alu_op_rorc,
 		
@@ -72,7 +72,6 @@ package pkg_alu;
 		alu_op_lsrp,
 		alu_op_asrp,
 		
-		
 		// 16-bit Bit rotation operations that rotate { a_in_hi, a_in_lo }
 		// by [b_in % inout_width] bits
 		alu_op_rolp,
@@ -80,7 +79,7 @@ package pkg_alu;
 		
 		
 		// 16-bit Bit rotating operations that rotate { a_in_hi, a_in_lo }
-		// (with carry as bit 16 or bit 0) by [b_in % inout_width] bits
+		// (with carry as bit 16) by [b_in % [inout_width + 1]] bits
 		alu_op_rolcp,
 		alu_op_rorcp
 		
@@ -146,7 +145,7 @@ package pkg_alu;
 			|| ( to_check == alu_op_sbc )
 			
 		// Bitwise operations
-			// 8-bit Bit rotating operations (with carry as bit 8 or bit 0)
+			// 8-bit Bit rotating operations (with carry as bit 8)
 			// that rotate by [b_in % inout_width] bits
 			|| ( to_check == alu_op_rolc )
 			|| ( to_check == alu_op_rorc ) )
