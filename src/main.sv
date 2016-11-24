@@ -108,7 +108,7 @@ module alu_test_bench;
 		//
 		//// 16-bit Bitshifting operations that shift { a_in_hi, a_in_lo }
 		//// by b_in bits
-		the_alu_op = alu_op_lslp;
+		//the_alu_op = alu_op_lslp;
 		//the_alu_op = alu_op_lsrp;
 		//the_alu_op = alu_op_asrp;
 		//
@@ -122,7 +122,7 @@ module alu_test_bench;
 		//// 16-bit Bit rotating operations that rotate { a_in_hi, a_in_lo }
 		//// (with carry as bit 16 or bit 0) by [b_in % inout_width] bits
 		//the_alu_op = alu_op_rolcp;
-		//the_alu_op = alu_op_rorcp;
+		the_alu_op = alu_op_rorcp;
 		
 		get_alu_oper_cat( the_alu_op, the_alu_op_cat );
 		
@@ -176,7 +176,7 @@ module alu_test_bench;
 			//	alu_out_lo, alu_proc_flags_out );
 			$display( "%b %b %d\t\t%b %b", alu_a_in_lo,
 				alu_proc_flags_in[pkg_pflags::pf_slot_c],
-				alu_b_in[ `alu_inout_width + 1 >> 2:0 ], alu_out_lo, 
+				alu_b_in[ `alu_inout_and_carry_width >> 2:0 ], alu_out_lo, 
 				alu_proc_flags_out );
 			
 			//{ dummy, alu_a_in_lo, alu_b_in,
@@ -185,10 +185,10 @@ module alu_test_bench;
 			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
 			{ dummy, alu_a_in_lo, 
 				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-				alu_b_in[ ( `alu_inout_width + 1 ) >> 2:0 ] }
+				alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] }
 				= { dummy, alu_a_in_lo, 
 				alu_proc_flags_in[pkg_pflags::pf_slot_c],
-				alu_b_in[ ( `alu_inout_width + 1 ) >> 2:0 ] } + 1;
+				alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] } + 1;
 		end
 		
 		else if ( the_alu_op_cat == alu_op_cat_16_no_ci )
@@ -218,7 +218,8 @@ module alu_test_bench;
 			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
 			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
 			$display( "%b %b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
-				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[1:0],
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+				alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ],
 				{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
 			
 			//{ dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in,
@@ -226,10 +227,11 @@ module alu_test_bench;
 			//	= { dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in,
 			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
 			{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
-				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[3:0] }
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+				alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] }
 				= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
-				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[3:0] } 
-				+ 1;
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+				alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] } + 1;
 		end
 		
 		

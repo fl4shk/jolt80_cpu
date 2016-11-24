@@ -59,7 +59,8 @@ module alu( input pkg_alu::alu_oper oper,
 		rot_p_c_temp;
 	
 	assign rot_p_mod_thing = ( 1 << `alu_inout_pair_width ) - 1;
-	assign rot_p_c_mod_thing = ( 1 << `alu_inout_pair_and_carry_width ) - 1;
+	assign rot_p_c_mod_thing = ( 1 << `alu_inout_pair_and_carry_width ) 
+		- 1;
 	
 	assign rot_p_temp = { { a_in_hi, a_in_lo }, { a_in_hi, a_in_lo } };
 	assign rot_p_c_temp = { proc_flags_in[pkg_pflags::pf_slot_c], 
