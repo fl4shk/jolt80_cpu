@@ -84,7 +84,7 @@ module alu_test_bench;
 		//// Complement operations
 		//the_alu_op = alu_op_inv;
 		//the_alu_op = alu_op_invp;
-		//the_alu_op = alu_op_neg;
+		the_alu_op = alu_op_neg;
 		//the_alu_op = alu_op_negp;
 		//
 		//
@@ -126,77 +126,116 @@ module alu_test_bench;
 		
 		get_alu_oper_cat( the_alu_op, the_alu_op_cat );
 		
-		{ alu_a_in_lo, alu_b_in } = { `alu_inout_width'h0,
-			`alu_inout_width'h0 };
+		{ alu_a_in_hi, alu_a_in_lo, alu_b_in } = { `alu_inout_width'h0,
+			`alu_inout_width'h0, `alu_inout_width'h0 };
 		alu_proc_flags_in = `proc_flags_width'h0;
 		
-		$display(the_alu_op_cat);
+		//$display(the_alu_op_cat);
 		
 		#1
 		ready = 1'b1;
 	end
 	
-	//// Clock generation
-	//always
-	//begin
-	//	#1
-	//	
-	//	if (ready)
-	//	begin
-	//		master_clk = !master_clk;
-	//	end
-	//end
-	//
-	//always @ ( posedge master_clk )
-	//begin
-	//	//if (!the_alu_op_cat)
-	//	//begin
-	//	//	//$display( "%d %d\t\t%d %b", alu_a_in_lo, alu_b_in, 
-	//	//	//	alu_out_lo, alu_proc_flags_out );
-	//	//	//$display( "%h %h\t\t%h %b", alu_a_in_lo, alu_b_in,
-	//	//	//	alu_out_lo, alu_proc_flags_out );
-	//	//	//$display( "%b %b\t\t%b %b", alu_a_in_lo, alu_b_in,
-	//	//	//	alu_out_lo, alu_proc_flags_out );
-	//	//	$display( "%b %d\t\t%b %b", alu_a_in_lo, alu_b_in[1:0],
-	//	//		alu_out_lo, alu_proc_flags_out );
-	//	//	//{ dummy, alu_a_in_lo, alu_b_in } = { dummy, alu_a_in_lo,
-	//	//	//	alu_b_in } + 1;
-	//	//	{ dummy, alu_a_in_lo, alu_b_in[1:0] } 
-	//	//		= { dummy, alu_a_in_lo, alu_b_in[1:0] } + 1;
-	//	//end
-	//	//
-	//	//else // if (the_alu_op_cat)
-	//	//begin
-	//	//	//$display( "%d %b %d\t\t%d %b", alu_a_in_lo, 
-	//	//	//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-	//	//	//	alu_out_lo, alu_proc_flags_out );
-	//	//	//$display( "%h %b %d\t\t%h %b", alu_a_in_lo, 
-	//	//	//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-	//	//	//	alu_out_lo, alu_proc_flags_out );
-	//	//	//$display( "%b %b %d\t\t%b %b", alu_a_in_lo, 
-	//	//	//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-	//	//	//	alu_out_lo, alu_proc_flags_out );
-	//	//	$display( "%b %b %d\t\t%b %b", alu_a_in_lo, 
-	//	//		alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[1:0],
-	//	//		alu_out_lo, alu_proc_flags_out );
-	//	//	
-	//	//	//{ dummy, alu_a_in_lo, alu_b_in, 
-	//	//	//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } 
-	//	//	//	= { dummy, alu_a_in_lo, 
-	//	//	//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in } 
-	//	//	//	+ 1;
-	//	//	{ dummy, alu_a_in_lo, alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-	//	//		alu_b_in[1:0] }
-	//	//		= { dummy, alu_a_in_lo, 
-	//	//		alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-	//	//		alu_b_in[1:0] } + 1;
-	//	//end
-	//	
-	//	if (dummy)
-	//	begin
-	//		$finish;
-	//	end
-	//end
+	// Clock generation
+	always
+	begin
+		#1
+		
+		if (ready)
+		begin
+			master_clk = !master_clk;
+		end
+	end
+	
+	always @ ( posedge master_clk )
+	begin
+		
+		if ( the_alu_op_cat == alu_op_cat_8_no_ci )
+		begin
+			//$display( "%d %d\t\t%d %b", alu_a_in_lo, alu_b_in, alu_out_lo, 
+			//	alu_proc_flags_out );
+			//$display( "%h %h\t\t%h %b", alu_a_in_lo, alu_b_in, alu_out_lo, 
+			//	alu_proc_flags_out );
+			$display( "%b %b\t\t%b %b", alu_a_in_lo, alu_b_in, alu_out_lo, 
+				alu_proc_flags_out );
+			
+			{ dummy, alu_a_in_lo, alu_b_in } = { dummy, alu_a_in_lo,
+				alu_b_in } + 1;
+		end
+		
+		else if ( the_alu_op_cat == alu_op_cat_8_ci )
+		begin
+			//$display( "%d %b %d\t\t%d %b", alu_a_in_lo,
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	alu_out_lo, alu_proc_flags_out );
+			//$display( "%h %b %h\t\t%h %b", alu_a_in_lo,
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	alu_out_lo, alu_proc_flags_out );
+			//$display( "%b %b %b\t\t%b %b", alu_a_in_lo,
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	alu_out_lo, alu_proc_flags_out );
+			$display( "%b %b %d\t\t%b %b", alu_a_in_lo,
+				alu_proc_flags_in[pkg_pflags::pf_slot_c],
+				alu_b_in[`alu_inout_width/2:0], alu_out_lo, 
+				alu_proc_flags_out );
+			
+			//{ dummy, alu_a_in_lo, alu_b_in,
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] }
+			//	= { dummy, alu_a_in_lo, alu_b_in,
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
+			{ dummy, alu_a_in_lo, 
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+				alu_b_in[`alu_inout_width/2:0] }
+				= { dummy, alu_a_in_lo, 
+				alu_proc_flags_in[pkg_pflags::pf_slot_c],
+				alu_b_in[`alu_inout_width/2:0] } + 1;
+		end
+		
+		else if ( the_alu_op_cat == alu_op_cat_16_no_ci )
+		begin
+			//$display( "%d %d\t\t%d %b", { alu_a_in_hi, alu_a_in_lo }, 
+			//	alu_b_in, { alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+			//$display( "%h %h\t\t%h %b", { alu_a_in_hi, alu_a_in_lo }, 
+			//	alu_b_in, { alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+			$display( "%b %b\t\t%b %b", { alu_a_in_hi, alu_a_in_lo }, 
+				alu_b_in, { alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+			
+			{ dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in } = { dummy, 
+				{ alu_a_in_hi, alu_a_in_lo }, alu_b_in } + 1;
+		end
+		
+		else // if ( the_alu_op_cat == alu_op_cat_16_ci )
+		begin
+			//$display( "%d %b %d\t\t%d %b", { alu_a_in_hi, alu_a_in_lo },
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+			//$display( "%h %b %h\t\t%h %b", { alu_a_in_hi, alu_a_in_lo },
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+			//$display( "%b %b %b\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+			$display( "%b %b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[1:0],
+				{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+			
+			//{ dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in,
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] }
+			//	= { dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in,
+			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
+			{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[3:0] }
+				= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
+				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in[3:0] } 
+				+ 1;
+		end
+		
+		
+		if (dummy)
+		begin
+			$finish;
+		end
+	end
 	
 endmodule
 

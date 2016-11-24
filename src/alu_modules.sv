@@ -27,7 +27,8 @@ module alu( input pkg_alu::alu_oper oper,
 	output logic [`proc_flags_msb_pos:0] proc_flags_out );
 	
 	
-	pkg_alu::alu_oper_cat oper_cat;
+	import pkg_alu::alu_oper_cat;
+	alu_oper_cat oper_cat;
 	
 	logic do_not_change_z_flag;
 	
@@ -64,227 +65,252 @@ module alu( input pkg_alu::alu_oper oper,
 		
 		do_not_change_z_flag = 1'b0;
 		
-		//case (oper)
-		//// Arithmetic operations
-		//	// Addition operations, starting with 4'h0
-		//	pkg_alu::alu_op_add:
-		//	begin
-		//		{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-		//			+ b_in;
-		//	end
-		//	
-		//	pkg_alu::alu_op_adc:
-		//	begin
-		//		{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-		//			+ b_in + proc_flags_in[pkg_pflags::pf_slot_c];
-		//	end
-		//	
-		//	// Subtraction operations, starting with 4'h2
-		//	pkg_alu::alu_op_sub:
-		//	begin
-		//		{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-		//			+ (~b_in) + 1'b1;
-		//	end
-		//	
-		//	pkg_alu::alu_op_sbc:
-		//	begin
-		//		{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-		//			+ (~b_in) + proc_flags_in[pkg_pflags::pf_slot_c];
-		//	end
-		//	
-		//	pkg_alu::alu_op_cmp:
-		//	begin
-		//		{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-		//			+ (~b_in) + 1'b1;
-		//	end
-		//	
-		//// Bitwise operations
-		//	// Operations analogous to logic gates (none of these affect
-		//	// carry)
-		//	pkg_alu::alu_op_and:
-		//	begin
-		//		{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-		//			= { a_in_lo & b_in, 
-		//			proc_flags_in[pkg_pflags::pf_slot_c] };
-		//	end
-		//	
-		//	pkg_alu::alu_op_orr:
-		//	begin
-		//		{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-		//			= { a_in_lo | b_in, 
-		//			proc_flags_in[pkg_pflags::pf_slot_c] };
-		//	end
-		//	
-		//	pkg_alu::alu_op_xor:
-		//	begin
-		//		{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-		//			= { a_in_lo ^ b_in, 
-		//			proc_flags_in[pkg_pflags::pf_slot_c] };
-		//	end
-		//	
-		//	// Bitshifting operations (number of bits specified by b_in)
-		//	pkg_alu::alu_op_lsl:
-		//	begin
-		//		if ( b_in == `alu_inout_width'h0 )
-		//		begin
-		//			// Don't change ANYTHING
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//				do_not_change_z_flag, out_lo } 
-		//				= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//				a_in_lo };
-		//		end
-		//		
-		//		else
-		//		begin
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
-		//				= { 1'b0, a_in_lo } << b_in;
-		//		end
-		//	end
-		//	
-		//	pkg_alu::alu_op_lsr:
-		//	begin
-		//		if ( b_in == `alu_inout_width'h0 )
-		//		begin
-		//			// Don't change ANYTHING
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//				do_not_change_z_flag, out_lo } 
-		//				= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//				a_in_lo };
-		//		end
-		//		
-		//		else
-		//		begin
-		//			{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-		//				= { a_in_lo, 1'b0 } >> b_in;
-		//		end
-		//	end
-		//	
-		//	pkg_alu::alu_op_asr:
-		//	begin
-		//		if ( b_in == `alu_inout_width'h0 )
-		//		begin
-		//			// Don't change ANYTHING
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//				do_not_change_z_flag, out_lo } 
-		//				= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//				a_in_lo };
-		//		end
-		//		
-		//		else
-		//		begin
-		//			{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-		//				= $signed({ a_in_lo, 1'b0 }) >>> b_in;
-		//		end
-		//	end
-		//	
-		//	// Bit rotation operations (number of bits specified by
-		//	// [b_in % inout_width])
-		//	pkg_alu::alu_op_rol:
-		//	begin
-		//		if ( b_in == `alu_inout_width'h0 )
-		//		begin
-		//			// Don't change ANYTHING
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//				do_not_change_z_flag, out_lo } 
-		//				= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//				a_in_lo };
-		//		end
-		//		
-		//		else
-		//		begin
-		//			// Don't change carry
-		//			{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-		//				= { rotate_no_carry_temp[ ( `alu_inout_width 
-		//				- ( b_in & rotate_no_carry_mod_thing ) ) 
-		//				+: `alu_inout_width ],
-		//				proc_flags_in[pkg_pflags::pf_slot_c] };
-		//		end
-		//	end
-		//	
-		//	pkg_alu::alu_op_ror:
-		//	begin
-		//		if ( b_in == `alu_inout_width'h0 )
-		//		begin
-		//			// Don't change ANYTHING
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//				do_not_change_z_flag, out_lo } 
-		//				= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//				a_in_lo };
-		//		end
-		//		
-		//		else
-		//		begin
-		//			// Don't change carry
-		//			{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-		//				= { rotate_no_carry_temp[ ( b_in 
-		//				& rotate_no_carry_mod_thing ) 
-		//				+: `alu_inout_width ],
-		//				proc_flags_in[pkg_pflags::pf_slot_c] };
-		//		end
-		//	end
-		//	
-		//	pkg_alu::alu_op_rolc:
-		//	begin
-		//		if ( b_in == `alu_inout_width'h0 )
-		//		begin
-		//			// Don't change ANYTHING
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//				do_not_change_z_flag, out_lo } 
-		//				= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//				a_in_lo };
-		//		end
-		//		
-		//		else
-		//		begin
-		//			//{ out_lo } 
-		//			//	= { rotate_no_carry_temp[ ( `alu_inout_width 
-		//			//	- ( b_in & rotate_no_carry_mod_thing ) ) 
-		//			//	+: `alu_inout_width ] };
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
-		//				= rolc_temp[ ( `alu_inout_and_carry_width 
-		//				- ( b_in & rotate_with_carry_mod_thing ) )
-		//				+: `alu_inout_and_carry_width ];
-		//		end
-		//	end
-		//	
-		//	pkg_alu::alu_op_rorc:
-		//	begin
-		//		if ( b_in == `alu_inout_width'h0 )
-		//		begin
-		//			// Don't change ANYTHING
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//				do_not_change_z_flag, out_lo } 
-		//				= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//				a_in_lo };
-		//		end
-		//		
-		//		else
-		//		begin
-		//			//{ out_lo }
-		//			//	= { rotate_no_carry_temp[ ( b_in 
-		//			//	& rotate_no_carry_mod_thing ) 
-		//			//	+: `alu_inout_width + 1 ] };
-		//			{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
-		//				= rorc_temp[ ( b_in & rotate_with_carry_mod_thing )
-		//				+: `alu_inout_and_carry_width + 1 ];
-		//		end
-		//	end
-		//	
-		//	pkg_alu::alu_op_lslp:
-		//	begin
-		//		
-		//	end
-		//	
-		//	default:
-		//	begin
-		//		// Don't change ANYTHING
-		//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
-		//			do_not_change_z_flag, out_lo } 
-		//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-		//			a_in_lo };
-		//	end
-		//	
-		//endcase
+		case (oper)
+		// Arithmetic operations
+			// Addition operations, starting with 4'h0
+			pkg_alu::alu_op_add:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ b_in;
+			end
+			
+			pkg_alu::alu_op_adc:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ b_in + proc_flags_in[pkg_pflags::pf_slot_c];
+			end
+			
+			// Subtraction operations, starting with 4'h2
+			pkg_alu::alu_op_sub:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ (~b_in) + 1'b1;
+			end
+			
+			pkg_alu::alu_op_sbc:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ (~b_in) + proc_flags_in[pkg_pflags::pf_slot_c];
+			end
+			
+			pkg_alu::alu_op_cmp:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ (~b_in) + 1'b1;
+			end
+			
+		// Bitwise operations
+			// Operations analogous to logic gates (none of these affect
+			// carry)
+			pkg_alu::alu_op_and:
+			begin
+				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+					= { a_in_lo & b_in, 
+					proc_flags_in[pkg_pflags::pf_slot_c] };
+			end
+			
+			pkg_alu::alu_op_orr:
+			begin
+				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+					= { a_in_lo | b_in, 
+					proc_flags_in[pkg_pflags::pf_slot_c] };
+			end
+			
+			pkg_alu::alu_op_xor:
+			begin
+				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+					= { a_in_lo ^ b_in, 
+					proc_flags_in[pkg_pflags::pf_slot_c] };
+			end
+			
+			// Complement operations
+			pkg_alu::alu_op_inv:
+			begin
+				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
+					= { ~a_in_lo, proc_flags_in[pkg_pflags::pf_slot_c] };
+			end
+			
+			pkg_alu::alu_op_invp:
+			begin
+				{ { out_hi, out_lo }, 
+					proc_flags_out[pkg_pflags::pf_slot_c] }
+					= { ~{ a_in_hi, a_in_lo }, 
+					proc_flags_in[pkg_pflags::pf_slot_c] };
+			end
+			
+			pkg_alu::alu_op_neg:
+			begin
+				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
+					= { -a_in_lo, proc_flags_in[pkg_pflags::pf_slot_c] };
+			end
+			
+			pkg_alu::alu_op_negp:
+			begin
+				{ { out_hi, out_lo }, 
+					proc_flags_out[pkg_pflags::pf_slot_c] }
+					= { -{ a_in_hi, a_in_lo }, 
+					proc_flags_in[pkg_pflags::pf_slot_c] };
+			end
+			
+			// Bitshifting operations (number of bits specified by b_in)
+			pkg_alu::alu_op_lsl:
+			begin
+				if ( b_in == `alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[pkg_pflags::pf_slot_c], 
+						do_not_change_z_flag, out_lo } 
+						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+						a_in_lo };
+				end
+				
+				else
+				begin
+					{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
+						= { 1'b0, a_in_lo } << b_in;
+				end
+			end
+			
+			pkg_alu::alu_op_lsr:
+			begin
+				if ( b_in == `alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[pkg_pflags::pf_slot_c], 
+						do_not_change_z_flag, out_lo } 
+						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+						a_in_lo };
+				end
+				
+				else
+				begin
+					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+						= { a_in_lo, 1'b0 } >> b_in;
+				end
+			end
+			
+			pkg_alu::alu_op_asr:
+			begin
+				if ( b_in == `alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[pkg_pflags::pf_slot_c], 
+						do_not_change_z_flag, out_lo } 
+						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+						a_in_lo };
+				end
+				
+				else
+				begin
+					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+						= $signed({ a_in_lo, 1'b0 }) >>> b_in;
+				end
+			end
+			
+			// Bit rotation operations (number of bits specified by
+			// [b_in % inout_width])
+			pkg_alu::alu_op_rol:
+			begin
+				if ( b_in == `alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[pkg_pflags::pf_slot_c], 
+						do_not_change_z_flag, out_lo } 
+						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+						a_in_lo };
+				end
+				
+				else
+				begin
+					// Don't change carry
+					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+						= { rotate_no_carry_temp[ ( `alu_inout_width 
+						- ( b_in & rotate_no_carry_mod_thing ) ) 
+						+: `alu_inout_width ],
+						proc_flags_in[pkg_pflags::pf_slot_c] };
+				end
+			end
+			
+			pkg_alu::alu_op_ror:
+			begin
+				if ( b_in == `alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[pkg_pflags::pf_slot_c], 
+						do_not_change_z_flag, out_lo } 
+						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+						a_in_lo };
+				end
+				
+				else
+				begin
+					// Don't change carry
+					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
+						= { rotate_no_carry_temp[ ( b_in 
+						& rotate_no_carry_mod_thing ) 
+						+: `alu_inout_width ],
+						proc_flags_in[pkg_pflags::pf_slot_c] };
+				end
+			end
+			
+			pkg_alu::alu_op_rolc:
+			begin
+				if ( b_in == `alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[pkg_pflags::pf_slot_c], 
+						do_not_change_z_flag, out_lo } 
+						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+						a_in_lo };
+				end
+				
+				else
+				begin
+					//{ out_lo } 
+					//	= { rotate_no_carry_temp[ ( `alu_inout_width 
+					//	- ( b_in & rotate_no_carry_mod_thing ) ) 
+					//	+: `alu_inout_width ] };
+					{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
+						= rolc_temp[ ( `alu_inout_and_carry_width 
+						- ( b_in & rotate_with_carry_mod_thing ) )
+						+: `alu_inout_and_carry_width ];
+				end
+			end
+			
+			pkg_alu::alu_op_rorc:
+			begin
+				if ( b_in == `alu_inout_width'h0 )
+				begin
+					// Don't change ANYTHING
+					{ proc_flags_out[pkg_pflags::pf_slot_c], 
+						do_not_change_z_flag, out_lo } 
+						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+						a_in_lo };
+				end
+				
+				else
+				begin
+					//{ out_lo }
+					//	= { rotate_no_carry_temp[ ( b_in 
+					//	& rotate_no_carry_mod_thing ) 
+					//	+: `alu_inout_width + 1 ] };
+					{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
+						= rorc_temp[ ( b_in & rotate_with_carry_mod_thing )
+						+: `alu_inout_and_carry_width + 1 ];
+				end
+			end
+			
+			
+			default:
+			begin
+				// Don't change ANYTHING
+				{ proc_flags_out[pkg_pflags::pf_slot_c], 
+					do_not_change_z_flag, out_lo } 
+					= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+					a_in_lo };
+			end
+			
+		endcase
 		
 		
 		if (!do_not_change_z_flag)
