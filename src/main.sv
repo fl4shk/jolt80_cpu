@@ -29,28 +29,24 @@ module spcpu_test_bench;
 	
 	//import pkg_alu::*;
 	//import pkg_alu::get_alu_oper_cat;
-	import pkg_instr_decoder::*;
+	//import pkg_instr_decoder::*;
 	
 	//logic master_clk;
 	
-	instr_grp_1_oper test_instr_oper;
+	//instr_grp_1_oper test_instr_oper;
+	//
+	//logic [`instr_grp_1_op_msb_pos:0] test_instr_oper_logic;
 	
-	logic [`instr_grp_1_op_msb_pos:0] test_instr_oper_logic;
 	
-	
-	initial
-	begin
-		////test_oper = instr_c1_op_add;
-		////test_oper = instr_grp_1_oper'(`instr_grp_1_op_width'd0);
-		//temp = 0;
-		//test_oper = instr_grp_1_oper'(temp);
-		//
-		//$display(test_oper);
-		
-		test_instr_oper_logic = `instr_grp_1_op_width'h1;
-		//$display( test_instr_oper_logic == instr_g1_op_adci );
-		
-	end
+	//logic alu_tb_reset;
+	//
+	//alu_test_bench alu_tb(.reset(alu_tb_reset));
+	//
+	//initial
+	//begin
+	//	alu_tb_reset = 1'b1;
+	//	
+	//end
 	
 	
 endmodule
@@ -58,7 +54,7 @@ endmodule
 
 //module alu_test_bench( input logic reset );
 //	
-//	import pkg_alu::get_alu_oper_cat;
+//	import pkg_alu::get_alu_oper_cat_tb;
 //	
 //	logic tb_clk, ready;
 //	
@@ -127,8 +123,8 @@ endmodule
 //			//the_alu_op = alu_op_ror;
 //			//
 //			//
-//			//// 8-bit Bit rotating operations (with carry as bit 8 or bit 0)
-//			//// that rotate by [b_in % inout_width] bits
+//			//// 8-bit Bit rotating operations (with carry as bit 8) that
+//			//// rotate { carry, a_in_lo } by one bit
 //			//the_alu_op = alu_op_rolc;
 //			//the_alu_op = alu_op_rorc;
 //			//
@@ -147,12 +143,12 @@ endmodule
 //			//the_alu_op = alu_op_rorp;
 //			//
 //			//
-//			//// 16-bit Bit rotating operations that rotate { a_in_hi, a_in_lo }
-//			//// (with carry as bit 16 or bit 0) by [b_in % inout_width] bits
+//			//// 16-bit Bit rotating operations that rotate { carry, a_in_hi,
+//			//// a_in_lo } (with carry as bit 16) by one bit
 //			//the_alu_op = alu_op_rolcp;
 //			the_alu_op = alu_op_rorcp;
 //			
-//			get_alu_oper_cat( the_alu_op, the_alu_op_cat );
+//			get_alu_oper_cat_tb( the_alu_op, the_alu_op_cat );
 //			
 //			{ alu_a_in_hi, alu_a_in_lo, alu_b_in } = { `alu_inout_width'h0,
 //				`alu_inout_width'h0, `alu_inout_width'h0 };
@@ -184,11 +180,20 @@ endmodule
 //			//	alu_out_lo, alu_proc_flags_out );
 //			//$display( "%h %h\t\t%h %b", alu_a_in_lo, alu_b_in, 
 //			//	alu_out_lo, alu_proc_flags_out );
-//			$display( "%b %b\t\t%b %b", alu_a_in_lo, alu_b_in, 
+//			//$display( "%b %b\t\t%b %b", alu_a_in_lo, alu_b_in, 
+//			//	alu_out_lo, alu_proc_flags_out );
+//			$display( "%b %d\t\t%b %b", alu_a_in_lo, alu_b_in, 
 //				alu_out_lo, alu_proc_flags_out );
+//			//$display( "%b %d\t\t%b %b", alu_a_in_lo,
+//			//	alu_b_in[ `alu_inout_width >> 2:0 ], alu_out_lo, 
+//			//	alu_proc_flags_out );
 //			
 //			{ dummy, alu_a_in_lo, alu_b_in } = { dummy, alu_a_in_lo,
 //				alu_b_in } + 1;
+//			
+//			//{ dummy, alu_a_in_lo, alu_b_in[ `alu_inout_width >> 2:0 ] }
+//			//	= { dummy, alu_a_in_lo, 
+//			//	alu_b_in[ `alu_inout_width >> 2:0 ] } + 1;
 //		end
 //		
 //		else if ( the_alu_op_cat == alu_op_cat_8_ci )
@@ -203,20 +208,23 @@ endmodule
 //			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
 //			//	alu_out_lo, alu_proc_flags_out );
 //			$display( "%b %b %d\t\t%b %b", alu_a_in_lo,
-//				alu_proc_flags_in[pkg_pflags::pf_slot_c],
-//				alu_b_in[ `alu_inout_and_carry_width >> 2:0 ], alu_out_lo, 
-//				alu_proc_flags_out );
+//				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+//				alu_out_lo, alu_proc_flags_out );
+//			//$display( "%b %b %d\t\t%b %b", alu_a_in_lo,
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c],
+//			//	alu_b_in[ `alu_inout_and_carry_width >> 2:0 ], alu_out_lo, 
+//			//	alu_proc_flags_out );
 //			
-//			//{ dummy, alu_a_in_lo, alu_b_in,
-//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] }
-//			//	= { dummy, alu_a_in_lo, alu_b_in,
-//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
-//			{ dummy, alu_a_in_lo, 
-//				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-//				alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] }
+//			{ dummy, alu_a_in_lo, alu_proc_flags_in[pkg_pflags::pf_slot_c],
+//				alu_b_in }
 //				= { dummy, alu_a_in_lo, 
-//				alu_proc_flags_in[pkg_pflags::pf_slot_c],
-//				alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] } + 1;
+//				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in } + 1;
+//			//{ dummy, alu_a_in_lo, 
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+//			//	alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] }
+//			//	= { dummy, alu_a_in_lo, 
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c],
+//			//	alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] } + 1;
 //		end
 //		
 //		else if ( the_alu_op_cat == alu_op_cat_16_no_ci )
@@ -245,21 +253,31 @@ endmodule
 //			//$display( "%b %b %b\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
 //			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
 //			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-//			$display( "%b %b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
+//			//$display( "%b %b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
+//			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+//			$display( "%b %b\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
 //				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-//				alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ],
 //				{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
+//			//$display( "%b %b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+//			//	alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ],
+//			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
 //			
-//			//{ dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in,
-//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] }
-//			//	= { dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in,
-//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
+//			//{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in }
+//			//	= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in } + 1;
 //			{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
-//				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-//				alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] }
+//				alu_proc_flags_in[pkg_pflags::pf_slot_c] }
 //				= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
-//				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-//				alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] } + 1;
+//				alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
+//			//{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+//			//	alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] }
+//			//	= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
+//			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
+//			//	alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] } + 1;
 //		end
 //		
 //		

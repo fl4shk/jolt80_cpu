@@ -41,8 +41,6 @@ package pkg_instr_decoder;
 		instr_grp_branches
 	} instr_group;
 	
-	//parameter meme = 2'b11;
-	
 	typedef enum logic [`instr_grp_1_op_msb_pos:0]
 	{
 		// Arithmetic instructions:
@@ -56,6 +54,7 @@ package pkg_instr_decoder;
 		// (CoPY Immediate)
 		instr_g1_op_cpyi 
 	} instr_grp_1_oper;
+	
 	
 	typedef enum logic [`instr_grp_2_op_msb_pos:0]
 	{
@@ -97,8 +96,8 @@ package pkg_instr_decoder;
 		instr_g2_op_ror,
 		
 		
-		// Bit rotating instructions that use carry as bit 8 and that use
-		// the value of rB as the number of bits to rotate by:
+		// Bit rotating instructions that use carry as bit 8 for a 9-bit
+		// rotate of { carry, rA } by one bit:
 		instr_g2_op_rolc,
 		instr_g2_op_rorc,
 		
@@ -113,9 +112,8 @@ package pkg_instr_decoder;
 		instr_g2_op_rorp,
 		
 		
-		// Bit rotating instructions that use carry as bit 16 for a 16-bit
-		// rotate of the reg pair rAp, using rB as the number of bits to
-		// rotate by:
+		// Bit rotating instructions that use carry as bit 16 for a 17-bit
+		// rotate of { carry, rAp } by one bit:
 		instr_g2_op_rolcp,
 		instr_g2_op_rorcp,
 		

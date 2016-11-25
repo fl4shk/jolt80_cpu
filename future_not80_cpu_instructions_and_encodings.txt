@@ -93,8 +93,8 @@ Group 2 (The instruction group with the most opcodes):
       4. rol
       5. ror
     
-    Bit rotating instructions that use carry as bit 8 and that use the
-    value of rB as the number of bits to rotate by:
+    Bit rotating instructions that use carry as bit 8 for a 9-bit rotate
+    of { carry, rA } by one bit:
       1. rolc
       2. rorc
     
@@ -106,8 +106,8 @@ Group 2 (The instruction group with the most opcodes):
       4. rolp
       5. rorp
     
-    Bit rotating instructions that use carry as bit 16 for a 16-bit rotate
-    of the reg pair rAp, using rB as the number of bits to rotate by:
+    Bit rotating instructions that use carry as bit 16 for a 17-bit rotate
+    of { carry, rAp } by one bit:
       1. rolcp
       2. rorcp
     

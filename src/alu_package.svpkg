@@ -100,7 +100,8 @@ package pkg_alu;
 	} alu_oper_cat;
 	
 	
-	task get_alu_oper_cat_old( input alu_oper to_check, 
+	// This task is intended to be used only in test benches.
+	task get_alu_oper_cat_tb( input alu_oper to_check, 
 		output alu_oper_cat to_get );
 		
 		// Arithmetic operations

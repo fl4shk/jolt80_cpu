@@ -28,14 +28,13 @@
 `define alu_op_msb_pos ( `width_to_msb_pos(`alu_op_width) )
 
 // ALU input/output number of bits and most significant bit position
-//`define alu_inout_width 8
-`define alu_inout_width 2
+`define alu_inout_width 8
+//`define alu_inout_width 4
+//`define alu_inout_width 2
 `define alu_inout_msb_pos ( `width_to_msb_pos(`alu_inout_width) )
-`define alu_inout_and_carry_width ( `alu_inout_width + 1 )
 
 `define alu_inout_pair_width ( `alu_inout_width + `alu_inout_width )
 `define alu_inout_pair_msb_pos ( `width_to_msb_pos(`alu_inout_pair_width) )
-`define alu_inout_pair_and_carry_width ( `alu_inout_pair_width + 1 )
 
 
 
@@ -83,7 +82,7 @@
 
 // Bitwise operations
 // 8-bit Bit rotating operations (with carry as bit 8) that rotate by [b_in
-// % inout_width] bits
+// % [inout_width + 1] bits
 `define alu_op_rolc_cat (alu_op_cat_8_ci)
 `define alu_op_rorc_cat (alu_op_cat_8_ci)
 
@@ -104,7 +103,7 @@
 // 16-bit Bit rotation operations that rotate { a_in_hi, a_in_lo } by [b_in
 // % inout_width] bits
 `define alu_op_rolp_cat (alu_op_cat_16_no_ci)
-`define alu_op_rorp_cat_cat_cat (alu_op_cat_16_no_ci)
+`define alu_op_rorp_cat (alu_op_cat_16_no_ci)
 
 
 
