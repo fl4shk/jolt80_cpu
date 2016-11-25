@@ -1,0 +1,232 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`include "src/instr_decoder_defines.svinc"
+
+
+package pkg_instr_decoder;
+	
+	
+	typedef enum logic [`instr_grp_msb_pos:0]
+	{
+		// Non-branching instructions with 8-bit immediate values
+		instr_grp_imm_8,
+		
+		// The instruction group with the most opcodes
+		instr_grp_largest,
+		
+		// Instructions with one register and two register pairs
+		instr_grp_1_reg_2_pairs,
+		
+		// Instructions encoded with four bytes instead of two so that
+		// there can be 16-bit immediate values
+		instr_grp_imm_16,
+		
+		// Branching instructions
+		instr_grp_branches
+	} instr_group;
+	
+	//parameter meme = 2'b11;
+	
+	typedef enum logic [`instr_grp_1_op_msb_pos:0]
+	{
+		// Arithmetic instructions:
+		instr_g1_op_addi,
+		instr_g1_op_adci,
+		
+		instr_g1_op_cmpi,
+		
+		//Copy instructions:
+		
+		// (CoPY Immediate)
+		instr_g1_op_cpyi 
+	} instr_grp_1_oper;
+	
+	typedef enum logic [`instr_grp_2_op_msb_pos:0]
+	{
+		// Arithmetic instructions:
+		instr_g2_op_add,
+		instr_g2_op_adc,
+		
+		instr_g2_op_sub,
+		instr_g2_op_sbc,
+		
+		instr_g2_op_cmp,
+		
+		// Bitwise instructions with two register operands:
+		instr_g2_op_and,
+		instr_g2_op_orr,
+		instr_g2_op_xor,
+		
+		// Complement instructions with one register operand (rB ignored):
+		
+		// (one's complement of rA)
+		instr_g2_op_inv,
+		
+		// (one's complement of rAp)
+		instr_g2_op_invp,
+		
+		// (two's complement of rA)
+		instr_g2_op_neg,
+		
+		// (two's complement of rAp)
+		instr_g2_op_negp,
+		
+		
+		// Bitshifting (and rotating) instructions that use the value of rB
+		// as the number of bits to shift by:
+		instr_g2_op_lsl,
+		instr_g2_op_lsr,
+		instr_g2_op_asr,
+		instr_g2_op_rol,
+		instr_g2_op_ror,
+		
+		
+		// Bit rotating instructions that use carry as bit 8 and that use
+		// the value of rB as the number of bits to rotate by:
+		instr_g2_op_rolc,
+		instr_g2_op_rorc,
+		
+		
+		// Bitshifting (and rotating) instructions that do a 16-bit shift
+		// or rotate on the reg pair rAp, using rB as the number of bits to
+		// shift by:
+		instr_g2_op_lslp,
+		instr_g2_op_lsrp,
+		instr_g2_op_asrp,
+		instr_g2_op_rolp,
+		instr_g2_op_rorp,
+		
+		
+		// Bit rotating instructions that use carry as bit 16 for a 16-bit
+		// rotate of the reg pair rAp, using rB as the number of bits to
+		// rotate by:
+		instr_g2_op_rolcp,
+		instr_g2_op_rorcp,
+		
+		
+		// Copy instructions:
+		
+		// (CoPY from one register to another register)
+		instr_g2_op_cpy,
+		
+		// (CoPY from reg Pair rAp to reg Pair rBp)
+		instr_g2_op_cpyp,
+		
+		
+		// Swap instructions:
+		// (SWap register Pair, also can be used as a combined "call",
+		// "jump", and "return" instruction by swapping some other register
+		// pair with the "pc" [r14p] register pair)
+		instr_g2_op_swp,
+		
+		
+		// Call instruction (Description:  sets the link register to the
+		// return address, then sets the program counter to the address
+		// contained in the reg pair rAp):
+		
+		// (CALL subroutine at address in reg pair rAp)
+		instr_g2_op_call,
+		
+		
+		// 8-bit Load/store instructions:
+		
+		// (LoaD contents into Register rA from memory)
+		instr_g2_op_ldr,
+		
+		// (STore Register rA contents to memory)
+		instr_g2_op_str 
+		
+	} instr_grp_2_oper;
+	
+	
+	typedef enum logic [`instr_grp_3_op_msb_pos:0]
+	{
+		// Indexed Load/store instructions:
+		
+		// Load 8-bit value from memory at address [rBp + rCp] into rA
+		instr_g3_op_ldrx,
+		
+		// Store rA to memory at address [rBp + rCp]
+		instr_g3_op_strx 
+	} instr_grp_3_oper;
+	
+	typedef enum logic [`instr_grp_4_op_msb_pos:0]
+	{
+		// Extended copy instructions:
+		
+		// (COPY Pair Immediate, which sets the a register pair rAp to a
+		// 16-bit value in one instruction, but in twice the number of
+		// cycles due to using more than two bytes [can be used a as a jump
+		// immediate by copying a 16-bit immediate value to the pc] [this
+		// instruction ONLY has an advantage over using two successive cpyi
+		// instructions when used to copy a 16-bit immediate value to the
+		// pc])
+		instr_g4_op_cpypi,
+		
+		// Call instructions
+		
+		// (CALL Immediate, which sets the link register to the return
+		// address, then sets the program counter to the destination
+		// address)
+		instr_g4_op_calli,
+		
+		// Indexed Load/store instructions:
+		
+		// (Load 8-bit value from memory at address [rBp + 16-bit Immediate
+		// value] into rA)
+		instr_g4_op_ldrxi,
+		
+		// (Store rA to memory at address [rBp + 16-bit Immediate value])
+		instr_g4_op_strxi
+		
+	} instr_grp_4_oper;
+	
+	typedef enum logic [`instr_grp_5_op_msb_pos:0]
+	{
+		// Branching instructions (note that iiii iiii is a SIGNED 8-bit
+		// integer):
+		
+		// (branch always)
+		instr_g5_op_bra,
+		
+		// (branch never, a form of NOP)
+		instr_g5_op_bnv,
+		
+		// (branch when Z == 0)
+		instr_g5_op_bne,
+		
+		// (branch when Z == 1)
+		instr_g5_op_beq,
+		
+		// (branch when C == 0 [unsigned less than])
+		instr_g5_op_bcc,
+		
+		// (branch when C == 1 [unsigned greater than or equal])
+		instr_g5_op_bcs,
+		
+		// (branch when C == 0 and Z == 1 [unsigned less than or equal])
+		instr_g5_op_bls,
+		
+		// (branch when C == 1 and Z == 0 [unsigned greater than])
+		instr_g5_op_bhi
+		
+	} instr_grp_5_oper;
+	
+	
+endpackage

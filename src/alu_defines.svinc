@@ -37,4 +37,82 @@
 `define alu_inout_pair_msb_pos ( `width_to_msb_pos(`alu_inout_pair_width) )
 `define alu_inout_pair_and_carry_width ( `alu_inout_pair_width + 1 )
 
+
+
+
+// ALU operation category defines
+
+// -- alu_op_cat_8_no_ci --
+// Arithmetic operations
+// Addition operations
+`define alu_op_add_cat (alu_op_cat_8_no_ci)
+
+// Subtraction operations
+`define alu_op_sub_cat (alu_op_cat_8_no_ci)
+`define alu_op_cmp_cat (alu_op_cat_8_no_ci)
+
+// Bitwise operations
+// Operations analogous to logic gates (none of these affect carry)
+`define alu_op_and_cat (alu_op_cat_8_no_ci)
+`define alu_op_orr_cat (alu_op_cat_8_no_ci)
+`define alu_op_xor_cat (alu_op_cat_8_no_ci)
+
+// Complement operations
+`define alu_op_inv_cat (alu_op_cat_8_no_ci)
+`define alu_op_neg_cat (alu_op_cat_8_no_ci)
+
+// 8-bit Bitshifting operations (number of bits specified by b_in)
+`define alu_op_lsl_cat (alu_op_cat_8_no_ci)
+`define alu_op_lsr_cat (alu_op_cat_8_no_ci)
+`define alu_op_asr_cat (alu_op_cat_8_no_ci)
+
+// 8-bit Bit rotation operations (number of bits specified by [b_in %
+// inout_width])
+`define alu_op_rol_cat (alu_op_cat_8_no_ci)
+`define alu_op_ror_cat (alu_op_cat_8_no_ci)
+
+
+
+// -- alu_op_cat_8_ci --
+// Arithmetic operations
+// Addition operations
+`define alu_op_adc_cat (alu_op_cat_8_ci)
+
+// Subtraction operations
+`define alu_op_sbc_cat (alu_op_cat_8_ci)
+
+// Bitwise operations
+// 8-bit Bit rotating operations (with carry as bit 8) that rotate by [b_in
+// % inout_width] bits
+`define alu_op_rolc_cat (alu_op_cat_8_ci)
+`define alu_op_rorc_cat (alu_op_cat_8_ci)
+
+
+
+// -- alu_op_cat_16_no_ci --
+// Bitwise operations
+// Complement operations
+`define alu_op_invp_cat (alu_op_cat_16_no_ci)
+`define alu_op_negp_cat (alu_op_cat_16_no_ci)
+
+// 16-bit Bitshifting operations that shift { a_in_hi, a_in_lo } by b_in
+// bits
+`define alu_op_lslp_cat (alu_op_cat_16_no_ci)
+`define alu_op_lsrp_cat (alu_op_cat_16_no_ci)
+`define alu_op_asrp_cat (alu_op_cat_16_no_ci)
+
+// 16-bit Bit rotation operations that rotate { a_in_hi, a_in_lo } by [b_in
+// % inout_width] bits
+`define alu_op_rolp_cat (alu_op_cat_16_no_ci)
+`define alu_op_rorp_cat_cat_cat (alu_op_cat_16_no_ci)
+
+
+
+// -- alu_op_cat_16_ci --
+// 16-bit Bit rotating operations that rotate { a_in_hi, a_in_lo } (with
+// carry as bit 16) by [b_in % [inout_width + 1]] bits
+`define alu_op_rolcp_cat (alu_op_cat_16_ci)
+`define alu_op_rorcp_cat (alu_op_cat_16_ci)
+
+
 `endif		// alu_defines_svinc

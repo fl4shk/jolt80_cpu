@@ -1,0 +1,63 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef instr_decoder_defines_svinc
+`define instr_decoder_defines_svinc
+
+
+`include "src/global_macros.svinc"
+
+// Instruction decoder constants
+
+// There are five (5) instruction groups, so use a 3-bit enum
+`define instr_grp_width 3
+`define instr_grp_msb_pos ( `width_to_msb_pos(`instr_grp_width) )
+
+
+// Instruction group 1 has 3 opcode bits
+// Encoding:  0ooo aaaa iiii iiii
+`define instr_grp_1_op_width 3
+`define instr_grp_1_op_msb_pos ( `width_to_msb_pos(`instr_grp_1_op_width) )
+
+
+// Instruction group 2 has 6 opcode bits
+// Encoding:  10oo oooo aaaa bbbb
+`define instr_grp_2_op_width 6
+`define instr_grp_2_op_msb_pos ( `width_to_msb_pos(`instr_grp_2_op_width) )
+
+
+// Instruction group 3 has 2 opcode bits
+// Encoding:  1100 aaaa bbbo ccco
+`define instr_grp_3_op_width 2
+`define instr_grp_3_op_msb_pos ( `width_to_msb_pos(`instr_grp_3_op_width) )
+
+
+// Instruction group 4 has 3 opcode bits
+// Encoding:  1101 aaaa bbbo oo00   iiii iiii jjjj jjjj
+`define instr_grp_4_op_width 3
+`define instr_grp_4_op_msb_pos ( `width_to_msb_pos(`instr_grp_4_op_width) )
+
+
+// Instruction group 5 has 4 opcode bits
+// Encoding:  1110 oooo iiii iiii
+`define instr_grp_5_op_width 4
+`define instr_grp_5_op_msb_pos ( `width_to_msb_pos(`instr_grp_5_op_width) )
+
+
+
+`endif		// instr_decoder_defines_svinc

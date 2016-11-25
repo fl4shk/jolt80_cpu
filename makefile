@@ -20,13 +20,13 @@ BUILD=$(VC) -g2009 -o $(PROJ).vvp
 #
 export VPATH	:=	$(foreach DIR,$(SRCDIRS),$(CURDIR)/$(DIR))
 #SRCFILES		:=	$(shell find . -type f -iname "*.sv")
+PKGFILES		:=	$(foreach DIR,$(SRCDIRS),$(shell find $(DIR) \
+	-maxdepth 1  -type f -iname "*.svpkg"))
 SRCFILES		:=	$(foreach DIR,$(SRCDIRS),$(shell find $(DIR) \
 	-maxdepth 1  -type f -iname "*.sv"))
-#SRCFILES		:=	$(foreach DIR,$(SRCDIRS),$(shell find $(DIR) \
-#	-maxdepth 1  -type f -iname "*.v"))
 
 all:
-	$(BUILD) $(SRCFILES)
+	$(BUILD) $(PKGFILES) $(SRCFILES)
 
 clean:  
 	rm -fv $(PROJ).vvp

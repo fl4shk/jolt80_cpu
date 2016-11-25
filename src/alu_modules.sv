@@ -32,7 +32,7 @@ module alu( input pkg_alu::alu_oper oper,
 	
 	logic do_not_change_z_flag;
 	
-	import pkg_alu::get_alu_oper_cat;
+	//import pkg_alu::get_alu_oper_cat;
 	
 	
 	// 8-bit bit rotation stuff
@@ -71,7 +71,7 @@ module alu( input pkg_alu::alu_oper oper,
 	
 	always @ ( oper, a_in_lo, b_in, proc_flags_in )
 	begin
-		get_alu_oper_cat( oper, oper_cat );
+		//get_alu_oper_cat( oper, oper_cat );
 		
 		do_not_change_z_flag = 1'b0;
 		
@@ -82,12 +82,14 @@ module alu( input pkg_alu::alu_oper oper,
 			begin
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
 					+ b_in;
+				oper_cat = `alu_op_add_cat;
 			end
 			
 			pkg_alu::alu_op_adc:
 			begin
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
 					+ b_in + proc_flags_in[pkg_pflags::pf_slot_c];
+				oper_cat = `alu_op_adc_cat;
 			end
 			
 			// Subtraction operations
@@ -95,6 +97,7 @@ module alu( input pkg_alu::alu_oper oper,
 			begin
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
 					+ (~b_in) + 1'b1;
+				oper_cat = `alu_op_sub_cat;
 			end
 			
 			pkg_alu::alu_op_sbc:

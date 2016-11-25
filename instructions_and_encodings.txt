@@ -23,11 +23,12 @@ Special register pairs:
 
 Instruction encodings:
 
-Type 1:  0ooo aaaa iiii iiii
+Group 1 (Non-branching instructions with 8-bit immediate values):  
+  Encoding:  0ooo aaaa iiii iiii
   Encoding description:  op (o); 
-  register rA, or reg pair r(aaaa/2)p [denoted rAp, so the least
-  significant bit of aaaa is ignored] (a); 
-  8-bit immediate value (i)
+    register rA, or reg pair r(aaaa/2)p [denoted rAp, so the least
+    significant bit of aaaa is ignored] (a); 
+    8-bit immediate value (i)
   Instructions:  
     Arithmetic instructions:
       1. addi
@@ -40,16 +41,18 @@ Type 1:  0ooo aaaa iiii iiii
       immediate value)
       
       5. cmpi
+    
     Copy instructions:
       6. cpyi (CoPY Immediate)
 
 
-Type 2:  10oo oooo aaaa bbbb
+Group 2 (The instruction group with the most opcodes):  
+  Encoding:  10oo oooo aaaa bbbb
   Encoding description:  op (o); 
-  register rA, or reg pair r(aaaa/2)p [denoted rAp, so the least
-  significant bit of aaaa is ignored] (a); 
-  register rB, or reg pair r(bbbb/2)p [denoted rBp, so the least
-  significant bit of bbbb is ignored] (b)
+    register rA, or reg pair r(aaaa/2)p [denoted rAp, so the least
+    significant bit of aaaa is ignored] (a); 
+    register rB, or reg pair r(bbbb/2)p [denoted rBp, so the least
+    significant bit of bbbb is ignored] (b)
   Instructions:  
     Arithmetic instructions:
       1. add
@@ -104,7 +107,7 @@ Type 2:  10oo oooo aaaa bbbb
     Swap instructions:
       1. swp (SWap register Pair, also can be used as a combined "call",
       "jump", and "return" instruction by swapping some other register pair
-      with the "pc" [r14] register pair)
+      with the "pc" [r14p] register pair)
     
     Call instruction (Description:  sets the link register to the return
     address, then sets the program counter to the address contained in
@@ -116,24 +119,27 @@ Type 2:  10oo oooo aaaa bbbb
       2. str (STore Register rA contents to memory)
 
 
-Type 3:  1100 aaaa bbbo ccco
+Group 3 (Instructions with one register and two register pairs):  
+  Encoding:  1100 aaaa bbbo ccco
   Encoding description:  op (o); register rA or reg pair r(aaaa/2)p (a); 
-  reg pair rBp [not always used] (b); reg pair rCp (c); 
-  high byte of 16-bit immediate value (i);
-  low byte of 16-bit immediate value (j);
+    reg pair rBp [not always used] (b); reg pair rCp (c); 
+    high byte of 16-bit immediate value (i);
+    low byte of 16-bit immediate value (j);
   Instructions
     Indexed Load/store instructions:
       1. ldrx (Load 8-bit value from memory at address [rBp + rCp] into rA)
       2. strx (Store rA to memory at address [rBp + rCp])
 
 
-Type 4 (four bytes):  1101 aaaa bbbo oo00   iiii iiii jjjj jjjj
+Group 4 (Instructions encoded with four bytes instead of two so that
+there can be 16-bit immediate values):  
+  Encoding:  1101 aaaa bbbo oo00   iiii iiii jjjj jjjj
   Encoding description:  op (o); 
-  register rA, or reg pair r(aaaa/2)p [denoted rAp, so the least
-  significant bit of aaaa is ignored] (a); 
-  reg pair rBp [not always used] (b);  
-  high byte of 16-bit immediate value (i);
-  low byte of 16-bit immediate value (j);
+    register rA, or reg pair r(aaaa/2)p [denoted rAp, so the least
+    significant bit of aaaa is ignored] (a); 
+    reg pair rBp [not always used] (b);  
+    high byte of 16-bit immediate value (i);
+    low byte of 16-bit immediate value (j);
   Instructions
     Extended copy instructions:
       1. cpypi (COPY Pair Immediate, which sets the a register pair rAp
@@ -153,7 +159,8 @@ Type 4 (four bytes):  1101 aaaa bbbo oo00   iiii iiii jjjj jjjj
       value])
 
 
-Type 5:  1110 oooo iiii iiii
+Group 5 (Branching instructions):  
+  Encoding:  1110 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
     Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
       1. bra (branch always)
@@ -164,6 +171,7 @@ Type 5:  1110 oooo iiii iiii
       6. bcs (branch when C == 1 [unsigned greater than or equal])
       7. bls (branch when C == 0 and Z == 1 [unsigned less than or equal])
       8. bhi (branch when C == 1 and Z == 0 [unsigned greater than])
+
 
 //Type 1:  0ooo aaaa iiii iiii
 //  Encoding description:  op (o); rA (a); immediate value (i)
