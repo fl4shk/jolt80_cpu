@@ -17,7 +17,8 @@
 
 
 
-module instr_decoder( );
+
+module instr_decoder( input pkg_instr_dec:: );
 	
 	
 	

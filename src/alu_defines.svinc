@@ -28,9 +28,9 @@
 `define alu_op_msb_pos ( `width_to_msb_pos(`alu_op_width) )
 
 // ALU input/output number of bits and most significant bit position
-`define alu_inout_width 8
+//`define alu_inout_width 8
 //`define alu_inout_width 4
-//`define alu_inout_width 2
+`define alu_inout_width 2
 `define alu_inout_msb_pos ( `width_to_msb_pos(`alu_inout_width) )
 
 `define alu_inout_pair_width ( `alu_inout_width + `alu_inout_width )

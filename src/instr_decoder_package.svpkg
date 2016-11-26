@@ -19,7 +19,7 @@
 `include "src/instr_decoder_defines.svinc"
 
 
-package pkg_instr_decoder;
+package pkg_instr_dec;
 	
 	
 	typedef enum logic [`instr_grp_msb_pos:0]
@@ -226,5 +226,7 @@ package pkg_instr_decoder;
 		
 	} instr_grp_5_oper;
 	
+	
+	//task decode_grp_1_instr( input logic sdf ); 
 	
 endpackage
