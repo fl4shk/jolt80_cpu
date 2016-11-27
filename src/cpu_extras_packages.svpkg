@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
-`include "src/proc_flags_defines.svinc"
+`include "src/cpu_extras_defines.svinc"
 
 package pkg_pflags;
 	
@@ -29,3 +29,7 @@ package pkg_pflags;
 endpackage
 
 
+package pkg_cpu_regs;
+	
+	
+endpackage

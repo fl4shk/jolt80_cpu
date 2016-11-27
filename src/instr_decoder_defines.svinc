@@ -22,41 +22,61 @@
 
 `include "src/global_macros.svinc"
 
+
+// Instruction constants
+
+// Most instructions, except for group 6, are 16 bits long
+`define instr_main_width 16
+`define instr_main_msb_pos ( `width_to_msb_pos(`instr_main_width) )
+
 // Instruction decoder constants
 
-// There are five (5) instruction groups, so use a 3-bit enum
+// There are six instruction groups (counting instr_grp_unknown), so use a
+// 3-bit enum
 `define instr_grp_width 3
 `define instr_grp_msb_pos ( `width_to_msb_pos(`instr_grp_width) )
 
 
-// Instruction group 1 has 3 opcode bits
+
+// Instruction Group 1 constants
 // Encoding:  0ooo aaaa iiii iiii
-`define instr_grp_1_op_width 3
-`define instr_grp_1_op_msb_pos ( `width_to_msb_pos(`instr_grp_1_op_width) )
+// Instruction group 1 has 3 opcode bits
+`define instr_g1_op_width 3
+`define instr_g1_op_msb_pos ( `width_to_msb_pos(`instr_g1_op_width) )
 
 
-// Instruction group 2 has 6 opcode bits
+// Instruction Group 2 constants
 // Encoding:  10oo oooo aaaa bbbb
-`define instr_grp_2_op_width 6
-`define instr_grp_2_op_msb_pos ( `width_to_msb_pos(`instr_grp_2_op_width) )
+// Instruction group 2 has 6 opcode bits
+`define instr_g2_op_width 6
+`define instr_g2_op_msb_pos ( `width_to_msb_pos(`instr_g2_op_width) )
 
 
+// Instruction Group 3 constants
+// Encoding:  1100 ooaa aabb bccc
 // Instruction group 3 has 2 opcode bits
-// Encoding:  1100 aaaa bbbo ccco
-`define instr_grp_3_op_width 2
-`define instr_grp_3_op_msb_pos ( `width_to_msb_pos(`instr_grp_3_op_width) )
+`define instr_g3_op_width 2
+`define instr_g3_op_msb_pos ( `width_to_msb_pos(`instr_g3_op_width) )
 
 
-// Instruction group 4 has 3 opcode bits
-// Encoding:  1101 aaaa bbbo oo00   iiii iiii jjjj jjjj
-`define instr_grp_4_op_width 3
-`define instr_grp_4_op_msb_pos ( `width_to_msb_pos(`instr_grp_4_op_width) )
+// Instruction Group 4 constants
+// Encoding:  1101 oooo iiii iiii
+// Instruction group 4 has 4 opcode bits
+`define instr_g4_op_width 4
+`define instr_g4_op_msb_pos ( `width_to_msb_pos(`instr_g4_op_width) )
 
 
-// Instruction group 5 has 4 opcode bits
-// Encoding:  1110 oooo iiii iiii
-`define instr_grp_5_op_width 4
-`define instr_grp_5_op_msb_pos ( `width_to_msb_pos(`instr_grp_5_op_width) )
+// Instruction Group 5 constants
+// Encoding:  1110 00oo oaaa abbb   iiii iiii jjjj jjjj
+// Instruction group 5 has 3 opcode bits
+`define instr_g5_op_width 3
+`define instr_g5_op_msb_pos ( `width_to_msb_pos(`instr_g5_op_width) )
+
+
+
+// Instruction group 2 has the most opcode bits
+`define instr_op_max_width `instr_g2_op_width
+`define instr_op_max_msb_pos ( `width_to_msb_pos(`instr_op_max_width) )
 
 
 

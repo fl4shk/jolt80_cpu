@@ -205,7 +205,7 @@ Group 2 (The instruction group with the most opcodes):
 
 
 Group 3 (Instructions with one register and two register pairs):  
-  Encoding:  1100 aaaa bbbo ccco
+  Encoding:  1100 ooaa aabb bccc
   Encoding description:  op (o); register rA or reg pair r(aaaa/2)p (a); 
     reg pair rBp [not always used] (b); reg pair rCp (c); 
     high byte of 16-bit immediate value (i);
@@ -219,9 +219,27 @@ Group 3 (Instructions with one register and two register pairs):
       4. stpx (Store rAp to memory at address [rBp + rCp])
 
 
-Group 4 (Instructions encoded with four bytes instead of two so that
-there can be 16-bit immediate values):  
-  Encoding:  1101 aaaa bbbo oo00   iiii iiii jjjj jjjj
+Group 4 (Branching instructions):  
+  Encoding:  1101 oooo iiii iiii
+  Encoding description:  op (o); immediate value (i)
+    Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
+      1. bra (branch always)
+      2. bnv (branch never, a form of NOP)
+      3. bne (branch when Z == 0)
+      4. beq (branch when Z == 1)
+      5. bcc (branch when C == 0 [unsigned less than])
+      6. bcs (branch when C == 1 [unsigned greater than or equal])
+      7. bls (branch when C == 0 and Z == 1 [unsigned less than or equal])
+      8. bhi (branch when C == 1 and Z == 0 [unsigned greater than])
+      9. bvc (branch when V == 0)
+      10. bvs (branch when V == 1)
+      11. bpl (branch when N == 0)
+      12. bmi (branch when N == 1)
+
+
+Group 5 (Instructions encoded with four bytes instead of two so that there
+can be 16-bit immediate values):  
+  Encoding:  1110 00oo oaaa abbb   iiii iiii jjjj jjjj
   Encoding description:  op (o); 
     register rA, or reg pair r(aaaa/2)p [denoted rAp, so the least
     significant bit of aaaa is ignored] (a); 
@@ -252,21 +270,5 @@ there can be 16-bit immediate values):
       Immediate value])
 
 
-Group 5 (Branching instructions):  
-  Encoding:  1110 oooo iiii iiii
-  Encoding description:  op (o); immediate value (i)
-    Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
-      1. bra (branch always)
-      2. bnv (branch never, a form of NOP)
-      3. bne (branch when Z == 0)
-      4. beq (branch when Z == 1)
-      5. bcc (branch when C == 0 [unsigned less than])
-      6. bcs (branch when C == 1 [unsigned greater than or equal])
-      7. bls (branch when C == 0 and Z == 1 [unsigned less than or equal])
-      8. bhi (branch when C == 1 and Z == 0 [unsigned greater than])
-      9. bvc (branch when V == 0)
-      10. bvs (branch when V == 1)
-      11. bpl (branch when N == 0)
-      12. bmi (branch when N == 1)
 
 

@@ -16,12 +16,12 @@
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 `include "src/alu_defines.svinc"
-`include "src/proc_flags_defines.svinc"
+`include "src/cpu_extras_defines.svinc"
 
 
-//module alu( input logic [`alu_op_msb_pos:0] oper,
+//module alu( input logic [alu_op_msb_pos:0] oper,
 module alu( input pkg_alu::alu_oper oper,
-	input logic [`alu_inout_msb_pos:0] a_in_lo, a_in_hi, b_in,
+	input logic [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in,
 	input logic [`proc_flags_msb_pos:0] proc_flags_in,
 	output logic [`alu_inout_msb_pos:0] out_lo, out_hi,
 	output logic [`proc_flags_msb_pos:0] proc_flags_out );
@@ -262,16 +262,16 @@ module alu( input pkg_alu::alu_oper oper,
 				else
 				begin
 					// Don't change carry
-					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-					//	= { rot_temp[ ( `alu_inout_width 
-					//	- ( b_in & rot_mod_thing ) ) 
-					//	+: `alu_inout_width ],
-					//	proc_flags_in[pkg_pflags::pf_slot_c] };
 					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
 						= { rot_temp[ ( `alu_inout_width 
-						- ( b_in % `alu_inout_width ) ) 
+						- ( b_in & rot_mod_thing ) ) 
 						+: `alu_inout_width ],
 						proc_flags_in[pkg_pflags::pf_slot_c] };
+					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+					//	= { rot_temp[ ( `alu_inout_width 
+					//	- ( b_in % `alu_inout_width ) ) 
+					//	+: ``alu_inout_width ],
+					//	proc_flags_in[pkg_pflags::pf_slot_c] };
 				end
 				
 			end
@@ -292,21 +292,21 @@ module alu( input pkg_alu::alu_oper oper,
 				else
 				begin
 					// Don't change carry
-					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-					//	= { rot_temp[ ( b_in & rot_mod_thing ) 
-					//	+: `alu_inout_width ],
-					//	proc_flags_in[pkg_pflags::pf_slot_c] };
 					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-						= { rot_temp[ ( b_in % `alu_inout_width ) 
+						= { rot_temp[ ( b_in & rot_mod_thing ) 
 						+: `alu_inout_width ],
 						proc_flags_in[pkg_pflags::pf_slot_c] };
+					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
+					//	= { rot_temp[ ( b_in % `alu_inout_width ) 
+					//	+: `alu_inout_width ],
+					//	proc_flags_in[pkg_pflags::pf_slot_c] };
 				end
 				
 			end
 			
 			
-			// 8-bit Bit rotating operations (with carry as bit 8) that
-			// rotate { carry, a_in_lo } by one bit
+			// Bit rotating instructions that use carry as bit 8 for a
+			// 9-bit rotate of { carry, a_in_lo } by one bit:
 			pkg_alu::alu_op_rolc:
 			begin
 				oper_cat = `alu_op_rolc_cat;
@@ -323,8 +323,8 @@ module alu( input pkg_alu::alu_oper oper,
 					= { proc_flags_in[pkg_pflags::pf_slot_c], a_in_lo };
 			end
 			
-			// 16-bit Bitshifting operations that shift { a_in_hi, 
-			// a_in_lo } by b_in bits
+			// 16-bit Bitshifting operations that shift 
+			// { a_in_hi, a_in_lo } by b_in bits
 			pkg_alu::alu_op_lslp:
 			begin
 				oper_cat = `alu_op_lslp_cat;
@@ -392,8 +392,8 @@ module alu( input pkg_alu::alu_oper oper,
 			end
 			
 			
-			// 16-bit Bit rotation operations that rotate { a_in_hi,
-			// a_in_lo } by [b_in % inout_width] bits
+			// 16-bit Bit rotation operations that rotate 
+			// { a_in_hi, a_in_lo } by [b_in % inout_width] bits
 			pkg_alu::alu_op_rolp:
 			begin
 				oper_cat = `alu_op_rolp_cat;
@@ -447,7 +447,7 @@ module alu( input pkg_alu::alu_oper oper,
 			
 			
 			// Bit rotating instructions that use carry as bit 16 for a
-			// 17-bit rotate of { carry, rAp } by one bit:
+			// 17-bit rotate of { carry, a_in_hi, a_in_lo } by one bit:
 			pkg_alu::alu_op_rolcp:
 			begin
 				oper_cat = `alu_op_rolcp_cat;

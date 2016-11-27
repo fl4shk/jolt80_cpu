@@ -1,0 +1,75 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef cpu_extras_defines_svinc
+`define cpu_extras_defines_svinc
+
+
+`include "src/global_macros.svinc"
+
+`define proc_flags_width 2
+`define proc_flags_msb_pos \
+	(`width_to_msb_pos(`proc_flags_width))
+
+
+
+// General register constants
+
+// 16 GPRs
+`define cpu_num_regs 16
+
+// 8 GPR pairs
+`define cpu_num_reg_pairs 8
+
+
+// Instruction encoding things
+`define cpu_reg_index_width 4
+`define cpu_reg_index_msb_pos ( `width_to_msb_pos(`cpu_reg_index_width) )
+
+`define cpu_rp_index_width 3
+`define cpu_rp_index_msb_pos ( `width_to_msb_pos(`cpu_rp_index_width) )
+
+
+// Register widths and most significant bit positions
+`define cpu_reg_width 8
+`define cpu_reg_msb_pos ( `width_to_msb_pos(`cpu_reg_width) )
+
+`define cpu_rp_width 16
+`define cpu_rp_msb_pos ( `width_to_msb_pos(`cpu_rp_width) )
+
+// Immediate value widths and most significant bit positions
+`define cpu_imm_value_8_width `cpu_reg_width
+`define cpu_imm_value_8_msb_pos `cpu_reg_msb_pos
+
+`define cpu_imm_value_16_width `cpu_rp_width
+`define cpu_imm_value_16_msb_pos `cpu_rp_msb_pos
+
+
+
+// Specific general purpose registers
+
+// The pc register pair occupies the register pair r14p ({ r14, r15 })
+`define cpu_rp_pc_hi_pos 14
+`define cpu_rp_pc_lo_pos 15
+
+// The lr register pair occupies the register pair r12p ({ r12, r13 })
+`define cpu_rp_lr_hi_pos 12
+`define cpu_rp_lr_lo_pos 13
+
+
+
+`endif		// cpu_extras_defines_svinc

@@ -17,91 +17,284 @@
 
 
 `include "src/alu_defines.svinc"
-`include "src/proc_flags_defines.svinc"
+`include "src/cpu_extras_defines.svinc"
 
 `include "src/instr_decoder_defines.svinc"
 
 
 module spcpu_test_bench;
 	
-	//logic alu_tb_reset;
-	//
-	//alu_test_bench alu_tb(.reset(alu_tb_reset));
-	//
-	//initial
-	//begin
-	//	alu_tb_reset = 1'b1;
-	//end
+	logic clk_gen_reset, tb_clk;
 	
-	logic instr_dec_tb_reset;
+	// Various test bench reset signals
+	logic alu_tb_reset, 
+		instr_grp_dec_tb_reset,
+		instr_dec_tb_reset;
 	
-	instr_decoder_test_bench instr_dec_tb(.reset(instr_dec_tb_reset));
+	
+	tb_clk_gen clk_gen( .reset(clk_gen_reset), .clk(tb_clk) );
+	
+	alu_test_bench alu_tb( .tb_clk(tb_clk), .reset(alu_tb_reset) );
+	instr_group_decoder_test_bench instr_grp_dec_tb( .tb_clk(tb_clk), 
+		.reset(instr_grp_dec_tb_reset) );
+	
+	instr_decoder_test_bench instr_dec_tb( .tb_clk(tb_clk),
+		.reset(instr_dec_tb_reset) );
 	
 	initial
 	begin
+		clk_gen_reset = 1'b1;
+		
+		//alu_tb_reset = 1'b1;
+		//instr_grp_dec_tb_reset = 1'b1;
 		instr_dec_tb_reset = 1'b1;
 	end
 	
 	
+	//initial
+	//begin
+	//	$finish;
+	//end
+	
+	
 endmodule
 
 
-//// Example test_bench module:
-//module example_test_bench( input logic reset );
-//	
-//	logic tb_clk;
-//	
-//	tb_clk_gen clk_gen( .reset(reset), .clk(tb_clk) );
-//	
-//	// This is used instead of an initial block
-//	always @ (reset)
-//	begin
-//		if (reset)
-//		begin
-//			
-//			
-//		end
-//	end
-//	
-//	always @ ( posedge tb_clk )
-//	begin
-//		// Main code stuff here
-//	end
-//	
-//endmodule
 
-
-
-module instr_decoder_test_bench( input logic reset );
+module instr_decoder_test_bench( input logic tb_clk, input logic reset );
 	
-	logic tb_clk;
+	logic ready;
 	
-	tb_clk_gen clk_gen( .reset(reset), .clk(tb_clk) );
+	import pkg_instr_dec::*;
 	
+	logic [`instr_main_msb_pos:0] test_instr_hi, test_instr_lo;
+	instr_group test_instr_group;
+	
+	// instr_grp_1_decoder outputs
+	logic [`instr_op_max_msb_pos:0] test_ig1_opcode;
+	logic [instr_g1_ra_index_msb_pos:0] test_ig1_ra_index;
+	logic [instr_g1_imm_value_msb_pos:0] test_ig1_imm_value_8;
+	
+	// instr_grp_2_decoder outputs
+	logic [`instr_op_max_msb_pos:0] test_ig2_opcode;
+	logic [instr_g2_ra_index_msb_pos:0] test_ig2_ra_index;
+	logic [instr_g2_rb_index_msb_pos:0] test_ig2_rb_index;
+	logic test_ig2_ra_index_is_for_pair, test_ig2_rb_index_is_for_pair;
+	
+	// instr_grp_3_decoder outputs
+	logic [`instr_op_max_msb_pos:0] test_ig3_opcode;
+	logic [instr_g3_ra_index_msb_pos:0] test_ig3_ra_index;
+	logic [instr_g3_rbp_index_msb_pos:0] test_ig3_rbp_index;
+	logic [instr_g3_rcp_index_msb_pos:0] test_ig3_rcp_index;
+	
+	
+	// Instruction decoder modules
+	instr_group_decoder instr_grp_dec( .instr_hi(test_instr_hi),
+		.group_out(test_instr_group) );
+	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(test_instr_hi),
+		.opcode_out(test_ig1_opcode), .ra_index_out(test_ig1_ra_index),
+		.imm_value_8_out(test_ig1_imm_value_8) );
+	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(test_instr_hi),
+		.opcode_out(test_ig2_opcode), .ra_index_out(test_ig2_ra_index),
+		.rb_index_out(test_ig2_rb_index),
+		.ra_index_is_for_pair(test_ig2_ra_index_is_for_pair),
+		.rb_index_is_for_pair(test_ig2_rb_index_is_for_pair) );
+	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(test_instr_hi),
+		.opcode_out(test_ig3_opcode), .ra_index_out(test_ig3_ra_index),
+		.rbp_index_out(test_ig3_rbp_index),
+		.rcp_index_out(test_ig3_rcp_index) );
+	
+	
+	// This is used instead of an initial block
 	always @ (reset)
 	begin
 		if (reset)
 		begin
+			ready = 1'b0;
 			
+			// Other initialization stuff goes here
+			test_instr_hi = 0;
 			
+			//$display( instr_g1_reg_a_index_range_hi,
+			//	instr_g1_reg_a_index_range_lo, 
+			//	instr_g1_imm_value_range_hi,
+			//	instr_g1_imm_value_range_lo );
+		end
+		
+		if ( ready == 1'b0 )
+		begin
+			#1
+			ready = 1'b1;
 			
+			#2
+			test_instr_hi = { instr_g1_id, pkg_instr_dec::instr_g1_op_adci,
+				4'b0111, 8'h33 };
+			
+			#2
+			test_instr_hi = { instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi,
+				4'h1, 8'h99 };
+			
+			#2
+			test_instr_hi = { instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 
+				12'b0 };
+			
+			#2
+			test_instr_hi = { instr_g2_id, pkg_instr_dec::instr_g2_op_call, 
+				4'd3, 4'd9 };
+			
+			#2
+			test_instr_hi = { instr_g2_id, pkg_instr_dec::instr_g2_op_invp, 
+				4'd3, 4'd9 };
+			
+			#2
+			test_instr_hi = { instr_g2_id, pkg_instr_dec::instr_g2_op_cpyp, 
+				4'd3, 4'd9 };
+			
+			#2
+			test_instr_hi = { instr_g2_id, pkg_instr_dec::instr_g2_op_swp, 
+				4'd4, 4'd9 };
+			
+			#2
+			test_instr_hi = { instr_g2_id, pkg_instr_dec::instr_g2_op_ldr, 
+				4'd4, 4'd9 };
+			
+			#2
+			test_instr_hi = { instr_g2_id, pkg_instr_dec::instr_g2_op_str, 
+				4'd4, 4'd9 };
+			
+			#2
+			test_instr_hi = { instr_g3_id, pkg_instr_dec::instr_g3_op_strx,
+				4'd3, 3'd2, 3'd7 };
+			
+			#2
+			$finish;
 		end
 	end
 	
+	
 	always @ ( posedge tb_clk )
 	begin
+	
+	if (ready)
+	begin
+		// Main code stuff here
 		
+		case (test_instr_group)
+			pkg_instr_dec::instr_grp_1:
+			begin
+				$display( "Group 1\t\t%b %b %b", test_ig1_opcode,
+					test_ig1_ra_index, test_ig1_imm_value_8 );
+			end
+			
+			pkg_instr_dec::instr_grp_2:
+			begin
+				$display( "Group 2\t\t%b %b %b\t\t%b %b", test_ig2_opcode,
+					test_ig2_ra_index, test_ig2_rb_index,
+					test_ig2_ra_index_is_for_pair,
+					test_ig2_rb_index_is_for_pair );
+				
+				if ( test_ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
+				begin
+					$display("invp instruction encountered");
+				end
+			end
+			
+			pkg_instr_dec::instr_grp_3:
+			begin
+				$display( "Group 3\t\t%b %b %b %b", test_ig3_opcode,
+					test_ig3_ra_index, test_ig3_rbp_index,
+					test_ig3_rcp_index );
+			end
+			
+			default:
+			begin
+				$display("Unknown instruction encoding");
+			end
+			
+		endcase
+	end
+	
 	end
 	
 	
 endmodule
 
 
-module alu_test_bench( input logic reset );
+
+
+module instr_group_decoder_test_bench( input logic tb_clk, 
+	input logic reset );
+	
+	logic ready;
+	
+	import pkg_instr_dec::*;
+	
+	logic [`instr_main_msb_pos:0] test_instr_hi, test_instr_lo;
+	instr_group test_instr_group;
+	
+	instr_group_decoder instr_grp_dec( .instr_hi(test_instr_hi),
+		.group_out(test_instr_group) );
+	
+	// This is used instead of an initial block
+	always @ (reset)
+	begin
+		if (reset)
+		begin
+			ready = 1'b0;
+			test_instr_hi = `instr_main_width'h0000;
+			
+		end
+		
+		if ( ready == 1'b0 )
+		begin
+			#1
+			ready = 1'b1;
+			
+			
+			#2
+			test_instr_hi = { instr_g1_id, pkg_instr_dec::instr_g1_op_addi, 
+				4'b0111, 8'h33 };
+			
+			
+			#2
+			test_instr_hi = { instr_g2_id, pkg_instr_dec::instr_g2_op_call,
+				4'd1, 4'd2 };
+			
+			
+			//#2
+			//test_instr_hi = { instr_g3_id, pkg_instr_dec::instr_g3_op_
+			
+			#2
+			$finish;
+			
+		end
+	end
+	
+	
+	always @ ( posedge tb_clk )
+	begin
+	
+	if (ready)
+	begin
+		
+		$display( "%b %b %b %b\t\t%d", test_instr_hi[15:12], 
+			test_instr_hi[11:8], test_instr_hi[7:4], test_instr_hi[3:0], 
+			test_instr_group );
+		
+	end
+	
+	end
+	
+	
+endmodule
+
+
+
+module alu_test_bench( input logic tb_clk, input logic reset );
+	
+	logic ready;
 	
 	import pkg_alu::get_alu_oper_cat_tb;
-	
-	logic tb_clk;
 	
 	logic dummy;
 	
@@ -114,17 +307,19 @@ module alu_test_bench( input logic reset );
 	logic [`proc_flags_msb_pos:0] alu_proc_flags_out;
 	
 	alu test_alu( .oper(the_alu_op), 
-		.a_in_lo(alu_a_in_lo), .a_in_hi(alu_a_in_hi), .b_in(alu_b_in),
+		.a_in_hi(alu_a_in_hi), .a_in_lo(alu_a_in_lo), .b_in(alu_b_in),
 		.proc_flags_in(alu_proc_flags_in), 
 		.out_lo(alu_out_lo), .out_hi(alu_out_hi),
 		.proc_flags_out(alu_proc_flags_out) );
 	
-	tb_clk_gen clk_gen( .reset(reset), .clk(tb_clk) );
 	
+	// This is used instead of an initial block
 	always @ (reset)
 	begin
 		if (reset)
 		begin
+			ready = 1'b0;
+			
 			dummy = 1'b0;
 			
 			//the_alu_op = pkg_alu::alu_op_add + 1;
@@ -145,7 +340,8 @@ module alu_test_bench( input logic reset );
 			//
 			//// Bitwise operations
 			//
-			//// Operations analogous to logic gates (none of these affect carry)
+			//// Operations analogous to logic gates (none of these affect
+			//// carry)
 			//the_alu_op = alu_op_and;
 			//the_alu_op = alu_op_orr;
 			//the_alu_op = alu_op_xor;
@@ -157,7 +353,8 @@ module alu_test_bench( input logic reset );
 			//the_alu_op = alu_op_negp;
 			//
 			//
-			//// 8-bit Bitshifting operations (number of bits specified by b_in)
+			//// 8-bit Bitshifting operations (number of bits specified by
+			//// b_in)
 			//the_alu_op = alu_op_lsl;
 			//the_alu_op = alu_op_lsr;
 			//the_alu_op = alu_op_asr;
@@ -168,28 +365,28 @@ module alu_test_bench( input logic reset );
 			//the_alu_op = alu_op_ror;
 			//
 			//
-			//// 8-bit Bit rotating operations (with carry as bit 8) that
-			//// rotate { carry, a_in_lo } by one bit
+			//// Bit rotating instructions that use carry as bit 8 for a
+			//// 9-bit rotate of { carry, a_in_lo } by one bit:
 			//the_alu_op = alu_op_rolc;
 			//the_alu_op = alu_op_rorc;
 			//
 			//
 			//
-			//// 16-bit Bitshifting operations that shift { a_in_hi, a_in_lo }
-			//// by b_in bits
+			//// 16-bit Bitshifting operations that shift 
+			//// { a_in_hi, a_in_lo } by b_in bits
 			//the_alu_op = alu_op_lslp;
 			//the_alu_op = alu_op_lsrp;
 			//the_alu_op = alu_op_asrp;
 			//
 			//
-			//// 16-bit Bit rotation operations that rotate { a_in_hi, a_in_lo }
-			//// by [b_in % inout_width] bits
+			//// 16-bit Bit rotation operations that rotate 
+			//// { a_in_hi, a_in_lo } by [b_in % inout_width] bits
 			//the_alu_op = alu_op_rolp;
 			//the_alu_op = alu_op_rorp;
 			//
 			//
-			//// 16-bit Bit rotating operations that rotate { carry, a_in_hi,
-			//// a_in_lo } (with carry as bit 16) by one bit
+			//// Bit rotating instructions that use carry as bit 16 for a
+			//// 17-bit rotate of { carry, a_in_hi, a_in_lo } by one bit:
 			//the_alu_op = alu_op_rolcp;
 			//the_alu_op = alu_op_rorcp;
 			
@@ -201,10 +398,21 @@ module alu_test_bench( input logic reset );
 			
 			//$display(the_alu_op_cat);
 		end
+		
+		if ( ready == 1'b0 )
+		begin
+			#1
+			ready = 1'b1;
+		end
 	end
+	
 	
 	always @ ( posedge tb_clk )
 	begin
+	
+	if (ready)
+	begin
+		
 		if ( the_alu_op_cat == alu_op_cat_8_no_ci )
 		begin
 			//$display( "%d %d\t\t%d %b", alu_a_in_lo, alu_b_in, 
@@ -316,41 +524,13 @@ module alu_test_bench( input logic reset );
 		begin
 			$finish;
 		end
-	end
-	
-endmodule
-
-
-
-// This module is intended for use as a clock generator
-module tb_clk_gen( input logic reset, output logic clk );
-	
-	logic local_clk, ready;
-	
-	assign clk = local_clk;
-	
-	always @ (reset)
-	begin
-		if (reset)
-		begin
-			local_clk = 1'b0;
-			
-			ready = 1'b0;
-			
-			#1
-			ready = 1'b1;
-		end
-	end
-	
-	always
-	begin
-		#1
 		
-		if (ready)
-		begin
-			local_clk = !local_clk;
-		end
 	end
 	
+	end
+	
+	
 endmodule
+
+
 

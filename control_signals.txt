@@ -1,0 +1,18 @@
+Control Signal Types
+
+
+General Actions
+1. Change a register's contents (immediate)
+2. Change a register's contents (not immediate)
+3. Change a register pair's contents (immediate)
+4. Change a register pair's contents (not immediate)
+5. Swap two register pairs
+6. Load from memory
+7. Store to memory
+8.
+
+
+Instruction components:
+  1. Fetch instruction
+  2. Decode instruction
+  3. Figure out what the instruction does
