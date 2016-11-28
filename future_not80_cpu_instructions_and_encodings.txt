@@ -11,9 +11,9 @@ Special register pairs:
   r14p.  If there is ever an assembler for this CPU, "pc" (without
   quotes) will be an alias for "r14p" (without quotes).
   2)  The link register's two bytes are stored in the register pair r12p
-  (enforced by the hardware, but only relevant to the call instruction).
-  If there is ever an assembler for this CPU, "lr" (without quotes) will be
-  an alias for "r12p" (without quotes).
+  (enforced by the hardware, but only relevant to the call and calli
+  instructions).  If there is ever an assembler for this CPU, "lr" (without
+  quotes) will be an alias for "r12p" (without quotes).
   3)  As an ASSEMBLER CONVENTION, the stack pointer's two bytes are stored
   in the register pair r10p.  If there is ever an assembler for this
   CPU, "sp" (without quotes) will be an alias for "r10p" (without
@@ -33,7 +33,7 @@ Group 1 (Non-branching instructions with 8-bit immediate values):
     Arithmetic instructions:
       1. addi
       2. adci
-      3. addpi (ADd 8-bit Immediate value to register Pair)
+      3. addpbi (ADd 8-bit Immediate value to register Pair)
       
       4. subi (ASSEMBLER ALIAS for addi with the two's complement of the
       immediate value)
@@ -41,8 +41,8 @@ Group 1 (Non-branching instructions with 8-bit immediate values):
       5. sbci (ASSEMBLER ALIAS for adci with the one's complement of the
       immediate value)
       
-      6. subpi (SuBtract 8-bit Immediate value from reg Pair rAp [NOT an
-      assembler alias for addpi])
+      6. subpbi (SuBtract 8-bit Immediate value from reg Pair rAp [NOT an
+      assembler alias for addpbi])
       
       7. cmpi
     
@@ -61,11 +61,11 @@ Group 2 (The instruction group with the most opcodes):
     Arithmetic instructions:
       1. add
       2. adc
-      3. addp (ADd register rB to reg Pair rAp)
+      3. addpb (ADd register rB to reg Pair rAp)
       
       4. sub
       5. sbc
-      6. subp (SuBtract rB from reg Pair rAp)
+      6. subpb (SuBtract 8-bit register rB from reg Pair rAp)
       
       7. cmp
       

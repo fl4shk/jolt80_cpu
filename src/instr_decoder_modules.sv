@@ -170,7 +170,21 @@ endmodule
 
 // Instruction Group 5 decoder
 // Encoding:  1110 00oo oaaa abbb   iiii iiii jjjj jjjj
-
+module instr_grp_5_decoder
+	import pkg_instr_dec::*;
+	
+	( input logic [`instr_main_msb_pos:0] instr_hi, instr_lo,
+	output logic [`instr_op_max_msb_pos:0] opcode_out,
+	output logic [instr_g5_ihi_ra_index_msb_pos:0] ra_index_out,
+	output logic [instr_g5_ihi_rbp_index_msb_pos:0] rbp_index_out,
+	output logic [instr_g5_ilo_imm_value_msb_pos:0] imm_value_16_out );
+	
+	
+	assign { opcode_out, ra_index_out, rbp_index_out, imm_value_16_out }
+		= { instr_hi[ instr_g5_ihi_op_range_hi 
+		: instr_g5_ihi_rbp_index_range_lo ], instr_lo };
+	
+endmodule
 
 
 

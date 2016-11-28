@@ -37,7 +37,6 @@ module spcpu_test_bench;
 	alu_test_bench alu_tb( .tb_clk(tb_clk), .reset(alu_tb_reset) );
 	instr_group_decoder_test_bench instr_grp_dec_tb( .tb_clk(tb_clk), 
 		.reset(instr_grp_dec_tb_reset) );
-	
 	instr_decoder_test_bench instr_dec_tb( .tb_clk(tb_clk),
 		.reset(instr_dec_tb_reset) );
 	
@@ -47,7 +46,7 @@ module spcpu_test_bench;
 		
 		//alu_tb_reset = 1'b1;
 		//instr_grp_dec_tb_reset = 1'b1;
-		instr_dec_tb_reset = 1'b1;
+		//instr_dec_tb_reset = 1'b1;
 	end
 	
 	
@@ -87,6 +86,16 @@ module instr_decoder_test_bench( input logic tb_clk, input logic reset );
 	logic [instr_g3_rbp_index_msb_pos:0] test_ig3_rbp_index;
 	logic [instr_g3_rcp_index_msb_pos:0] test_ig3_rcp_index;
 	
+	// instr_grp_4_decoder outputs
+	logic [`instr_op_max_msb_pos:0] test_ig4_opcode;
+	logic [instr_g4_imm_value_msb_pos:0] test_ig4_imm_value_8;
+	
+	// instr_grp_5_decoder outputs
+	logic [`instr_op_max_msb_pos:0] test_ig5_opcode;
+	logic [instr_g5_ihi_ra_index_msb_pos:0] test_ig5_ra_index;
+	logic [instr_g5_ihi_rbp_index_msb_pos:0] test_ig5_rbp_index;
+	logic [instr_g5_ilo_imm_value_msb_pos:0] test_ig5_imm_value_16;
+	
 	
 	// Instruction decoder modules
 	instr_group_decoder instr_grp_dec( .instr_hi(test_instr_hi),
@@ -103,6 +112,14 @@ module instr_decoder_test_bench( input logic tb_clk, input logic reset );
 		.opcode_out(test_ig3_opcode), .ra_index_out(test_ig3_ra_index),
 		.rbp_index_out(test_ig3_rbp_index),
 		.rcp_index_out(test_ig3_rcp_index) );
+	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(test_instr_hi),
+		.opcode_out(test_ig4_opcode),
+		.imm_value_8_out(test_ig4_imm_value_8) );
+	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(test_instr_hi),
+		.instr_lo(test_instr_lo), .opcode_out(test_ig5_opcode),
+		.ra_index_out(test_ig5_ra_index),
+		.rbp_index_out(test_ig5_rbp_index),
+		.imm_value_16_out(test_ig5_imm_value_16) );
 	
 	
 	// This is used instead of an initial block
@@ -167,6 +184,24 @@ module instr_decoder_test_bench( input logic tb_clk, input logic reset );
 				4'd3, 3'd2, 3'd7 };
 			
 			#2
+			test_instr_hi = { instr_g4_id, pkg_instr_dec::instr_g4_op_bnv,
+				-8'd1 };
+			
+			#2
+			test_instr_hi = { instr_g4_id, pkg_instr_dec::instr_g4_op_bhi,
+				8'd8 };
+			
+			#2
+			{ test_instr_hi, test_instr_lo } = { instr_g5_ihi_id, 
+				pkg_instr_dec::instr_g5_op_calli, 4'd3, 3'd2,
+				-16'h1faa };
+			
+			#2
+			{ test_instr_hi, test_instr_lo } = { instr_g5_ihi_id, 
+				pkg_instr_dec::instr_g5_op_ldrxi, 4'd3, 3'd2,
+				~16'h1faa + 1'b1 };
+			
+			#2
 			$finish;
 		end
 	end
@@ -193,10 +228,10 @@ module instr_decoder_test_bench( input logic tb_clk, input logic reset );
 					test_ig2_ra_index_is_for_pair,
 					test_ig2_rb_index_is_for_pair );
 				
-				if ( test_ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
-				begin
-					$display("invp instruction encountered");
-				end
+				//if ( test_ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
+				//begin
+				//	$display("invp instruction encountered");
+				//end
 			end
 			
 			pkg_instr_dec::instr_grp_3:
@@ -204,6 +239,19 @@ module instr_decoder_test_bench( input logic tb_clk, input logic reset );
 				$display( "Group 3\t\t%b %b %b %b", test_ig3_opcode,
 					test_ig3_ra_index, test_ig3_rbp_index,
 					test_ig3_rcp_index );
+			end
+			
+			pkg_instr_dec::instr_grp_4:
+			begin
+				$display( "Group 4\t\t%b %b", test_ig4_opcode,
+					test_ig4_imm_value_8 );
+			end
+			
+			pkg_instr_dec::instr_grp_5:
+			begin
+				$display( "Group 5\t\t%b %b %b %h", test_ig5_opcode,
+					test_ig5_ra_index, test_ig5_rbp_index,
+					test_ig5_imm_value_16 );
 			end
 			
 			default:
