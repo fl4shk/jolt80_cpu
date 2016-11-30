@@ -44,7 +44,46 @@ module spcpu_test_bench;
 	instr_decoder_test_bench instr_dec_tb( .tb_clk(tb_clk),
 		.reset(instr_dec_tb_reset) );
 	
-	//spcpu test_cpu;
+	tb_mem_inputs mem_inputs;
+	logic [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out ;
+	
+	tb_memory test_mem( .write_clk(tb_clk), .the_inputs(mem_inputs),
+		.read_data_out(tb_mem_read_data_out) );
+	
+	
+	task read_test_mem_8;
+		input [`cpu_addr_msb_pos:0] read_addr;
+		
+		{ mem_inputs.read_addr_in, mem_inputs.read_data_acc_sz }
+			= { read_addr, pkg_cpu::cpu_data_acc_sz_8 };
+	endtask
+	
+	task write_test_mem_8;
+		input [`cpu_addr_msb_pos:0] write_addr;
+		input [`cpu_data_inout_8_msb_pos:0] to_write;
+		
+		{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
+			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we }
+			= { write_addr, to_write, pkg_cpu::cpu_data_acc_sz_8, 1'b1 };
+	endtask
+	
+	
+	task read_test_mem_16;
+		input [`cpu_addr_msb_pos:0] read_addr;
+		
+		{ mem_inputs.read_addr_in, mem_inputs.read_data_acc_sz }
+			= { read_addr, pkg_cpu::cpu_data_acc_sz_16 };
+	endtask
+	
+	task write_test_mem_16;
+		input [`cpu_addr_msb_pos:0] write_addr;
+		input [`cpu_data_inout_16_msb_pos:0] to_write;
+		
+		{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
+			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we }
+			= { write_addr, to_write, pkg_cpu::cpu_data_acc_sz_16, 1'b1 };
+	endtask
+	
 	
 	initial
 	begin
@@ -52,13 +91,44 @@ module spcpu_test_bench;
 		
 		//alu_tb_reset = 1'b1;
 		//instr_grp_dec_tb_reset = 1'b1;
-		instr_dec_tb_reset = 1'b1;
+		//instr_dec_tb_reset = 1'b1;
 		
 		
-		//test_cpu_reset = 1'b1;
-		//
-		//#2
-		//test_cpu_reset = 1'b0;
+		{ mem_inputs.read_addr_in, mem_inputs.write_addr_in,
+			mem_inputs.write_data_in, mem_inputs.read_data_acc_sz, 
+			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we } = 0;
+		
+		
+		#2
+		read_test_mem_16(0);
+		
+		#2
+		write_test_mem_16( 0, 16'hf920 );
+		
+		
+		#2
+		read_test_mem_16(2);
+		
+		
+		#2
+		write_test_mem_16( 10, 16'hff0a );
+		
+		#2
+		read_test_mem_16(10);
+		
+		
+		#2
+		$finish;
+	end
+	
+	always @ ( posedge tb_clk )
+	begin
+		$display( "spcpu_test_bench:  %h %h\t\t%h\t\t%h %h\t\t%h\t%h",
+			mem_inputs.read_addr_in, mem_inputs.write_addr_in,
+			mem_inputs.write_data_in, 
+			mem_inputs.read_data_acc_sz, mem_inputs.write_data_acc_sz, 
+			mem_inputs.write_data_we,
+			tb_mem_read_data_out );
 	end
 	
 	
@@ -125,6 +195,7 @@ module spcpu
 		.instr_lo(the_cpu_vars.instr_in_lo), .ig5d_outputs(ig5d_outputs) );
 	
 	
+	
 	logic [`cpu_data_inout_16_msb_pos:0] temp_data_in;
 	logic [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
@@ -144,6 +215,8 @@ module spcpu
 		{ data_inout_addr, data_inout_we } <= 0;
 		
 		data_inout_we <= 1'b0;
+		the_cpu_vars.next_data_inout_we <= 1'b0;
+		
 		the_cpu_vars.next_pc <= 0;
 		
 		// Clear every CPU register
@@ -176,35 +249,38 @@ module spcpu
 	if (!reset)
 	begin
 		
-		case (the_cpu_vars.next_state)
-			pkg_cpu::cpu_st_load_or_exec_instr_hi:
-			begin
-				
-			end
-			
-			pkg_cpu::cpu_st_load_instr_lo_and_exec:
-			begin
-				
-			end
-			
-			pkg_cpu::cpu_st_load_non_instr:
-			begin
-				
-			end
-			
-			pkg_cpu::cpu_st_store:
-			begin
-				
-			end
-			
-			pkg_cpu::cpu_st_branch:
-			begin
-				
-			end
-			
-		endcase
+		//case (the_cpu_vars.next_state)
+		//	pkg_cpu::cpu_st_load_or_exec_instr_hi:
+		//	begin
+		//		
+		//	end
+		//	
+		//	pkg_cpu::cpu_st_load_instr_lo_and_exec:
+		//	begin
+		//		
+		//	end
+		//	
+		//	pkg_cpu::cpu_st_load_non_instr:
+		//	begin
+		//		
+		//	end
+		//	
+		//	pkg_cpu::cpu_st_store:
+		//	begin
+		//		
+		//	end
+		//	
+		//	pkg_cpu::cpu_st_branch:
+		//	begin
+		//		
+		//	end
+		//	
+		//endcase
 		
-		data_inout_addr <= the_cpu_vars.next_data_inout_we;
+		
+		the_cpu_vars.curr_state <= the_cpu_vars.next_state;
+		data_acc_sz <= the_cpu_vars.next_data_acc_sz;
+		data_inout_we <= the_cpu_vars.next_data_inout_we;
 		
 	end
 	

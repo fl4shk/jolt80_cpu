@@ -19,7 +19,80 @@
 //`include "src/cpu_extras_defines.svinc"
 `include "src/instr_decoder_defines.svinc"
 
-//module tb_rom( input bit reset, input bit tb_clk, );
+
+`define make_mem_pair(index_hi) `make_pair( mem, index_hi )
+`define make_mem_quad(index_hi) `make_quad( mem, index_hi )
+
+
+typedef struct packed
+{
+	bit [`cpu_addr_msb_pos:0] read_addr_in, write_addr_in;
+	bit [`cpu_data_inout_16_msb_pos:0] write_data_in;
+	
+	// Size (8-bit or 16-bit) of data being read/written
+	bit read_data_acc_sz, write_data_acc_sz;
+	
+	// Write enable
+	bit write_data_we;
+	
+} tb_mem_inputs;
+
+
+// Test ROM/RAM (though mainly RAM with some initial values)
+// Asynchronous reads, Synchronous writes
+module tb_memory
+	
+	( input bit write_clk,
+	input tb_mem_inputs the_inputs,
+	output bit [`cpu_data_inout_16_msb_pos:0] read_data_out );
+	
+	import pkg_cpu::*;
+	import pkg_instr_dec::*;
+	
+	
+	
+	parameter num_bytes = 17'h10000;
+	
+	
+	// The memory (DON'T change this to a bit array!)
+	logic [`cpu_data_inout_8_msb_pos:0] mem[0:num_bytes];
+	
+	initial
+	begin
+		`make_mem_pair(0) = { `instr_g1_id, 
+			pkg_instr_dec::instr_g1_op_cpyi, 4'h0, 8'h10 };
+		`make_mem_pair(2) = { `instr_g4_id, pkg_instr_dec::instr_g4_op_bra, 
+			-8'h2 };
+		`make_mem_pair(4) = { `instr_g1_id,
+			pkg_instr_dec::instr_g1_op_cmpi, 4'h0, 8'h10 };
+	end
+	
+	assign read_data_out = ( the_inputs.read_data_acc_sz 
+		== pkg_cpu::cpu_data_acc_sz_8 ) ? mem[the_inputs.read_addr_in]
+		: `make_mem_pair(the_inputs.read_addr_in);
+	
+	always @ ( posedge write_clk )
+	begin
+		if ( the_inputs.write_data_we == 1'b1 )
+		begin
+			// Write 8-bit data
+			if ( the_inputs.write_data_acc_sz 
+				== pkg_cpu::cpu_data_acc_sz_8 )
+			begin
+				mem[the_inputs.write_addr_in] <= the_inputs.write_data_in
+					[`cpu_data_inout_8_msb_pos:0];
+			end
+			
+			else // if ( the_inputs.write_data_acc_sz
+				// == pkg_cpu::cpu_data_acc_sz_16 )
+			begin
+				`make_mem_pair(the_inputs.write_addr_in)
+					<= the_inputs.write_data_in;
+			end
+		end
+	end
+	
+endmodule
 
 
 

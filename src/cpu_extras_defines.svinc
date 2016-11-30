@@ -87,6 +87,8 @@
 
 // Macros
 `define make_pair( arr, index_hi ) { arr[index_hi], arr[ index_hi + 1 ] }
+`define make_quad( arr, index_hi ) { arr[index_hi], arr[ index_hi + 1 ], \
+	arr[ index_hi + 2 ], arr[ index_hi + 3 ] }
 
 `define make_reg_pair(index_hi) `make_pair( cpu_regs, index_hi )
 

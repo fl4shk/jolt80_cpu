@@ -67,7 +67,7 @@ package pkg_cpu;
 	
 	typedef struct packed
 	{
-		bit [`cpu_reg_msb_pos:0] cpu_regs[0:15];
+		bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 		
 		bit [`cpu_state_msb_pos:0] curr_state, next_state;
 		bit next_data_acc_sz;
