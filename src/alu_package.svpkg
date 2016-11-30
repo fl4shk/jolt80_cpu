@@ -21,9 +21,9 @@
 
 package pkg_alu;
 	
-
+	
 	// ALU operation enum values
-	typedef enum logic [`alu_op_msb_pos:0]
+	typedef enum bit [`alu_op_msb_pos:0]
 	{
 		// Arithmetic operations
 		// Addition operations
@@ -88,7 +88,7 @@ package pkg_alu;
 		
 	} alu_oper;
 	
-	typedef enum logic [1:0]
+	typedef enum bit [1:0]
 	{
 		// 8-bit operation with no carry in
 		alu_op_cat_8_no_ci,

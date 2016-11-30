@@ -15,12 +15,82 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
-`include "src/cpu_extras_defines.svinc"
+`include "src/instr_decoder_defines.svinc"
+//`include "src/cpu_extras_defines.svinc"
+
+package pkg_cpu;
+	
+	// Special general purpose register pairs
+	
+	// The pc register pair occupies the register pair r14p ({ r14, r15 })
+	parameter cpu_rp_pc_hi_rind = `cpu_reg_index_ie_width'd14;
+	parameter cpu_rp_pc_lo_rind = `cpu_reg_index_ie_width'd15;
+	
+	// The register pair index of the program counter
+	parameter cpu_rp_pc_pind = `cpu_rp_index_ie_width'd7;
+	
+	// The lr register pair occupies the register pair r12p ({ r12, r13 })
+	parameter cpu_rp_lr_hi_rind = `cpu_reg_index_ie_width'd12;
+	parameter cpu_rp_lr_lo_rind = `cpu_reg_index_ie_width'd13;
+	
+	// The register pair index of the link register
+	parameter cpu_rp_lr_pind = `cpu_rp_index_ie_width'd6;
+	
+	
+	typedef enum bit [`cpu_state_msb_pos:0]
+	{
+		// Load and execute a 16-bit instruction, or load the high 16 bits
+		// of a 32-bit instruction
+		cpu_st_load_or_exec_instr_hi,
+		
+		// Load the low 16 bits of a 32-bit instruction and execute the
+		// full 32-bit instruction
+		cpu_st_load_instr_lo_and_exec,
+		
+		// Load an 8-bit value from memory
+		cpu_st_load_non_instr,
+		
+		// Store an 8-bit value to memory
+		cpu_st_store,
+		
+		// Branches, jumps, and calls
+		cpu_st_branch
+		
+	} cpu_state;
+	
+	typedef enum bit
+	{
+		cpu_data_acc_sz_8,
+		cpu_data_acc_sz_16
+		
+	} cpu_data_access_size;
+	
+	typedef struct packed
+	{
+		bit [`cpu_reg_msb_pos:0] cpu_regs[0:15];
+		
+		bit [`cpu_state_msb_pos:0] curr_state, next_state;
+		bit next_data_acc_sz;
+		bit next_data_inout_we;
+		
+		bit [`cpu_addr_msb_pos:0] next_pc;
+		
+		//bit [`instr_main_msb_pos:0] next_instr_in_hi, next_instr_in_lo;
+		bit [`instr_main_msb_pos:0] instr_in_hi, instr_in_lo;
+		
+		
+	} cpu_vars;
+	
+	
+	
+endpackage
+
+
 
 package pkg_pflags;
 	
 	// Two processor flags (for simplicity):  carry (c) and zero (z)
-	typedef enum logic [`proc_flags_msb_pos:0] 
+	typedef enum bit [`proc_flags_msb_pos:0] 
 	{
 		pf_slot_z,
 		pf_slot_c
@@ -29,7 +99,4 @@ package pkg_pflags;
 endpackage
 
 
-package pkg_cpu_regs;
-	
-	
-endpackage
+

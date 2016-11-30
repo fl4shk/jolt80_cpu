@@ -16,10 +16,17 @@
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 
+//`include "src/cpu_extras_defines.svinc"
+`include "src/instr_decoder_defines.svinc"
+
+//module tb_rom( input bit reset, input bit tb_clk, );
+
+
+
 // This module is intended for use as a clock generator in test_benches
-module tb_clk_gen( input logic reset, output logic clk );
+module tb_clk_gen( input bit reset, output bit clk );
 	
-	logic local_clk, ready;
+	bit local_clk, ready;
 	
 	assign clk = local_clk;
 	
@@ -50,9 +57,9 @@ endmodule
 
 
 // Example test_bench module:
-module example_test_bench( input logic tb_clk, input logic reset );
+module example_test_bench( input bit tb_clk, input bit reset );
 	
-	logic ready;
+	bit ready;
 	
 	// This is used instead of an initial block
 	always @ (reset)

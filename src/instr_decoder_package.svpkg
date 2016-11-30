@@ -17,171 +17,14 @@
 
 
 `include "src/instr_decoder_defines.svinc"
+`include "src/cpu_extras_defines.svinc"
 
 
 package pkg_instr_dec;
 	
 	
-	// Instruction Group 1 parameters
-	// Encoding:  0ooo aaaa iiii iiii
-	parameter instr_g1_id = 1'b0;
-	parameter instr_g1_id_pos = 15;
 	
-	// Instruction group 1 has 3 opcode bits
-	parameter instr_g1_op_range_hi = 14;
-	parameter instr_g1_op_range_lo = ( instr_g1_op_range_hi 
-		- `instr_g1_op_msb_pos );
-	
-	// Instruction group 1 has a 4-bit index for rA
-	parameter instr_g1_ra_index_width = `cpu_reg_index_width;
-	parameter instr_g1_ra_index_msb_pos = `cpu_reg_index_msb_pos;
-	parameter instr_g1_ra_index_range_hi = ( instr_g1_op_range_lo - 1 );
-	parameter instr_g1_ra_index_range_lo 
-		= ( instr_g1_ra_index_range_hi - instr_g1_ra_index_msb_pos );
-	
-	// Instruction group 1 has an 8-bit immediate value
-	parameter instr_g1_imm_value_width = `cpu_imm_value_8_width;
-	parameter instr_g1_imm_value_msb_pos = `cpu_imm_value_8_msb_pos;
-	parameter instr_g1_imm_value_range_hi = ( instr_g1_ra_index_range_lo 
-		- 1 );
-	parameter instr_g1_imm_value_range_lo = ( instr_g1_imm_value_range_hi 
-		- instr_g1_imm_value_msb_pos );
-	
-	
-	
-	
-	// Instruction Group 2 parameters
-	// Encoding:  10oo oooo aaaa bbbb
-	parameter instr_g2_id = 2'b10;
-	parameter instr_g2_id_range_hi = 15;
-	parameter instr_g2_id_range_lo = 14;
-	
-	// Instruction group 2 has 6 opcode bits
-	parameter instr_g2_op_range_hi = ( instr_g2_id_range_lo - 1 );
-	parameter instr_g2_op_range_lo = ( instr_g2_op_range_hi 
-		- `instr_g2_op_msb_pos );
-	
-	// Instruction group 2 has a 4-bit index for rA (or rAp)
-	parameter instr_g2_ra_index_width = `cpu_reg_index_width;
-	parameter instr_g2_ra_index_msb_pos = `cpu_reg_index_msb_pos;
-	parameter instr_g2_ra_index_range_hi = ( instr_g2_op_range_lo - 1 );
-	parameter instr_g2_ra_index_range_lo 
-		= ( instr_g2_ra_index_range_hi - instr_g2_ra_index_msb_pos );
-	
-	// Instruction group 2 has a 4-bit index for rB (or rBp)
-	parameter instr_g2_rb_index_width = `cpu_reg_index_width;
-	parameter instr_g2_rb_index_msb_pos = `cpu_reg_index_msb_pos;
-	parameter instr_g2_rb_index_range_hi = ( instr_g2_ra_index_range_lo 
-		- 1 );
-	parameter instr_g2_rb_index_range_lo 
-		= ( instr_g2_rb_index_range_hi - instr_g2_rb_index_msb_pos );
-	
-	
-	
-	
-	// Instruction Group 3 parameters
-	// Encoding:  1100 ooaa aabb bccc
-	parameter instr_g3_id = 4'b1100;
-	parameter instr_g3_id_range_hi = 15;
-	parameter instr_g3_id_range_lo = 12;
-	
-	// Instruction group 3 has 2 opcode bits
-	parameter instr_g3_op_range_hi = ( instr_g3_id_range_lo - 1 );
-	parameter instr_g3_op_range_lo = ( instr_g3_op_range_hi 
-		- `instr_g3_op_msb_pos );
-	
-	// Instruction group 3 has a 4-bit index for rA
-	parameter instr_g3_ra_index_width = `cpu_reg_index_width;
-	parameter instr_g3_ra_index_msb_pos = `cpu_reg_index_msb_pos;
-	parameter instr_g3_ra_index_range_hi = ( instr_g3_op_range_lo - 1 );
-	parameter instr_g3_ra_index_range_lo 
-		= ( instr_g3_ra_index_range_hi - instr_g3_ra_index_msb_pos );
-	
-	// Instruction group 3 has a 3-bit index for rBp
-	parameter instr_g3_rbp_index_width = `cpu_rp_index_width;
-	parameter instr_g3_rbp_index_msb_pos = `cpu_rp_index_msb_pos;
-	parameter instr_g3_rbp_index_range_hi = ( instr_g3_ra_index_range_lo 
-		- 1 );
-	parameter instr_g3_rbp_index_range_lo 
-		= ( instr_g3_rbp_index_range_hi - instr_g3_rbp_index_msb_pos );
-	
-	// Instruction group 3 has a 3-bit index for rCp
-	parameter instr_g3_rcp_index_width = `cpu_rp_index_width;
-	parameter instr_g3_rcp_index_msb_pos = `cpu_rp_index_msb_pos;
-	parameter instr_g3_rcp_index_range_hi = ( instr_g3_rbp_index_range_lo 
-		- 1 );
-	parameter instr_g3_rcp_index_range_lo 
-		= ( instr_g3_rcp_index_range_hi - instr_g3_rcp_index_msb_pos );
-	
-	
-	
-	// Instruction Group 4 parameters
-	// Encoding:  1101 oooo iiii iiii
-	parameter instr_g4_id = 4'b1101;
-	parameter instr_g4_id_range_hi = 15;
-	parameter instr_g4_id_range_lo = 12;
-	
-	// Instruction group 4 has 4 opcode bits
-	parameter instr_g4_op_range_hi = ( instr_g4_id_range_lo - 1 );
-	parameter instr_g4_op_range_lo = ( instr_g4_op_range_hi
-		- `instr_g4_op_msb_pos );
-	
-	
-	// Instruction group 4 has an 8-bit immediate value
-	parameter instr_g4_imm_value_width = `cpu_imm_value_8_width;
-	parameter instr_g4_imm_value_msb_pos = `cpu_imm_value_8_msb_pos;
-	parameter instr_g4_imm_value_range_hi = ( instr_g4_op_range_lo - 1 );
-	parameter instr_g4_imm_value_range_lo = ( instr_g4_imm_value_range_hi
-		- instr_g4_imm_value_msb_pos );
-	
-	
-	
-	
-	// Instruction Group 5 parameters
-	// Encoding:  1110 00oo oaaa abbb   iiii iiii jjjj jjjj
-	// "ihi" is short for "Instruction High", which is the high 16 bits of
-	// a 32-bit instruction
-	// "ilo" is short for "Instruction Low", which is the low 16 bits of a
-	// 32-bit instruction
-	parameter instr_g5_ihi_id = 6'b111000;
-	parameter instr_g5_ihi_id_range_hi = 15;
-	parameter instr_g5_ihi_id_range_lo = 10;
-	
-	// Instruction group 5 has 3 opcode bits
-	parameter instr_g5_ihi_op_range_hi = ( instr_g5_ihi_id_range_lo 
-		- 1 );
-	parameter instr_g5_ihi_op_range_lo = ( instr_g5_ihi_op_range_hi
-		- `instr_g5_op_msb_pos );
-	
-	// Instruction group 5 has a 4-bit index for rA
-	parameter instr_g5_ihi_ra_index_width = `cpu_reg_index_width;
-	parameter instr_g5_ihi_ra_index_msb_pos = `cpu_reg_index_msb_pos;
-	parameter instr_g5_ihi_ra_index_range_hi = ( instr_g5_ihi_op_range_lo 
-		- 1 );
-	parameter instr_g5_ihi_ra_index_range_lo 
-		= ( instr_g5_ihi_ra_index_range_hi 
-		- instr_g5_ihi_ra_index_msb_pos );
-	
-	// Instruction group 5 has a 3-bit index for rBp
-	parameter instr_g5_ihi_rbp_index_width = `cpu_rp_index_width;
-	parameter instr_g5_ihi_rbp_index_msb_pos = `cpu_rp_index_msb_pos;
-	parameter instr_g5_ihi_rbp_index_range_hi 
-		= ( instr_g5_ihi_ra_index_range_lo - 1 );
-	parameter instr_g5_ihi_rbp_index_range_lo 
-		= ( instr_g5_ihi_rbp_index_range_hi 
-		- instr_g5_ihi_rbp_index_msb_pos );
-	
-	// Instruction group 5 has a 16-bit immediate value
-	parameter instr_g5_ilo_imm_value_width = `cpu_imm_value_16_width;
-	parameter instr_g5_ilo_imm_value_msb_pos = `cpu_imm_value_16_msb_pos;
-	parameter instr_g5_ilo_imm_value_range_hi = 15;
-	parameter instr_g5_ilo_imm_value_range_lo 
-		= ( instr_g5_ilo_imm_value_range_hi
-		- instr_g5_ilo_imm_value_msb_pos );
-	
-	
-	
-	typedef enum logic [`instr_grp_msb_pos:0]
+	typedef enum bit [`instr_grp_msb_pos:0]
 	{
 		// Non-branching instructions with 8-bit immediate values
 		instr_grp_1,
@@ -208,7 +51,7 @@ package pkg_instr_dec;
 	
 	// Instruction group 1 has 3 opcode bits
 	// Encoding:  0ooo aaaa iiii iiii
-	typedef enum logic [`instr_g1_op_msb_pos:0]
+	typedef enum bit [`instr_g1_op_msb_pos:0]
 	{
 		// Arithmetic instructions:
 		instr_g1_op_addi,
@@ -225,7 +68,7 @@ package pkg_instr_dec;
 	
 	// Instruction group 2 has 6 opcode bits
 	// Encoding:  10oo oooo aaaa bbbb
-	typedef enum logic [`instr_g2_op_msb_pos:0]
+	typedef enum bit [`instr_g2_op_msb_pos:0]
 	{
 		// Arithmetic instructions:
 		instr_g2_op_add,
@@ -324,7 +167,7 @@ package pkg_instr_dec;
 	
 	// Instruction group 3 has 2 opcode bits
 	// Encoding:  1100 ooaa aabb bccc
-	typedef enum logic [`instr_g3_op_msb_pos:0]
+	typedef enum bit [`instr_g3_op_msb_pos:0]
 	{
 		// Indexed Load/store instructions:
 		
@@ -338,7 +181,7 @@ package pkg_instr_dec;
 	
 	// Instruction group 4 has 4 opcode bits
 	// Encoding:  1101 oooo iiii iiii
-	typedef enum logic [`instr_g4_op_msb_pos:0]
+	typedef enum bit [`instr_g4_op_msb_pos:0]
 	{
 		// Branching instructions (note that iiii iiii is a SIGNED 8-bit
 		// integer):
@@ -372,7 +215,7 @@ package pkg_instr_dec;
 	
 	// Instruction group 5 has 3 opcode bits
 	// Encoding:  1110 00oo oaaa abbb   iiii iiii jjjj jjjj
-	typedef enum logic [`instr_g5_op_msb_pos:0]
+	typedef enum bit [`instr_g5_op_msb_pos:0]
 	{
 		// Extended copy instructions:
 		
@@ -403,6 +246,55 @@ package pkg_instr_dec;
 		
 	} instr_grp_5_oper;
 	
-	//task decode_grp_1_instr( input logic sdf ); 
+	
+	// instr_grp_1_decoder outputs
+	typedef struct packed
+	{
+		bit [`instr_g1_op_msb_pos:0] opcode;
+		bit [`instr_g1_ra_index_msb_pos:0] ra_index;
+		bit [`instr_g1_imm_value_msb_pos:0] imm_value_8;
+	} ig1_dec_outputs;
+	
+	
+	// instr_grp_2_decoder outputs
+	typedef struct packed
+	{
+		bit [`instr_g2_op_msb_pos:0] opcode;
+		bit [`instr_g2_ra_index_msb_pos:0] ra_index;
+		bit [`instr_g2_rb_index_msb_pos:0] rb_index;
+		bit ra_index_is_for_pair, rb_index_is_for_pair;
+	} ig2_dec_outputs;
+	
+	
+	// instr_grp_3_decoder outputs
+	typedef struct packed
+	{
+		bit [`instr_g3_op_msb_pos:0] opcode;
+		bit [`instr_g3_ra_index_msb_pos:0] ra_index;
+		bit [`instr_g3_rbp_index_msb_pos:0] rbp_index;
+		bit [`instr_g3_rcp_index_msb_pos:0] rcp_index;
+	} ig3_dec_outputs;
+	
+	
+	// instr_grp_4_decoder outputs
+	typedef struct packed
+	{
+		bit [`instr_g4_op_msb_pos:0] opcode;
+		bit [`instr_g4_imm_value_msb_pos:0] imm_value_8;
+	} ig4_dec_outputs;
+	
+	
+	// instr_grp_5_decoder outputs
+	typedef struct packed
+	{
+		bit [`instr_g5_op_msb_pos:0] opcode;
+		bit [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
+		bit [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;
+		bit [`instr_g5_ilo_imm_value_msb_pos:0] imm_value_16;
+	} ig5_dec_outputs;
+	
+	
 	
 endpackage
+
+

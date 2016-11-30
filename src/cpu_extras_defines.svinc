@@ -20,11 +20,11 @@
 
 
 `include "src/global_macros.svinc"
+//`include "src/instr_decoder_defines.svinc"
 
 `define proc_flags_width 2
 `define proc_flags_msb_pos \
 	(`width_to_msb_pos(`proc_flags_width))
-
 
 
 // General register constants
@@ -37,11 +37,13 @@
 
 
 // Instruction encoding things
-`define cpu_reg_index_width 4
-`define cpu_reg_index_msb_pos ( `width_to_msb_pos(`cpu_reg_index_width) )
+`define cpu_reg_index_ie_width 4
+`define cpu_reg_index_ie_msb_pos \
+	( `width_to_msb_pos(`cpu_reg_index_ie_width) )
 
-`define cpu_rp_index_width 3
-`define cpu_rp_index_msb_pos ( `width_to_msb_pos(`cpu_rp_index_width) )
+`define cpu_rp_index_ie_width 3
+`define cpu_rp_index_ie_msb_pos \
+	( `width_to_msb_pos(`cpu_rp_index_ie_width) )
 
 
 // Register widths and most significant bit positions
@@ -59,16 +61,37 @@
 `define cpu_imm_value_16_msb_pos `cpu_rp_msb_pos
 
 
+// CPU Register array size stuff
+`define cpu_reg_arr_width 16
+`define cpu_reg_arr_msb_pos ( `width_to_msb_pos(`cpu_reg_arr_width) )
 
-// Specific general purpose registers
 
-// The pc register pair occupies the register pair r14p ({ r14, r15 })
-`define cpu_rp_pc_hi_pos 14
-`define cpu_rp_pc_lo_pos 15
+// Non-instruction data in/out size stuff (8-bit because during instruction
+// execution, the CPU can only load or store one byte at a time)
+`define cpu_data_inout_8_width `cpu_reg_width
+`define cpu_data_inout_8_msb_pos `cpu_reg_msb_pos
 
-// The lr register pair occupies the register pair r12p ({ r12, r13 })
-`define cpu_rp_lr_hi_pos 12
-`define cpu_rp_lr_lo_pos 13
+// Instruction data size stuff (16-bit
+`define cpu_data_inout_16_width `cpu_rp_width
+`define cpu_data_inout_16_msb_pos `cpu_rp_msb_pos
+
+
+
+// Addressing stuff
+`define cpu_addr_width `cpu_rp_width
+`define cpu_addr_msb_pos `cpu_rp_msb_pos
+ 
+// CPU state stuff
+`define cpu_state_width 3
+`define cpu_state_msb_pos ( `width_to_msb_pos(`cpu_state_width) )
+
+// Macros
+`define make_pair( arr, index_hi ) { arr[index_hi], arr[ index_hi + 1 ] }
+
+`define make_reg_pair(index_hi) `make_pair( cpu_regs, index_hi )
+
+`define get_cpu_rp_pc `make_reg_pair(cpu_rp_pc_hi_rind)
+`define get_cpu_rp_lr `make_reg_pair(cpu_rp_lr_hi_rind)
 
 
 

@@ -19,25 +19,25 @@
 `include "src/cpu_extras_defines.svinc"
 
 
-//module alu( input logic [alu_op_msb_pos:0] oper,
+//module alu( input bit [alu_op_msb_pos:0] oper,
 module alu( input pkg_alu::alu_oper oper,
-	input logic [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in,
-	input logic [`proc_flags_msb_pos:0] proc_flags_in,
-	output logic [`alu_inout_msb_pos:0] out_lo, out_hi,
-	output logic [`proc_flags_msb_pos:0] proc_flags_out );
+	input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in,
+	input bit [`proc_flags_msb_pos:0] proc_flags_in,
+	output bit [`alu_inout_msb_pos:0] out_lo, out_hi,
+	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
 	
 	import pkg_alu::alu_oper_cat;
 	alu_oper_cat oper_cat;
 	
-	logic do_not_change_z_flag;
+	bit do_not_change_z_flag;
 	
 	//import pkg_alu::get_alu_oper_cat;
 	
 	
 	// 8-bit bit rotation stuff
-	logic [`alu_inout_msb_pos:0] rot_mod_thing;
-	logic [ `alu_inout_width + `alu_inout_width - 1:0 ] rot_temp;
+	bit [`alu_inout_msb_pos:0] rot_mod_thing;
+	bit [ `alu_inout_width + `alu_inout_width - 1:0 ] rot_temp;
 	
 	
 	// Note that using `width_to_msb_pos in this way ONLY works if
@@ -48,8 +48,8 @@ module alu( input pkg_alu::alu_oper oper,
 	
 	
 	// 16-bit bit rotation stuff
-	logic [`alu_inout_pair_msb_pos:0] rot_p_mod_thing;
-	logic [ `alu_inout_pair_width + `alu_inout_pair_width 
+	bit [`alu_inout_pair_msb_pos:0] rot_p_mod_thing;
+	bit [ `alu_inout_pair_width + `alu_inout_pair_width 
 		+ `alu_inout_pair_width + `alu_inout_pair_width - 1:0 ] rot_p_temp;
 	
 	
