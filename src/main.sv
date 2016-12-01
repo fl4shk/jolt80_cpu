@@ -22,9 +22,12 @@
 //`include "src/cpu_extras_defines.svinc"
 
 
+
 module spcpu_test_bench;
 	
 	bit clk_gen_reset, tb_clk;
+	
+	bit test_mem_reset;
 	
 	// Various test bench reset signals
 	bit alu_tb_reset, 
@@ -45,96 +48,117 @@ module spcpu_test_bench;
 		.reset(instr_dec_tb_reset) );
 	
 	tb_mem_inputs mem_inputs;
-	logic [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out ;
+	//logic [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out ;
+	wire [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out ;
 	
-	tb_memory test_mem( .write_clk(tb_clk), .the_inputs(mem_inputs),
-		.read_data_out(tb_mem_read_data_out) );
+	tb_memory test_mem( .write_clk(tb_clk), .reset(test_mem_reset),
+		.the_inputs(mem_inputs), .read_data_out(tb_mem_read_data_out) );
 	
-	
-	task read_test_mem_8;
-		input [`cpu_addr_msb_pos:0] read_addr;
-		
-		{ mem_inputs.read_addr_in, mem_inputs.read_data_acc_sz }
-			= { read_addr, pkg_cpu::cpu_data_acc_sz_8 };
-	endtask
-	
-	task write_test_mem_8;
-		input [`cpu_addr_msb_pos:0] write_addr;
-		input [`cpu_data_inout_8_msb_pos:0] to_write;
-		
-		{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
-			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we }
-			= { write_addr, to_write, pkg_cpu::cpu_data_acc_sz_8, 1'b1 };
-	endtask
+	`include "src/test_mem_tasks.svinc"
 	
 	
-	task read_test_mem_16;
-		input [`cpu_addr_msb_pos:0] read_addr;
-		
-		{ mem_inputs.read_addr_in, mem_inputs.read_data_acc_sz }
-			= { read_addr, pkg_cpu::cpu_data_acc_sz_16 };
-	endtask
+	wire [`cpu_data_inout_16_msb_pos:0] test_cpu_data_inout_direct;
+	bit [`cpu_addr_msb_pos:0] test_cpu_data_inout_addr;
+	bit test_cpu_data_acc_sz, test_cpu_data_inout_we;
 	
-	task write_test_mem_16;
-		input [`cpu_addr_msb_pos:0] write_addr;
-		input [`cpu_data_inout_16_msb_pos:0] to_write;
-		
-		{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
-			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we }
-			= { write_addr, to_write, pkg_cpu::cpu_data_acc_sz_16, 1'b1 };
-	endtask
+	spcpu test_cpu( .clk(tb_clk), .reset(test_cpu_reset),
+		.data_inout(test_cpu_data_inout_direct),
+		.data_inout_addr(test_cpu_data_inout_addr),
+		.data_acc_sz(test_cpu_data_acc_sz),
+		.data_inout_we(test_cpu_data_inout_we) );
+	
+	//logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_in, 
+	//	test_cpu_data_out;
+	logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_out;
+	
+	
+	//assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
+	//	? test_cpu_data_in : `cpu_data_inout_16_width'hz;
+	assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
+		? tb_mem_read_data_out : `cpu_data_inout_16_width'hz;
+	
+	assign test_cpu_data_out = (test_cpu_data_inout_we)
+		? test_cpu_data_inout_direct : `cpu_data_inout_16_width'hz;
 	
 	
 	initial
 	begin
-		clk_gen_reset = 1'b1;
+		clk_gen_reset = 1'b0;
+		test_cpu_reset = 1'b0;
 		
-		//alu_tb_reset = 1'b1;
-		//instr_grp_dec_tb_reset = 1'b1;
-		//instr_dec_tb_reset = 1'b1;
-		
-		
-		{ mem_inputs.read_addr_in, mem_inputs.write_addr_in,
-			mem_inputs.write_data_in, mem_inputs.read_data_acc_sz, 
+		{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
 			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we } = 0;
 		
+		#2
+		test_cpu_reset = 1'b1;
 		
 		#2
-		read_test_mem_16(0);
+		clk_gen_reset = 1'b1;
 		
-		#2
-		write_test_mem_16( 0, 16'hf920 );
-		
-		
-		#2
-		read_test_mem_16(2);
-		
-		
-		#2
-		write_test_mem_16( 10, 16'hff0a );
-		
-		#2
-		read_test_mem_16(10);
-		
-		
-		#2
-		$finish;
 	end
+	
 	
 	always @ ( posedge tb_clk )
 	begin
-		$display( "spcpu_test_bench:  %h %h\t\t%h\t\t%h %h\t\t%h\t%h",
-			mem_inputs.read_addr_in, mem_inputs.write_addr_in,
-			mem_inputs.write_data_in, 
-			mem_inputs.read_data_acc_sz, mem_inputs.write_data_acc_sz, 
-			mem_inputs.write_data_we,
-			tb_mem_read_data_out );
+		
+		// If the CPU wants to read or write 8-bit data
+		if ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+		begin
+			// If the CPU wants to read 8-bit data
+			if (!test_cpu_data_inout_we)
+			begin
+				read_test_mem_8(test_cpu_data_inout_addr);
+				
+				//$display( "%h", test_cpu_data_in );
+			end
+			
+			// If the CPU wants to write 8-bit data
+			else // if (test_cpu_data_inout_we)
+			begin
+				write_test_mem_8( test_cpu_data_inout_addr, 
+					test_cpu_data_out );
+			end
+		end
+		
+		
+		// If the CPU wants to read or write 16-bit data
+		else // if ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
+		begin
+			// If the CPU wants to read 16-bit data (for Small Practice
+			// CPU, it's used for loading either a 16-bit instruction or
+			// a 16-bit half of a 32-bit instruction)
+			if (!test_cpu_data_inout_we)
+			begin
+				read_test_mem_16(test_cpu_data_inout_addr);
+			end
+			
+			// If the CPU wants to write 16-bit data (which should NOT 
+			// happen with the current design of Small Practice CPU)
+			else // if (test_cpu_data_inout_we)
+			begin
+				$display( "spcpu_test_bench:  Uh oh!  The CPU module ",
+					"wants to store a 16-bit value!  That should NOT ",
+					"happen!" );
+			end
+		end
+		
 	end
-	
 	
 	
 endmodule
 
+
+
+`define make_reg_pair( index_hi ) `make_pair( cpu_regs, index_hi )
+
+// Make reg pair with pair index
+`define make_reg_pair_w_pi( pair_index ) `make_pair( cpu_regs, \
+	pair_index << 1 )
+
+//`define get_cpu_rp_pc `make_reg_pair(cpu_rp_pc_hi_rind)
+//`define get_cpu_rp_lr `make_reg_pair(cpu_rp_lr_hi_rind)
+`define get_cpu_rp_pc `make_reg_pair_w_pi(pkg_cpu::cpu_rp_pc_pind)
+`define get_cpu_rp_lr `make_reg_pair_w_pi(pkg_cpu::cpu_rp_lr_pind)
 
 
 // The CPU itself
@@ -162,42 +186,55 @@ module spcpu
 	
 	
 	
-	// Struct and enum instances
 	
-	cpu_vars the_cpu_vars;
 	
-	instr_group the_instr_grp;
+	// For some reason, vvp does weird things when I make cpu_regs part of
+	// the misc_cpu_vars struct, so just get rid of that struct for now.
+	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	
-	ig1_dec_outputs ig1d_outputs;
-	ig2_dec_outputs ig2d_outputs;
-	ig3_dec_outputs ig3d_outputs;
-	ig4_dec_outputs ig4d_outputs;
-	ig5_dec_outputs ig5d_outputs;
+	// The high 16 bits of a 32-bit instruction
+	bit [`instr_main_msb_pos:0] instr_in_hi;
+	
+	//// The low 16 bits of a 32-bit instruction
+	//	instr_in_lo;
+	
+	// The current CPU state
+	bit [`cpu_state_msb_pos:0] curr_state;
+	
+	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
+	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
+	
+	
+	
+	// Instruction decoding struct and enum instances
+	instr_group curr_instr_grp;
+	
+	ig1_dec_outputs curr_ig1d_outputs;
+	ig2_dec_outputs curr_ig2d_outputs;
+	ig3_dec_outputs curr_ig3d_outputs;
+	ig4_dec_outputs curr_ig4d_outputs;
+	ig5_dec_outputs curr_ig5d_outputs, prev_ig5d_outputs;
 	
 	
 	// Instruction decoder modules
-	instr_group_decoder instr_grp_dec( .instr_hi(the_cpu_vars.instr_in_hi),
-		.group_out(the_instr_grp) );
-	instr_grp_1_decoder instr_grp_1_dec
-		( .instr_hi(the_cpu_vars.instr_in_hi),
-		.ig1d_outputs(ig1d_outputs) );
-	instr_grp_2_decoder instr_grp_2_dec
-		( .instr_hi(the_cpu_vars.instr_in_hi),
-		.ig2d_outputs(ig2d_outputs) );
-	instr_grp_3_decoder instr_grp_3_dec
-		( .instr_hi(the_cpu_vars.instr_in_hi),
-		.ig3d_outputs(ig3d_outputs) );
-	instr_grp_4_decoder instr_grp_4_dec
-		( .instr_hi(the_cpu_vars.instr_in_hi),
-		.ig4d_outputs(ig4d_outputs) );
-	instr_grp_5_decoder instr_grp_5_dec
-		( .instr_hi(the_cpu_vars.instr_in_hi),
-		.instr_lo(the_cpu_vars.instr_in_lo), .ig5d_outputs(ig5d_outputs) );
+	instr_group_decoder instr_grp_dec( .instr_hi(temp_data_in),
+		.group_out(curr_instr_grp) );
+	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(temp_data_in),
+		.ig1d_outputs(curr_ig1d_outputs) );
+	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(temp_data_in),
+		.ig2d_outputs(curr_ig2d_outputs) );
+	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(temp_data_in),
+		.ig3d_outputs(curr_ig3d_outputs) );
+	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(temp_data_in),
+		.ig4d_outputs(curr_ig4d_outputs) );
+	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(temp_data_in),
+		.ig5d_outputs(curr_ig5d_outputs) );
 	
-	
-	
-	logic [`cpu_data_inout_16_msb_pos:0] temp_data_in;
-	logic [`cpu_data_inout_16_msb_pos:0] temp_data_out;
+	// Handle 32-bit instructions (all group 5 instructions are 32-bit)
+	//instr_group_decoder prev_instr_grp_dec( .instr_hi(instr_in_hi),
+	//	.group_out(prev_instr_grp) );
+	instr_grp_5_decoder prev_instr_grp_5_dec( .instr_hi(instr_in_hi),
+		.ig5d_outputs(prev_ig5d_outputs) );
 	
 	
 	assign data_inout = (data_inout_we) ? temp_data_out
@@ -206,37 +243,53 @@ module spcpu
 		: `cpu_data_inout_16_width'hz;
 	
 	
+	// Tasks
+	task set_pc_etc;
+		input [`cpu_addr_msb_pos:0] val;
+		
+		`get_cpu_rp_pc <= val;
+		data_inout_addr <= val;
+	endtask
+	
+	task advance_pc_etc;
+		set_pc_etc( `get_cpu_rp_pc + 2 );
+	endtask
+	
+	task advance_data_inout_addr;
+		data_inout_addr <= data_inout_addr + 2;
+	endtask
+	
+	task advance_pc_etc_after_32_bit_exec;
+		`get_cpu_rp_pc <= `get_cpu_rp_pc + 4;
+		data_inout_addr <= data_inout_addr + 2; 
+	endtask
+	
+	
+	
+	
+	logic ready;
 	
 	always @ (reset)
 	begin
 	
 	if (reset)
 	begin
-		{ data_inout_addr, data_inout_we } <= 0;
-		
-		data_inout_we <= 1'b0;
-		the_cpu_vars.next_data_inout_we <= 1'b0;
-		
-		the_cpu_vars.next_pc <= 0;
-		
-		// Clear every CPU register
-		{ the_cpu_vars.cpu_regs[0], the_cpu_vars.cpu_regs[1], 
-			the_cpu_vars.cpu_regs[2], the_cpu_vars.cpu_regs[3], 
-			the_cpu_vars.cpu_regs[4], the_cpu_vars.cpu_regs[5], 
-			the_cpu_vars.cpu_regs[6], the_cpu_vars.cpu_regs[7],
-			the_cpu_vars.cpu_regs[8], the_cpu_vars.cpu_regs[9], 
-			the_cpu_vars.cpu_regs[10], the_cpu_vars.cpu_regs[11],
-			the_cpu_vars.cpu_regs[12], the_cpu_vars.cpu_regs[13],
-			the_cpu_vars.cpu_regs[14], the_cpu_vars.cpu_regs[15] } <= 0;
-		
-		the_cpu_vars.curr_state <= pkg_cpu::cpu_st_load_or_exec_instr_hi;
-		the_cpu_vars.next_state <= pkg_cpu::cpu_st_load_or_exec_instr_hi;
+		//{ data_inout_addr, data_inout_we } = 0;
+		data_inout_addr <= 0;
+		data_inout_we <= 0;
 		
 		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
-		the_cpu_vars.next_data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
 		
-		data_inout_we <= 1'b0;
-		the_cpu_vars.next_data_inout_we <= 1'b0;
+		
+		// Clear every CPU register
+		{ cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3], 
+			cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
+			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
+			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
+		
+		curr_state <= pkg_cpu::cpu_st_load_or_exec_instr_hi;
+		
+		ready <= 0;
 	end
 	
 	end
@@ -245,45 +298,107 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
-	
-	if (!reset)
-	begin
-		
-		//case (the_cpu_vars.next_state)
-		//	pkg_cpu::cpu_st_load_or_exec_instr_hi:
-		//	begin
-		//		
-		//	end
-		//	
-		//	pkg_cpu::cpu_st_load_instr_lo_and_exec:
-		//	begin
-		//		
-		//	end
-		//	
-		//	pkg_cpu::cpu_st_load_non_instr:
-		//	begin
-		//		
-		//	end
-		//	
-		//	pkg_cpu::cpu_st_store:
-		//	begin
-		//		
-		//	end
-		//	
-		//	pkg_cpu::cpu_st_branch:
-		//	begin
-		//		
-		//	end
-		//	
-		//endcase
-		
-		
-		the_cpu_vars.curr_state <= the_cpu_vars.next_state;
-		data_acc_sz <= the_cpu_vars.next_data_acc_sz;
-		data_inout_we <= the_cpu_vars.next_data_inout_we;
-		
+		if ( `get_cpu_rp_pc == 20 )
+		begin
+			$finish;
+		end
 	end
 	
+	
+	
+	always @ ( posedge clk )
+	begin
+		
+		//$display( "%h\t\t%h\t\t%h", temp_data_in, data_inout_addr, 
+		//	`get_cpu_rp_pc );
+		////$display( "%h %h", data_inout_addr, `get_cpu_rp_pc );
+		
+		// Set the next PC
+		advance_pc_etc();
+		
+		
+		data_acc_sz = pkg_cpu::cpu_data_acc_sz_16;
+		data_inout_we <= 1'b0;
+		instr_in_hi <= temp_data_in;
+		
+		
+		if (!ready)
+		begin
+			ready <= 1;
+		end
+		
+		else if ( curr_state == pkg_cpu::cpu_st_load_or_exec_instr_hi )
+		begin
+			case (curr_instr_grp)
+				pkg_instr_dec::instr_grp_1:
+				begin
+					$display( "Group 1:  %b %h %h", 
+						curr_ig1d_outputs.opcode,
+						curr_ig1d_outputs.ra_index, 
+						curr_ig1d_outputs.imm_value_8 );
+					//$display( "Group 1:  %h\t\t%h\t\t%h", temp_data_in, 
+					//	data_inout_addr, `get_cpu_rp_pc );
+				end
+				
+				pkg_instr_dec::instr_grp_2:
+				begin
+					$display( "Group 2:  %b %h %h\t\t%b %b", 
+						curr_ig2d_outputs.opcode, 
+						curr_ig2d_outputs.ra_index,
+						curr_ig2d_outputs.rb_index,
+						curr_ig2d_outputs.ra_index_is_for_pair,
+						curr_ig2d_outputs.rb_index_is_for_pair );
+					//$display( "Group 2:  %h\t\t%h\t\t%h", temp_data_in, 
+					//	data_inout_addr, `get_cpu_rp_pc );
+				end
+				
+				pkg_instr_dec::instr_grp_3:
+				begin
+					$display( "Group 3:  %b %h %h %h", 
+						curr_ig3d_outputs.opcode,
+						curr_ig3d_outputs.ra_index, 
+						curr_ig3d_outputs.rbp_index,
+						curr_ig3d_outputs.rcp_index );
+					//$display( "Group 3:  %h\t\t%h\t\t%h", temp_data_in, 
+					//	data_inout_addr, `get_cpu_rp_pc );
+				end
+				
+				pkg_instr_dec::instr_grp_4:
+				begin
+					$display( "Group 4:  %b %h", curr_ig4d_outputs.opcode,
+						curr_ig4d_outputs.imm_value_8 );
+					//$display( "Group 4:  %h\t\t%h\t\t%h", temp_data_in, 
+					//	data_inout_addr, `get_cpu_rp_pc );
+				end
+				
+				pkg_instr_dec::instr_grp_5:
+				begin
+					$display("Group 5:  see next line");
+					
+					// Switch states
+					curr_state <= pkg_cpu::cpu_st_load_instr_lo_and_exec;
+				end
+				
+				default:
+				begin
+					$display("Unknown instruction encoding");
+				end
+				
+			endcase
+		end
+		
+		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo_and_exec )
+		begin
+			// Switch states
+			curr_state <= pkg_cpu::cpu_st_load_or_exec_instr_hi;
+			
+			$display( "Group 5:  %b %h %h", prev_ig5d_outputs.opcode,
+				prev_ig5d_outputs.ra_index, prev_ig5d_outputs.rbp_index );
+			//$display( "Group 5:  %h %h\t\t%h\t\t%h", instr_in_hi, 
+			//	temp_data_in, data_inout_addr, `get_cpu_rp_pc );
+		end
+		
+		
 	end
 	
 	
@@ -323,7 +438,7 @@ module instr_decoder_test_bench( input bit tb_clk, input bit reset );
 	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(test_instr_hi),
 		.ig4d_outputs(ig4d_outputs) );
 	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(test_instr_hi),
-		.instr_lo(test_instr_lo), .ig5d_outputs(ig5d_outputs) );
+		.ig5d_outputs(ig5d_outputs) );
 	
 	
 	// This is used instead of an initial block
@@ -455,9 +570,8 @@ module instr_decoder_test_bench( input bit tb_clk, input bit reset );
 			
 			pkg_instr_dec::instr_grp_5:
 			begin
-				$display( "Group 5\t\t%b %b %b %h", ig5d_outputs.opcode,
-					ig5d_outputs.ra_index, ig5d_outputs.rbp_index,
-					ig5d_outputs.imm_value_16 );
+				$display( "Group 5\t\t%b %h %h", ig5d_outputs.opcode,
+					ig5d_outputs.ra_index, ig5d_outputs.rbp_index );
 			end
 			
 			default:

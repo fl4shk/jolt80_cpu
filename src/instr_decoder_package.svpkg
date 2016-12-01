@@ -290,7 +290,6 @@ package pkg_instr_dec;
 		bit [`instr_g5_op_msb_pos:0] opcode;
 		bit [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
 		bit [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;
-		bit [`instr_g5_ilo_imm_value_msb_pos:0] imm_value_16;
 	} ig5_dec_outputs;
 	
 	

@@ -37,6 +37,28 @@ package pkg_cpu;
 	parameter cpu_rp_lr_pind = `cpu_rp_index_ie_width'd6;
 	
 	
+	//typedef enum bit [`cpu_state_msb_pos:0]
+	//{
+	//	// Load and execute a 16-bit instruction, or load the high 16 bits
+	//	// of a 32-bit instruction
+	//	cpu_st_load_or_exec_instr_hi,
+	//	
+	//	// Load the low 16 bits of a 32-bit instruction and execute the
+	//	// full 32-bit instruction
+	//	cpu_st_load_instr_lo_and_exec,
+	//	
+	//	// Load an 8-bit value from memory
+	//	cpu_st_load_non_instr,
+	//	
+	//	// Store an 8-bit value to memory
+	//	cpu_st_store,
+	//	
+	//	// Branches, jumps, and calls
+	//	cpu_st_branch
+	//	
+	//} cpu_state;
+	
+	
 	typedef enum bit [`cpu_state_msb_pos:0]
 	{
 		// Load and execute a 16-bit instruction, or load the high 16 bits
@@ -45,17 +67,7 @@ package pkg_cpu;
 		
 		// Load the low 16 bits of a 32-bit instruction and execute the
 		// full 32-bit instruction
-		cpu_st_load_instr_lo_and_exec,
-		
-		// Load an 8-bit value from memory
-		cpu_st_load_non_instr,
-		
-		// Store an 8-bit value to memory
-		cpu_st_store,
-		
-		// Branches, jumps, and calls
-		cpu_st_branch
-		
+		cpu_st_load_instr_lo_and_exec
 	} cpu_state;
 	
 	typedef enum bit
@@ -64,22 +76,6 @@ package pkg_cpu;
 		cpu_data_acc_sz_16
 		
 	} cpu_data_access_size;
-	
-	typedef struct packed
-	{
-		bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
-		
-		bit [`cpu_state_msb_pos:0] curr_state, next_state;
-		bit next_data_acc_sz;
-		bit next_data_inout_we;
-		
-		bit [`cpu_addr_msb_pos:0] next_pc;
-		
-		//bit [`instr_main_msb_pos:0] next_instr_in_hi, next_instr_in_lo;
-		bit [`instr_main_msb_pos:0] instr_in_hi, instr_in_lo;
-		
-		
-	} cpu_vars;
 	
 	
 	

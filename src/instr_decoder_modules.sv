@@ -209,7 +209,7 @@ module instr_grp_5_decoder
 	//output bit [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index_out,
 	//output bit [`instr_g5_ilo_imm_value_msb_pos:0] imm_value_16_out );
 	
-	( input bit [`instr_main_msb_pos:0] instr_hi, instr_lo,
+	( input bit [`instr_main_msb_pos:0] instr_hi,
 	output ig5_dec_outputs ig5d_outputs );
 	
 	
@@ -220,9 +220,9 @@ module instr_grp_5_decoder
 	//assign ig5d_outputs = { instr_hi[ `instr_g5_ihi_op_range_hi 
 	//	: `instr_g5_ihi_rbp_index_range_lo ], instr_lo };
 	assign { ig5d_outputs.opcode, ig5d_outputs.ra_index,
-		ig5d_outputs.rbp_index, ig5d_outputs.imm_value_16 } 
-		= { instr_hi[ `instr_g5_ihi_op_range_hi 
-		: `instr_g5_ihi_rbp_index_range_lo ], instr_lo };
+		ig5d_outputs.rbp_index } 
+		= instr_hi[ `instr_g5_ihi_op_range_hi 
+		: `instr_g5_ihi_rbp_index_range_lo ];
 	
 endmodule
 
