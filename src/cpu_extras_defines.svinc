@@ -82,7 +82,7 @@
 `define cpu_addr_msb_pos `cpu_rp_msb_pos
  
 // CPU state stuff
-`define cpu_state_width 1
+`define cpu_state_width 4
 `define cpu_state_msb_pos ( `width_to_msb_pos(`cpu_state_width) )
 
 // Macros

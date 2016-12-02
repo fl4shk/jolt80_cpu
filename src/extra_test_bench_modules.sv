@@ -73,7 +73,6 @@ module tb_memory
 		
 		`make_mem_pair(init_counter) = to_write;
 		init_counter = init_counter + 2;
-		
 	endtask
 	task init_mem_32;
 		input [31:0] to_write;
@@ -90,25 +89,19 @@ module tb_memory
 			mem[zero_counter] = 0;
 		end
 		
-		
 		init_counter = 16'h0;
 		
 		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'h9, 
 			8'h10 });
-		
 		init_mem_16({ `instr_g4_id, pkg_instr_dec::instr_g4_op_bra, 
 			-8'h2 });
-		
 		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi, 4'h0, 
 			8'h10 });
-		
 		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'h3,
 			8'h3f });
-		
 		init_mem_16({ `instr_g2_id, pkg_instr_dec::instr_g2_op_str, 4'h3,
 			4'h9 });
-		
-		init_mem_32( { `instr_g5_ihi_id, pkg_instr_dec::instr_g5_op_calli,
+		init_mem_32({ `instr_g5_ihi_id, pkg_instr_dec::instr_g5_op_calli,
 			4'h8, 3'h7, 16'hffaa });
 			
 		

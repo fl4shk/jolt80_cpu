@@ -1,0 +1,54 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef spcpu_debug_tasks_svinc
+`define spcpu_debug_tasks_svinc
+
+task debug_disp_instr_from_grp_1;
+	$display( "Group 1:  %h %h %h", ig1d_outputs.opcode, 
+		ig1d_outputs.ra_index, ig1d_outputs.imm_value_8 );
+endtask
+
+task debug_disp_instr_from_grp_2;
+	$display( "Group 2:  %h %h %h\t\t%b %b", ig2d_outputs.opcode,
+		ig2d_outputs.ra_index, ig2d_outputs.rb_index,
+		ig2d_outputs.ra_index_is_for_pair, 
+		ig2d_outputs.rb_index_is_for_pair );
+endtask
+
+task debug_disp_instr_from_grp_3;
+	$display( "Group 3:  %h %h %h %h", ig3d_outputs.opcode,
+		ig3d_outputs.ra_index, ig3d_outputs.rbp_index, 
+		ig3d_outputs.rcp_index );
+endtask
+
+task debug_disp_instr_from_grp_4;
+	$display( "Group 4:  %h %h", ig4d_outputs.opcode,
+		ig4d_outputs.imm_value_8 );
+endtask
+
+task debug_disp_instr_from_grp_5_part_1;
+	$display("Group 5:  see next line");
+endtask
+
+task debug_disp_instr_from_grp_5_part_2;
+	$display( "Group 5:  %h %h %h", ig5d_outputs.opcode,
+		ig5d_outputs.ra_index, ig5d_outputs.rbp_index );
+endtask
+
+`endif		// spcpu_debug_tasks_svinc

@@ -61,13 +61,21 @@ package pkg_cpu;
 	
 	typedef enum bit [`cpu_state_msb_pos:0]
 	{
-		// Load and execute a 16-bit instruction, or load the high 16 bits
-		// of a 32-bit instruction
-		cpu_st_load_or_exec_instr_hi,
+		// Load a 16-bit instruction, or load the high 16 bits of a 32-bit
+		// instruction
+		cpu_st_load_instr_hi,
 		
-		// Load the low 16 bits of a 32-bit instruction and execute the
-		// full 32-bit instruction
-		cpu_st_load_instr_lo_and_exec
+		// Load the low 16 bits of a 32-bit instruction
+		cpu_st_load_instr_lo,
+		
+		// Begin executing an instruction (the instruction MAY or MAY NOT
+		// finish executing on this clock cycle)
+		cpu_st_start_exec_instr,
+		
+		// Finish executing a multi-cycle instruction (this is the second
+		// cycle of instruction execution)
+		cpu_st_finish_exec_instr
+		
 	} cpu_state;
 	
 	typedef enum bit

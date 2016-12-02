@@ -155,11 +155,16 @@ endmodule
 `define make_reg_pair_w_pi( pair_index ) `make_pair( cpu_regs, \
 	pair_index << 1 )
 
-//`define get_cpu_rp_pc `make_reg_pair(cpu_rp_pc_hi_rind)
-//`define get_cpu_rp_lr `make_reg_pair(cpu_rp_lr_hi_rind)
 `define get_cpu_rp_pc `make_reg_pair_w_pi(pkg_cpu::cpu_rp_pc_pind)
 `define get_cpu_rp_lr `make_reg_pair_w_pi(pkg_cpu::cpu_rp_lr_pind)
 
+// The next value of the PC after a non-PC-changing 16-bit instruction, or
+// the next value of data_inout_addr after loading the high 16 bits of a
+// 32-bit instruction
+`define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + 2 )
+
+// The next value of the PC after a non-PC-changing 32-bit instruction
+`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + 4 )
 
 // The CPU itself
 module spcpu
@@ -192,11 +197,12 @@ module spcpu
 	// the misc_cpu_vars struct, so just get rid of that struct for now.
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	
-	// The high 16 bits of a 32-bit instruction
-	bit [`instr_main_msb_pos:0] instr_in_hi;
+	// The entirety of a 16-bit insturction, or the high 16 bits of a
+	// 32-bit instruction
+	bit [`instr_main_msb_pos:0] instr_in_hi,
 	
-	//// The low 16 bits of a 32-bit instruction
-	//	instr_in_lo;
+	// The low 16 bits of a 32-bit instruction
+		instr_in_lo;
 	
 	// The current CPU state
 	bit [`cpu_state_msb_pos:0] curr_state;
@@ -204,37 +210,42 @@ module spcpu
 	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
 	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
+	wire instr_is_32_bit;
 	
 	
 	// Instruction decoding struct and enum instances
-	instr_group curr_instr_grp;
 	
-	ig1_dec_outputs curr_ig1d_outputs;
-	ig2_dec_outputs curr_ig2d_outputs;
-	ig3_dec_outputs curr_ig3d_outputs;
-	ig4_dec_outputs curr_ig4d_outputs;
-	ig5_dec_outputs curr_ig5d_outputs, prev_ig5d_outputs;
+	// The instr_group that is the output of the instr_group_decoder module
+	// called instr_grp_dec
+	instr_group init_instr_grp;
+	
+	// The instr_group instance that is used after loading the first 16
+	// bits of an instruction
+	instr_group final_instr_grp;
+	
+	ig1_dec_outputs ig1d_outputs;
+	ig2_dec_outputs ig2d_outputs;
+	ig3_dec_outputs ig3d_outputs;
+	ig4_dec_outputs ig4d_outputs;
+	ig5_dec_outputs ig5d_outputs;
+	
 	
 	
 	// Instruction decoder modules
 	instr_group_decoder instr_grp_dec( .instr_hi(temp_data_in),
-		.group_out(curr_instr_grp) );
-	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(temp_data_in),
-		.ig1d_outputs(curr_ig1d_outputs) );
-	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(temp_data_in),
-		.ig2d_outputs(curr_ig2d_outputs) );
-	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(temp_data_in),
-		.ig3d_outputs(curr_ig3d_outputs) );
-	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(temp_data_in),
-		.ig4d_outputs(curr_ig4d_outputs) );
-	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(temp_data_in),
-		.ig5d_outputs(curr_ig5d_outputs) );
+		.group_out(init_instr_grp) );
 	
-	// Handle 32-bit instructions (all group 5 instructions are 32-bit)
-	//instr_group_decoder prev_instr_grp_dec( .instr_hi(instr_in_hi),
-	//	.group_out(prev_instr_grp) );
-	instr_grp_5_decoder prev_instr_grp_5_dec( .instr_hi(instr_in_hi),
-		.ig5d_outputs(prev_ig5d_outputs) );
+	
+	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(instr_in_hi),
+		.ig1d_outputs(ig1d_outputs) );
+	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(instr_in_hi),
+		.ig2d_outputs(ig2d_outputs) );
+	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(instr_in_hi),
+		.ig3d_outputs(ig3d_outputs) );
+	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(instr_in_hi),
+		.ig4d_outputs(ig4d_outputs) );
+	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(instr_in_hi),
+		.ig5d_outputs(ig5d_outputs) );
 	
 	
 	assign data_inout = (data_inout_we) ? temp_data_out
@@ -242,28 +253,90 @@ module spcpu
 	assign temp_data_in = (!data_inout_we) ? data_inout
 		: `cpu_data_inout_16_width'hz;
 	
+	assign instr_is_32_bit = ( final_instr_grp 
+		== pkg_instr_dec::instr_grp_5 );
 	
 	// Tasks
-	task set_pc_etc;
+	`include "src/spcpu_debug_tasks.svinc"
+	
+	
+	
+	// This task exists to help reduce bugs fro
+	task set_pc_and_dio_addr;
 		input [`cpu_addr_msb_pos:0] val;
 		
 		`get_cpu_rp_pc <= val;
 		data_inout_addr <= val;
 	endtask
 	
-	task advance_pc_etc;
-		set_pc_etc( `get_cpu_rp_pc + 2 );
+	// Advance the PC and data_inout_addr after a 16-bit non-PC-changing
+	// instruction, which is also known as a "regular" 16-bit instruction
+	task advance_pc_etc_after_reg_instr_16;
+		set_pc_and_dio_addr(`get_pc_after_reg_instr_16);
 	endtask
 	
-	task advance_data_inout_addr;
-		data_inout_addr <= data_inout_addr + 2;
+	// Advance the PC and data_inout_addr after a 32-bit non-PC-changing
+	// instruction, which is also known as a "regular" 32-bit instruction
+	task advance_pc_etc_after_reg_instr_32;
+		set_pc_and_dio_addr(`get_pc_after_reg_instr_32);
 	endtask
 	
-	task advance_pc_etc_after_32_bit_exec;
-		`get_cpu_rp_pc <= `get_cpu_rp_pc + 4;
-		data_inout_addr <= data_inout_addr + 2; 
+	
+	// Advance data_inout_addr by two bytes so the low 16 bits of a 32-bit
+	// instruction can be loaded on the next cycle
+	task advance_dio_addr_for_instr_lo;
+		data_inout_addr <= `get_pc_after_reg_instr_16;
 	endtask
 	
+	
+	task disable_dio_we;
+		data_inout_we <= 1'b0;
+	endtask
+	
+	task enable_dio_we;
+		data_inout_we <= 1'b1;
+	endtask
+	
+	// Prepare to, on the next cycle, load an 8-bit value
+	task prepare_to_load_8_with_addr;
+		input [`cpu_addr_msb_pos:0] read_addr;
+		
+		data_inout_addr <= read_addr;
+		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+		disable_dio_we();
+	endtask
+	task prepare_to_load_8_no_addr;
+		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+		disable_dio_we();
+	endtask
+	
+	// Prepare to, on the next cycle, write an 8-bit value
+	task prepare_to_store_8_with_addr;
+		input [`cpu_addr_msb_pos:0] write_addr;
+		
+		data_inout_addr <= write_addr;
+		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+		enable_dio_we();
+	endtask
+	task prepare_to_store_8_no_addr;
+		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+		enable_dio_we();
+	endtask
+	
+	// Prepare to, on the next cycle, load a 16-bit value
+	task prepare_to_load_16_with_addr;
+		input [`cpu_addr_msb_pos:0] read_addr;
+		
+		data_inout_addr <= read_addr;
+		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
+		disable_dio_we();
+	endtask
+	task prepare_to_load_16_no_addr;
+		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
+		disable_dio_we();
+	endtask
+	
+	`include "src/spcpu_instr_exec_tasks.svinc"
 	
 	
 	
@@ -287,7 +360,7 @@ module spcpu
 			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
 			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
 		
-		curr_state <= pkg_cpu::cpu_st_load_or_exec_instr_hi;
+		curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 		
 		ready <= 0;
 	end
@@ -309,95 +382,76 @@ module spcpu
 	always @ ( posedge clk )
 	begin
 		
-		//$display( "%h\t\t%h\t\t%h", temp_data_in, data_inout_addr, 
-		//	`get_cpu_rp_pc );
-		////$display( "%h %h", data_inout_addr, `get_cpu_rp_pc );
-		
-		// Set the next PC
-		advance_pc_etc();
-		
-		
-		data_acc_sz = pkg_cpu::cpu_data_acc_sz_16;
-		data_inout_we <= 1'b0;
-		instr_in_hi <= temp_data_in;
-		
-		
 		if (!ready)
 		begin
 			ready <= 1;
+			prepare_to_load_16_no_addr();
 		end
 		
-		else if ( curr_state == pkg_cpu::cpu_st_load_or_exec_instr_hi )
+		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			case (curr_instr_grp)
-				pkg_instr_dec::instr_grp_1:
-				begin
-					$display( "Group 1:  %b %h %h", 
-						curr_ig1d_outputs.opcode,
-						curr_ig1d_outputs.ra_index, 
-						curr_ig1d_outputs.imm_value_8 );
-					//$display( "Group 1:  %h\t\t%h\t\t%h", temp_data_in, 
-					//	data_inout_addr, `get_cpu_rp_pc );
-				end
-				
-				pkg_instr_dec::instr_grp_2:
-				begin
-					$display( "Group 2:  %b %h %h\t\t%b %b", 
-						curr_ig2d_outputs.opcode, 
-						curr_ig2d_outputs.ra_index,
-						curr_ig2d_outputs.rb_index,
-						curr_ig2d_outputs.ra_index_is_for_pair,
-						curr_ig2d_outputs.rb_index_is_for_pair );
-					//$display( "Group 2:  %h\t\t%h\t\t%h", temp_data_in, 
-					//	data_inout_addr, `get_cpu_rp_pc );
-				end
-				
-				pkg_instr_dec::instr_grp_3:
-				begin
-					$display( "Group 3:  %b %h %h %h", 
-						curr_ig3d_outputs.opcode,
-						curr_ig3d_outputs.ra_index, 
-						curr_ig3d_outputs.rbp_index,
-						curr_ig3d_outputs.rcp_index );
-					//$display( "Group 3:  %h\t\t%h\t\t%h", temp_data_in, 
-					//	data_inout_addr, `get_cpu_rp_pc );
-				end
-				
-				pkg_instr_dec::instr_grp_4:
-				begin
-					$display( "Group 4:  %b %h", curr_ig4d_outputs.opcode,
-						curr_ig4d_outputs.imm_value_8 );
-					//$display( "Group 4:  %h\t\t%h\t\t%h", temp_data_in, 
-					//	data_inout_addr, `get_cpu_rp_pc );
-				end
-				
-				pkg_instr_dec::instr_grp_5:
-				begin
-					$display("Group 5:  see next line");
-					
-					// Switch states
-					curr_state <= pkg_cpu::cpu_st_load_instr_lo_and_exec;
-				end
-				
-				default:
-				begin
-					$display("Unknown instruction encoding");
-				end
-				
-			endcase
-		end
-		
-		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo_and_exec )
-		begin
-			// Switch states
-			curr_state <= pkg_cpu::cpu_st_load_or_exec_instr_hi;
+			// Back up temp_data_in and init_instr_grp
+			instr_in_hi <= temp_data_in;
+			final_instr_grp <= init_instr_grp;
 			
-			$display( "Group 5:  %b %h %h", prev_ig5d_outputs.opcode,
-				prev_ig5d_outputs.ra_index, prev_ig5d_outputs.rbp_index );
-			//$display( "Group 5:  %h %h\t\t%h\t\t%h", instr_in_hi, 
-			//	temp_data_in, data_inout_addr, `get_cpu_rp_pc );
+			if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
+			begin
+				//instr_in_hi <= temp_data_in;
+				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+			end
+			
+			// Handle 32-bit instructions
+			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
+			begin
+				//instr_in_hi <= temp_data_in;
+				curr_state <= pkg_cpu::cpu_st_load_instr_lo;
+				
+				advance_dio_addr_for_instr_lo();
+				prepare_to_load_16_no_addr();
+			end
+			
+			else // if ( init_instr_grp 
+				// == pkg_instr_dec::instr_grp_unknown )
+			begin
+				$display("Unknown instruction encoding");
+				
+				//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+			end
+			
 		end
 		
+		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo )
+		begin
+			curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+			instr_in_lo <= temp_data_in;
+		end
+		
+		
+		// Instruction execution states
+		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
+		begin
+			start_exec_instr();
+			
+			// This is temporary
+			curr_state <= pkg_cpu::cpu_st_finish_exec_instr;
+		end
+		
+		else // if ( curr_state == pkg_cpu::cpu_st_finish_exec_instr )
+		begin
+			finish_exec_instr();
+			
+			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+			
+			if (!instr_is_32_bit)
+			begin
+				advance_pc_etc_after_reg_instr_16();
+			end
+			
+			else // if (instr_is_32_bit)
+			begin
+				advance_pc_etc_after_reg_instr_32();
+			end
+		end
 		
 	end
 	
