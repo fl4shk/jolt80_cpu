@@ -25,7 +25,7 @@ task debug_disp_instr_from_grp_1;
 endtask
 
 task debug_disp_instr_from_grp_2;
-	$display( "Group 2:  %h %h %h\t\t%b %b", ig2d_outputs.opcode,
+	$display( "Group 2:  %h %h %h %b %b", ig2d_outputs.opcode,
 		ig2d_outputs.ra_index, ig2d_outputs.rb_index,
 		ig2d_outputs.ra_index_is_for_pair, 
 		ig2d_outputs.rb_index_is_for_pair );
@@ -42,13 +42,39 @@ task debug_disp_instr_from_grp_4;
 		ig4d_outputs.imm_value_8 );
 endtask
 
-task debug_disp_instr_from_grp_5_part_1;
-	$display("Group 5:  see next line");
+task debug_disp_instr_from_grp_5;
+	$display( "Group 5:  %h\t\t%h %h\t\t%h", ig5d_outputs.opcode,
+		ig5d_outputs.ra_index, ig5d_outputs.rbp_index, instr_in_lo );
 endtask
 
-task debug_disp_instr_from_grp_5_part_2;
-	$display( "Group 5:  %h %h %h", ig5d_outputs.opcode,
-		ig5d_outputs.ra_index, ig5d_outputs.rbp_index );
+
+task debug_disp_instr;
+	case (final_instr_grp)
+		pkg_instr_dec::instr_grp_1:
+		begin
+			debug_disp_instr_from_grp_1();
+		end
+		
+		pkg_instr_dec::instr_grp_2:
+		begin
+			debug_disp_instr_from_grp_2();
+		end
+		
+		pkg_instr_dec::instr_grp_3:
+		begin
+			debug_disp_instr_from_grp_3();
+		end
+		
+		pkg_instr_dec::instr_grp_4:
+		begin
+			debug_disp_instr_from_grp_4();
+		end
+		
+		pkg_instr_dec::instr_grp_5:
+		begin
+			debug_disp_instr_from_grp_5();
+		end
+	endcase
 endtask
 
 `endif		// spcpu_debug_tasks_svinc

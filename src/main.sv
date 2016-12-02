@@ -29,10 +29,10 @@ module spcpu_test_bench;
 	
 	bit test_mem_reset;
 	
-	// Various test bench reset signals
-	bit alu_tb_reset, 
-		instr_grp_dec_tb_reset,
-		instr_dec_tb_reset;
+	//// Various test bench reset signals
+	//bit alu_tb_reset, 
+	//	instr_grp_dec_tb_reset,
+	//	instr_dec_tb_reset;
 	
 	// reset signal for test_cpu
 	bit test_cpu_reset;
@@ -41,11 +41,11 @@ module spcpu_test_bench;
 	tb_clk_gen clk_gen( .reset(clk_gen_reset), .clk(tb_clk) );
 	
 	
-	alu_test_bench alu_tb( .tb_clk(tb_clk), .reset(alu_tb_reset) );
-	instr_group_decoder_test_bench instr_grp_dec_tb( .tb_clk(tb_clk), 
-		.reset(instr_grp_dec_tb_reset) );
-	instr_decoder_test_bench instr_dec_tb( .tb_clk(tb_clk),
-		.reset(instr_dec_tb_reset) );
+	//alu_test_bench alu_tb( .tb_clk(tb_clk), .reset(alu_tb_reset) );
+	//instr_group_decoder_test_bench instr_grp_dec_tb( .tb_clk(tb_clk), 
+	//	.reset(instr_grp_dec_tb_reset) );
+	//instr_decoder_test_bench instr_dec_tb( .tb_clk(tb_clk),
+	//	.reset(instr_dec_tb_reset) );
 	
 	tb_mem_inputs mem_inputs;
 	//logic [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out ;
@@ -166,6 +166,15 @@ endmodule
 // The next value of the PC after a non-PC-changing 32-bit instruction
 `define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + 4 )
 
+
+`define wire_rhs_pc_indices_contain_reg_index( reg_index ) \
+	( ( reg_index == pkg_cpu::cpu_rp_pc_hi_rind ) \
+	|| ( reg_index == pkg_cpu::cpu_rp_pc_lo_rind ) )
+
+`define wire_rhs_rp_index_is_pc_index( rp_index ) \
+	( rp_index == pkg_cpu:: cpu_rp_pc_pind )
+
+
 // The CPU itself
 module spcpu
 	
@@ -210,7 +219,60 @@ module spcpu
 	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
 	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
-	wire instr_is_32_bit;
+	
+	
+	// Instruction Group 1 Instruction Execution Things
+	// Get rid of some boilerplate
+	wire [`instr_g1_op_msb_pos:0] ig1_opcode;
+	wire [`instr_g1_ra_index_msb_pos:0] ig1_ra_index;
+	wire [`instr_g1_imm_value_msb_pos:0] ig1_imm_value_8;
+	
+	wire ig1_instr_changes_pc, ig1_pc_contains_ra;
+	
+	
+	
+	// Instruction Group 2 Instruction Execution Things
+	// Get rid of some boilerplate
+	wire [`instr_g2_op_msb_pos:0] ig2_opcode;
+	wire [`instr_g2_ra_index_msb_pos:0] ig2_ra_index;
+	wire [`instr_g2_rb_index_msb_pos:0] ig2_rb_index;
+	wire ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair;
+	
+	wire ig2_instr_changes_pc, ig2_pc_contains_ra, ig2_pc_contains_rb,
+		ig2_rap_is_pc, ig2_rbp_is_pc;
+	
+	
+	
+	// Instruction Group 3 Instruction Execution Things
+	// Get rid of some boilerplate
+	wire [`instr_g3_op_msb_pos:0] ig3_opcode;
+	wire [`instr_g3_ra_index_msb_pos:0] ig3_ra_index;
+	wire [`instr_g3_rbp_index_msb_pos:0] ig3_rbp_index;
+	wire [`instr_g3_rcp_index_msb_pos:0] ig3_rcp_index;
+	
+	wire ig3_instr_changes_pc, ig3_pc_contains_ra, ig3_rbp_is_pc,
+		ig3_rcp_is_pc;
+	
+	
+	
+	// Instruction Group 4 Instruction Execution Things
+	// ALL Instructions in group 4 change the PC
+	// Get rid of some boilerplate
+	wire [`instr_g4_op_msb_pos:0] ig4_opcode;
+	wire [`instr_g4_imm_value_msb_pos:0] ig4_imm_value_8;
+	
+	
+	
+	// Instruction Group 5 Instruction Execution Things
+	// Get rid of some boilerplate
+	wire [`instr_g5_op_msb_pos:0] ig5_opcode;
+	wire [`instr_g5_ihi_ra_index_msb_pos:0] ig5_ra_index;
+	wire [`instr_g5_ihi_rbp_index_msb_pos:0] ig5_rbp_index;
+	
+	wire ig5_instr_changes_pc, ig5_pc_contains_ra, ig5_rbp_is_pc;
+	
+	
+	
 	
 	
 	// Instruction decoding struct and enum instances
@@ -248,13 +310,68 @@ module spcpu
 		.ig5d_outputs(ig5d_outputs) );
 	
 	
+	// Outside world access assign statements
 	assign data_inout = (data_inout_we) ? temp_data_out
 		: `cpu_data_inout_16_width'hz;
 	assign temp_data_in = (!data_inout_we) ? data_inout
 		: `cpu_data_inout_16_width'hz;
 	
-	assign instr_is_32_bit = ( final_instr_grp 
-		== pkg_instr_dec::instr_grp_5 );
+	
+	
+	// Instruction Group 1 Instruction Execution Things
+	assign { ig1_opcode, ig1_ra_index, ig1_imm_value_8 } 
+		= { ig1d_outputs.opcode, ig1d_outputs.ra_index, 
+		ig1d_outputs.imm_value_8 };
+	
+	assign ig1_pc_contains_ra 
+		= `wire_rhs_pc_indices_contain_reg_index(ig1d_outputs.ra_index);
+	
+	assign ig1_instr_changes_pc = ( ig1_pc_contains_ra 
+		// Arithmetic instructions:
+		? ( ( ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+		|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+		
+		// Skip instr_g1_op_cmpi because it CAN'T change registers
+		
+		//Copy instructions:
+		
+		// (CoPY Immediate)
+		|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi ) )
+		: 0 );
+	
+	
+	
+	// Instruction Group 2 Instruction Execution Things
+	assign ig2_pc_contains_ra
+		= `wire_rhs_pc_indices_contain_reg_index(ig2d_outputs.ra_index);
+	assign ig2_pc_contains_rb
+		= `wire_rhs_pc_indices_contain_reg_index(ig2d_outputs.rb_index);
+	assign ig2_rap_is_pc = ( ig2d_outputs.ra_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig2d_outputs.ra_index) );
+	assign ig2_rbp_is_pc = ( ig2d_outputs.rb_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig2d_outputs.rb_index) );
+	
+	
+	
+	// Instruction Group 3 Instruction Execution Things
+	assign ig3_pc_contains_ra
+		= `wire_rhs_pc_indices_contain_reg_index(ig3d_outputs.ra_index);
+	assign ig3_rbp_is_pc 
+		= `wire_rhs_rp_index_is_pc_index(ig3d_outputs.rbp_index);
+	assign ig3_rcp_is_pc 
+		= `wire_rhs_rp_index_is_pc_index(ig3d_outputs.rcp_index);
+	
+	
+	
+	// Instruction Group 4 Instruction Execution Things
+	
+	// Instruction Group 5 Instruction Execution Things
+	assign ig5_pc_contains_ra
+		= `wire_rhs_pc_indices_contain_reg_index(ig5d_outputs.ra_index);
+	assign ig5_rbp_is_pc 
+		= `wire_rhs_rp_index_is_pc_index(ig5d_outputs.rbp_index);
+	
+	
 	
 	// Tasks
 	`include "src/spcpu_debug_tasks.svinc"
@@ -371,8 +488,9 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
-		if ( `get_cpu_rp_pc == 20 )
+		if ( `get_cpu_rp_pc >= 20 )
 		begin
+			$display("\ndone");
 			$finish;
 		end
 	end
@@ -382,10 +500,15 @@ module spcpu
 	always @ ( posedge clk )
 	begin
 		
+		//$display( "%h", `get_cpu_rp_pc );
+		
 		if (!ready)
 		begin
 			ready <= 1;
+			advance_pc_etc_after_reg_instr_16();
 			prepare_to_load_16_no_addr();
+			
+			//$display(ig1_instr_changes_pc);
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
@@ -431,26 +554,13 @@ module spcpu
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
 			start_exec_instr();
-			
-			// This is temporary
-			curr_state <= pkg_cpu::cpu_st_finish_exec_instr;
 		end
 		
 		else // if ( curr_state == pkg_cpu::cpu_st_finish_exec_instr )
 		begin
 			finish_exec_instr();
 			
-			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-			
-			if (!instr_is_32_bit)
-			begin
-				advance_pc_etc_after_reg_instr_16();
-			end
-			
-			else // if (instr_is_32_bit)
-			begin
-				advance_pc_etc_after_reg_instr_32();
-			end
+			//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 		end
 		
 	end
@@ -458,504 +568,5 @@ module spcpu
 	
 	
 endmodule
-
-
-
-
-
-module instr_decoder_test_bench( input bit tb_clk, input bit reset );
-	
-	bit ready;
-	
-	import pkg_instr_dec::*;
-	
-	bit [`instr_main_msb_pos:0] test_instr_hi, test_instr_lo;
-	instr_group test_instr_group;
-	
-	
-	ig1_dec_outputs ig1d_outputs;
-	ig2_dec_outputs ig2d_outputs;
-	ig3_dec_outputs ig3d_outputs;
-	ig4_dec_outputs ig4d_outputs;
-	ig5_dec_outputs ig5d_outputs;
-	
-	
-	// Instruction decoder modules
-	instr_group_decoder instr_grp_dec( .instr_hi(test_instr_hi),
-		.group_out(test_instr_group) );
-	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(test_instr_hi),
-		.ig1d_outputs(ig1d_outputs) );
-	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(test_instr_hi),
-		.ig2d_outputs(ig2d_outputs) );
-	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(test_instr_hi),
-		.ig3d_outputs(ig3d_outputs) );
-	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(test_instr_hi),
-		.ig4d_outputs(ig4d_outputs) );
-	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(test_instr_hi),
-		.ig5d_outputs(ig5d_outputs) );
-	
-	
-	// This is used instead of an initial block
-	always @ (reset)
-	begin
-		if (reset)
-		begin
-			ready = 1'b0;
-			
-			// Other initialization stuff goes here
-			test_instr_hi = 0;
-			
-			//$display( instr_g1_reg_a_index_range_hi,
-			//	instr_g1_reg_a_index_range_lo, 
-			//	instr_g1_imm_value_range_hi,
-			//	instr_g1_imm_value_range_lo );
-		end
-		
-		if ( ready == 1'b0 )
-		begin
-			#1
-			ready = 1'b1;
-			
-			#2
-			test_instr_hi = { `instr_g1_id, 
-				pkg_instr_dec::instr_g1_op_adci, 4'b0111, 8'h33 };
-			
-			#2
-			test_instr_hi = { `instr_g1_id, 
-				pkg_instr_dec::instr_g1_op_cmpi, 4'h1, 8'h99 };
-			
-			#2
-			test_instr_hi = { `instr_g1_id, 
-				pkg_instr_dec::instr_g1_op_cpyi, 12'b0 };
-			
-			#2
-			test_instr_hi = { `instr_g2_id, 
-				pkg_instr_dec::instr_g2_op_call, 4'd3, 4'd9 };
-			
-			#2
-			test_instr_hi = { `instr_g2_id, 
-				pkg_instr_dec::instr_g2_op_invp, 4'd3, 4'd9 };
-			
-			#2
-			test_instr_hi = { `instr_g2_id, 
-				pkg_instr_dec::instr_g2_op_cpyp, 4'd3, 4'd9 };
-			
-			#2
-			test_instr_hi = { `instr_g2_id, 
-				pkg_instr_dec::instr_g2_op_swp, 4'd4, 4'd9 };
-			
-			#2
-			test_instr_hi = { `instr_g2_id, 
-				pkg_instr_dec::instr_g2_op_ldr, 4'd4, 4'd9 };
-			
-			#2
-			test_instr_hi = { `instr_g2_id, pkg_instr_dec::instr_g2_op_str, 
-				4'd4, 4'd9 };
-			
-			#2
-			test_instr_hi = { `instr_g3_id, 
-				pkg_instr_dec::instr_g3_op_strx, 4'd3, 3'd2, 3'd7 };
-			
-			#2
-			test_instr_hi = { `instr_g4_id, pkg_instr_dec::instr_g4_op_bnv,
-				-8'd1 };
-			
-			#2
-			test_instr_hi = { `instr_g4_id, pkg_instr_dec::instr_g4_op_bhi,
-				8'd8 };
-			
-			#2
-			{ test_instr_hi, test_instr_lo } = { `instr_g5_ihi_id, 
-				pkg_instr_dec::instr_g5_op_calli, 4'd3, 3'd2,
-				-16'h1faa };
-			
-			#2
-			{ test_instr_hi, test_instr_lo } = { `instr_g5_ihi_id, 
-				pkg_instr_dec::instr_g5_op_ldrxi, 4'd3, 3'd2,
-				~16'h1faa + 1'b1 };
-			
-			#2
-			$finish;
-		end
-	end
-	
-	
-	always @ ( posedge tb_clk )
-	begin
-	
-	if (ready)
-	begin
-		// Main code stuff here
-		
-		case (test_instr_group)
-			pkg_instr_dec::instr_grp_1:
-			begin
-				$display( "Group 1\t\t%b %b %b", ig1d_outputs.opcode,
-					ig1d_outputs.ra_index, ig1d_outputs.imm_value_8 );
-			end
-			
-			pkg_instr_dec::instr_grp_2:
-			begin
-				$display( "Group 2\t\t%b %b %b\t\t%b %b", 
-					ig2d_outputs.opcode, ig2d_outputs.ra_index,
-					ig2d_outputs.rb_index,
-					ig2d_outputs.ra_index_is_for_pair,
-					ig2d_outputs.rb_index_is_for_pair );
-				
-				//if ( ig2d_outputs.opcode 
-				//	== pkg_instr_dec::instr_g2_op_invp )
-				//begin
-				//	$display("invp instruction encountered");
-				//end
-			end
-			
-			pkg_instr_dec::instr_grp_3:
-			begin
-				$display( "Group 3\t\t%b %b %b %b", ig3d_outputs.opcode,
-					ig3d_outputs.ra_index, ig3d_outputs.rbp_index,
-					ig3d_outputs.rcp_index );
-			end
-			
-			pkg_instr_dec::instr_grp_4:
-			begin
-				$display( "Group 4\t\t%b %b", ig4d_outputs.opcode,
-					ig4d_outputs.imm_value_8 );
-			end
-			
-			pkg_instr_dec::instr_grp_5:
-			begin
-				$display( "Group 5\t\t%b %h %h", ig5d_outputs.opcode,
-					ig5d_outputs.ra_index, ig5d_outputs.rbp_index );
-			end
-			
-			default:
-			begin
-				$display("Unknown instruction encoding");
-			end
-			
-		endcase
-	end
-	
-	end
-	
-	
-endmodule
-
-
-
-
-module instr_group_decoder_test_bench( input bit tb_clk, 
-	input bit reset );
-	
-	bit ready;
-	
-	import pkg_instr_dec::*;
-	
-	bit [`instr_main_msb_pos:0] test_instr_hi, test_instr_lo;
-	instr_group test_instr_group;
-	
-	instr_group_decoder instr_grp_dec( .instr_hi(test_instr_hi),
-		.group_out(test_instr_group) );
-	
-	// This is used instead of an initial block
-	always @ (reset)
-	begin
-		if (reset)
-		begin
-			ready = 1'b0;
-			test_instr_hi = `instr_main_width'h0000;
-			
-		end
-		
-		if ( ready == 1'b0 )
-		begin
-			#1
-			ready = 1'b1;
-			
-			
-			#2
-			test_instr_hi = { `instr_g1_id, 
-				pkg_instr_dec::instr_g1_op_addi, 4'b0111, 8'h33 };
-			
-			
-			#2
-			test_instr_hi = { `instr_g2_id, 
-				pkg_instr_dec::instr_g2_op_call, 4'd1, 4'd2 };
-			
-			
-			//#2
-			//test_instr_hi = { `instr_g3_id, pkg_instr_dec::instr_g3_op_
-			
-			#2
-			$finish;
-			
-		end
-	end
-	
-	
-	always @ ( posedge tb_clk )
-	begin
-	
-	if (ready)
-	begin
-		
-		$display( "%b %b %b %b\t\t%d", test_instr_hi[15:12], 
-			test_instr_hi[11:8], test_instr_hi[7:4], test_instr_hi[3:0], 
-			test_instr_group );
-		
-	end
-	
-	end
-	
-	
-endmodule
-
-
-
-module alu_test_bench( input bit tb_clk, input bit reset );
-	
-	bit ready;
-	
-	import pkg_alu::get_alu_oper_cat_tb;
-	import pkg_alu::*;
-	
-	bit dummy;
-	
-	// ALU inputs and outputs
-	alu_oper the_alu_op;
-	alu_oper_cat the_alu_op_cat;
-	bit [`alu_inout_msb_pos:0] alu_a_in_lo, alu_a_in_hi, alu_b_in;
-	bit [`proc_flags_msb_pos:0] alu_proc_flags_in;
-	bit [`alu_inout_msb_pos:0] alu_out_lo, alu_out_hi;
-	bit [`proc_flags_msb_pos:0] alu_proc_flags_out;
-	
-	alu test_alu( .oper(the_alu_op), 
-		.a_in_hi(alu_a_in_hi), .a_in_lo(alu_a_in_lo), .b_in(alu_b_in),
-		.proc_flags_in(alu_proc_flags_in), 
-		.out_lo(alu_out_lo), .out_hi(alu_out_hi),
-		.proc_flags_out(alu_proc_flags_out) );
-	
-	
-	// This is used instead of an initial block
-	always @ (reset)
-	begin
-	
-	if (reset)
-	begin
-		ready = 1'b0;
-		
-		dummy = 1'b0;
-		
-		//the_alu_op = pkg_alu::alu_op_add + 1;
-		//the_alu_op = pkg_alu::alu_op_add + pkg_alu::alu_op_add;
-		//the_alu_op = the_alu_op + 1;
-		//the_alu_op += 1;
-		
-		//// Arithmetic operations
-		//// Addition operations
-		the_alu_op = alu_op_add;
-		//the_alu_op = alu_op_adc;
-		//
-		//
-		//// Subtraction operations
-		//the_alu_op = alu_op_sub;
-		//the_alu_op = alu_op_sbc;
-		//the_alu_op = alu_op_cmp;
-		//
-		//// Bitwise operations
-		//
-		//// Operations analogous to logic gates (none of these affect
-		//// carry)
-		//the_alu_op = alu_op_and;
-		//the_alu_op = alu_op_orr;
-		//the_alu_op = alu_op_xor;
-		//
-		//// Complement operations
-		//the_alu_op = alu_op_inv;
-		//the_alu_op = alu_op_invp;
-		//the_alu_op = alu_op_neg;
-		//the_alu_op = alu_op_negp;
-		//
-		//
-		//// 8-bit Bitshifting operations (number of bits specified by
-		//// b_in)
-		//the_alu_op = alu_op_lsl;
-		//the_alu_op = alu_op_lsr;
-		//the_alu_op = alu_op_asr;
-		//
-		//// 8-bit Bit rotation operations (number of bits specified by
-		//// [b_in % inout_width])
-		//the_alu_op = alu_op_rol;
-		//the_alu_op = alu_op_ror;
-		//
-		//
-		//// Bit rotating instructions that use carry as bit 8 for a
-		//// 9-bit rotate of { carry, a_in_lo } by one bit:
-		//the_alu_op = alu_op_rolc;
-		//the_alu_op = alu_op_rorc;
-		//
-		//
-		//
-		//// 16-bit Bitshifting operations that shift 
-		//// { a_in_hi, a_in_lo } by b_in bits
-		//the_alu_op = alu_op_lslp;
-		//the_alu_op = alu_op_lsrp;
-		//the_alu_op = alu_op_asrp;
-		//
-		//
-		//// 16-bit Bit rotation operations that rotate 
-		//// { a_in_hi, a_in_lo } by [b_in % inout_width] bits
-		//the_alu_op = alu_op_rolp;
-		//the_alu_op = alu_op_rorp;
-		//
-		//
-		//// Bit rotating instructions that use carry as bit 16 for a
-		//// 17-bit rotate of { carry, a_in_hi, a_in_lo } by one bit:
-		//the_alu_op = alu_op_rolcp;
-		//the_alu_op = alu_op_rorcp;
-		
-		get_alu_oper_cat_tb( the_alu_op, the_alu_op_cat );
-		
-		{ alu_a_in_hi, alu_a_in_lo, alu_b_in } = { `alu_inout_width'h0,
-			`alu_inout_width'h0, `alu_inout_width'h0 };
-		alu_proc_flags_in = `proc_flags_width'h0;
-		
-		//$display(the_alu_op_cat);
-	end
-	
-	if ( ready == 1'b0 )
-	begin
-		#1
-		ready = 1'b1;
-	end
-	
-	end
-	
-	
-	always @ ( posedge tb_clk )
-	begin
-	
-	if (ready)
-	begin
-		
-		if ( the_alu_op_cat == alu_op_cat_8_no_ci )
-		begin
-			//$display( "%d %d\t\t%d %b", alu_a_in_lo, alu_b_in, 
-			//	alu_out_lo, alu_proc_flags_out );
-			//$display( "%h %h\t\t%h %b", alu_a_in_lo, alu_b_in, 
-			//	alu_out_lo, alu_proc_flags_out );
-			//$display( "%b %b\t\t%b %b", alu_a_in_lo, alu_b_in, 
-			//	alu_out_lo, alu_proc_flags_out );
-			$display( "%b %d\t\t%b %b", alu_a_in_lo, alu_b_in, 
-				alu_out_lo, alu_proc_flags_out );
-			//$display( "%b %d\t\t%b %b", alu_a_in_lo,
-			//	alu_b_in[ `alu_inout_width >> 2:0 ], alu_out_lo, 
-			//	alu_proc_flags_out );
-			
-			{ dummy, alu_a_in_lo, alu_b_in } = { dummy, alu_a_in_lo,
-				alu_b_in } + 1;
-			
-			//{ dummy, alu_a_in_lo, alu_b_in[ `alu_inout_width >> 2:0 ] }
-			//	= { dummy, alu_a_in_lo, 
-			//	alu_b_in[ `alu_inout_width >> 2:0 ] } + 1;
-		end
-		
-		else if ( the_alu_op_cat == alu_op_cat_8_ci )
-		begin
-			//$display( "%d %b %d\t\t%d %b", alu_a_in_lo,
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-			//	alu_out_lo, alu_proc_flags_out );
-			//$display( "%h %b %h\t\t%h %b", alu_a_in_lo,
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-			//	alu_out_lo, alu_proc_flags_out );
-			//$display( "%b %b %b\t\t%b %b", alu_a_in_lo,
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-			//	alu_out_lo, alu_proc_flags_out );
-			$display( "%b %b %d\t\t%b %b", alu_a_in_lo,
-				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-				alu_out_lo, alu_proc_flags_out );
-			//$display( "%b %b %d\t\t%b %b", alu_a_in_lo,
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c],
-			//	alu_b_in[ `alu_inout_and_carry_width >> 2:0 ], alu_out_lo, 
-			//	alu_proc_flags_out );
-			
-			{ dummy, alu_a_in_lo, alu_proc_flags_in[pkg_pflags::pf_slot_c],
-				alu_b_in }
-				= { dummy, alu_a_in_lo, 
-				alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in } + 1;
-			//{ dummy, alu_a_in_lo, 
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-			//	alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] }
-			//	= { dummy, alu_a_in_lo, 
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c],
-			//	alu_b_in[ `alu_inout_and_carry_width >> 2:0 ] } + 1;
-		end
-		
-		else if ( the_alu_op_cat == alu_op_cat_16_no_ci )
-		begin
-			//$display( "%d %d\t\t%d %b", { alu_a_in_hi, alu_a_in_lo }, 
-			//	alu_b_in, { alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			//$display( "%h %h\t\t%h %b", { alu_a_in_hi, alu_a_in_lo }, 
-			//	alu_b_in, { alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			//$display( "%b %b\t\t%b %b", { alu_a_in_hi, alu_a_in_lo }, 
-			//	alu_b_in, { alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			$display( "%b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo }, 
-				alu_b_in, { alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			
-			{ dummy, { alu_a_in_hi, alu_a_in_lo }, alu_b_in } = { dummy, 
-				{ alu_a_in_hi, alu_a_in_lo }, alu_b_in } + 1;
-		end
-		
-		else // if ( the_alu_op_cat == alu_op_cat_16_ci )
-		begin
-			//$display( "%d %b %d\t\t%d %b", { alu_a_in_hi, alu_a_in_lo },
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			//$display( "%h %b %h\t\t%h %b", { alu_a_in_hi, alu_a_in_lo },
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			//$display( "%b %b %b\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			//$display( "%b %b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in,
-			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			$display( "%b %b\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
-				alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-				{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			//$display( "%b %b %d\t\t%b %b", { alu_a_in_hi, alu_a_in_lo },
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-			//	alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ],
-			//	{ alu_out_hi, alu_out_lo }, alu_proc_flags_out );
-			
-			//{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in }
-			//	= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], alu_b_in } + 1;
-			{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
-				alu_proc_flags_in[pkg_pflags::pf_slot_c] }
-				= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
-				alu_proc_flags_in[pkg_pflags::pf_slot_c] } + 1;
-			//{ dummy, { alu_a_in_hi, alu_a_in_lo }, 
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-			//	alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] }
-			//	= { dummy, { alu_a_in_hi, alu_a_in_lo }, 
-			//	alu_proc_flags_in[pkg_pflags::pf_slot_c], 
-			//	alu_b_in[ `alu_inout_pair_and_carry_width >> 2:0 ] } + 1;
-		end
-		
-		
-		if (dummy)
-		begin
-			$finish;
-		end
-		
-	end
-	
-	end
-	
-	
-endmodule
-
 
 
