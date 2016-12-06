@@ -118,10 +118,10 @@ module tb_memory
 		//init_mem_16({ `instr_g2_id, pkg_instr_dec::instr_g2_op_str, 4'h3,
 		//	4'h9 });
 		
-		$display( "tb_memory:  %h %h %h\t\t%h %h %h\t\t%h", 
-			`make_mem_pair(0), `make_mem_pair(2), `make_mem_pair(4),
-			`make_mem_pair(6), `make_mem_pair(8), `make_mem_pair(10),
-			`make_mem_pair(12) );
+		//$display( "tb_memory:  %h %h %h\t\t%h %h %h\t\t%h", 
+		//	`make_mem_pair(0), `make_mem_pair(2), `make_mem_pair(4),
+		//	`make_mem_pair(6), `make_mem_pair(8), `make_mem_pair(10),
+		//	`make_mem_pair(12) );
 	end
 	
 	

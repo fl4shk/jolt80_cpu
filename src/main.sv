@@ -22,7 +22,6 @@
 //`include "src/cpu_extras_defines.svinc"
 
 
-
 module spcpu_test_bench;
 	
 	bit clk_gen_reset, tb_clk;

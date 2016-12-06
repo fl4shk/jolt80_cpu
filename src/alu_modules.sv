@@ -20,14 +20,18 @@
 
 
 //module alu( input bit [alu_op_msb_pos:0] oper,
-module alu( input pkg_alu::alu_oper oper,
+module alu
+	import pkg_alu::*;
+	import pkg_pflags::*;
+	
+	( input alu_oper oper,
 	input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in,
 	input bit [`proc_flags_msb_pos:0] proc_flags_in,
-	output bit [`alu_inout_msb_pos:0] out_lo, out_hi,
+	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
 	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
 	
-	import pkg_alu::alu_oper_cat;
+	// import alu_oper_cat;
 	alu_oper_cat oper_cat;
 	
 	bit do_not_change_z_flag;

@@ -514,3 +514,73 @@
 //	
 //	
 //endmodule
+
+
+//module alu_test_bench_2;
+//	
+//	import pkg_cpu::*;
+//	import pkg_instr_dec::*;
+//	import pkg_pflags::*;
+//	import pkg_alu::*;
+//	
+//	//bit clk_gen_reset, tb_clk;
+//	//tb_clk_gen clk_gen( .reset(clk_gen_reset), .clk(tb_clk) );
+//	
+//	alu_oper oper;
+//	bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in;
+//	bit [`proc_flags_msb_pos:0] proc_flags_in;
+//	bit [`alu_inout_msb_pos:0] out_lo, out_hi;
+//	bit [`proc_flags_msb_pos:0] proc_flags_out;
+//	
+//	alu test_alu( .oper(oper), .a_in_hi(a_in_hi), .a_in_lo(a_in_lo),
+//		.b_in(b_in), .proc_flags_in(proc_flags_in), .out_lo(out_lo),
+//		.out_hi(out_hi), .proc_flags_out(proc_flags_out) );
+//	
+//	bit [`alu_inout_msb_pos:0] sub16_result_lo, sub16_result_hi;
+//	
+//	bit [`alu_inout_msb_pos:0] temp_a_in_lo, temp_a_in_hi;
+//	bit [`alu_inout_msb_pos:0] temp_b_in_lo, temp_b_in_hi;
+//	
+//	assign { temp_a_in_hi, temp_a_in_lo } = 16'haaaa;
+//	//assign { temp_b_in_hi, temp_b_in_lo } = -16'h1;
+//	assign { temp_b_in_hi, temp_b_in_lo } = -16'h2;
+//	
+//	
+//	
+//	initial
+//	begin
+//		
+//		#2
+//		{ oper, proc_flags_in[pkg_pflags::pf_slot_c],
+//			{ a_in_lo, b_in } } 
+//			= { pkg_alu::alu_op_add, 1'b0,
+//			{ temp_a_in_lo, temp_b_in_lo } };
+//		
+//		#2
+//		sub16_result_lo = out_lo;
+//		{ oper, proc_flags_in[pkg_pflags::pf_slot_c],
+//			{ a_in_lo, b_in } } 
+//			= { pkg_alu::alu_op_adc, proc_flags_out[pkg_pflags::pf_slot_c],
+//			{ temp_a_in_hi, temp_b_in_hi } };
+//		
+//		
+//		#2
+//		sub16_result_hi = out_lo;
+//		
+//		
+//		#2
+//		
+//		$display( "%h %h\t\t%b %h", 
+//			{ temp_a_in_hi, temp_a_in_lo },
+//			{ temp_b_in_hi, temp_b_in_lo }, 
+//			proc_flags_out[pkg_pflags::pf_slot_c], 
+//			{ sub16_result_hi, sub16_result_lo } );
+//		
+//		//$display( "%h %h", sub16_result_lo, out_lo );
+//		
+//		$finish;
+//	end
+//	
+//	
+//endmodule
+
