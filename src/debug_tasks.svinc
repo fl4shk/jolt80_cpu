@@ -16,8 +16,8 @@
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 
-`ifndef spcpu_debug_tasks_svinc
-`define spcpu_debug_tasks_svinc
+`ifndef debug_tasks_svinc
+`define debug_tasks_svinc
 
 task debug_disp_instr_from_grp_1;
 	$display( "Group 1:  %h %h %h", ig1d_outputs.opcode, 
@@ -77,4 +77,4 @@ task debug_disp_instr;
 	endcase
 endtask
 
-`endif		// spcpu_debug_tasks_svinc
+`endif		// debug_tasks_svinc

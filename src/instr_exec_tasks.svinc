@@ -16,17 +16,26 @@
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 
-`ifndef spcpu_instr_exec_tasks_svinc
-`define spcpu_instr_exec_tasks_svinc
+`ifndef instr_exec_tasks_svinc
+`define instr_exec_tasks_svinc
 
 
 task start_exec_instr_from_grp_1;
 	
+	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
+	//	ig1_instr_changes_pc );
 	$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
-		ig1_instr_changes_pc );
+		instr_changes_pc );
 	
+	
+	
+	// instr_changes_pc <= 0;
+	
+	//if ( instr_changes_pc )
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	
+	
 	
 	advance_pc_etc_after_reg_instr_16();
 	prepare_to_load_16_no_addr();
@@ -34,7 +43,8 @@ task start_exec_instr_from_grp_1;
 endtask
 
 task start_exec_instr_from_grp_2;
-	$display("start_exec_instr_from_grp_2 is unfinished");
+	$display( "start_exec_instr_from_grp_2 is unfinished\t\t%h", 
+		instr_changes_pc );
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_16();
@@ -50,7 +60,8 @@ task start_exec_instr_from_grp_3;
 endtask
 
 task start_exec_instr_from_grp_4;
-	$display("start_exec_instr_from_grp_4 is unfinished");
+	$display( "start_exec_instr_from_grp_4 is unfinished\t\t%h", 
+		instr_changes_pc );
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_16();
@@ -58,7 +69,8 @@ task start_exec_instr_from_grp_4;
 endtask
 
 task start_exec_instr_from_grp_5;
-	$display("start_exec_instr_from_grp_5 is unfinished");
+	$display( "start_exec_instr_from_grp_5 is unfinished\t\t%h", 
+		instr_changes_pc );
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_32();
@@ -164,4 +176,4 @@ endtask
 
 
 
-`endif		// spcpu_instr_exec_tasks_svinc
+`endif		// instr_exec_tasks_svinc

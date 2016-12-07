@@ -89,10 +89,11 @@ module spcpu_test_bench;
 			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we } = 0;
 		
 		#2
+		clk_gen_reset = 1'b1;
 		test_cpu_reset = 1'b1;
 		
 		#2
-		clk_gen_reset = 1'b1;
+		test_cpu_reset = 1'b0;
 		
 	end
 	
@@ -201,6 +202,8 @@ module spcpu
 	
 	
 	
+	
+	
 	// CPU state stuff
 	// For some reason, vvp does weird things when I make cpu_regs part of
 	// the misc_cpu_vars struct, so just get rid of that struct for now.
@@ -216,6 +219,8 @@ module spcpu
 	// The current CPU state
 	bit [`cpu_state_msb_pos:0] curr_state;
 	
+	// Whether or not the instruction changed the pc
+	bit instr_changes_pc;
 	
 	// These are used for communication with the outside world
 	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
@@ -249,16 +254,15 @@ module spcpu
 	instr_group_decoder instr_grp_dec( .instr_hi(temp_data_in),
 		.group_out(init_instr_grp) );
 	
-	
-	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(instr_in_hi),
+	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(temp_data_in),
 		.ig1d_outputs(ig1d_outputs) );
-	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(instr_in_hi),
+	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(temp_data_in),
 		.ig2d_outputs(ig2d_outputs) );
-	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(instr_in_hi),
+	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(temp_data_in),
 		.ig3d_outputs(ig3d_outputs) );
-	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(instr_in_hi),
+	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(temp_data_in),
 		.ig4d_outputs(ig4d_outputs) );
-	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(instr_in_hi),
+	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(temp_data_in),
 		.ig5d_outputs(ig5d_outputs) );
 	
 	
@@ -275,17 +279,19 @@ module spcpu
 	
 	
 	// Tasks
-	`include "src/spcpu_debug_tasks.svinc"
+	`include "src/debug_tasks.svinc"
 	
 	`include "src/state_changing_tasks.svinc"
 	
-	`include "src/spcpu_instr_exec_tasks.svinc"
+	`include "src/instr_exec_tasks.svinc"
+	
+	`include "src/check_instr_changes_pc_tasks.svinc"
 	
 	
+	bit ready;
+	initial ready = 0;
 	
-	logic ready;
-	
-	always @ (reset)
+	always @ ( posedge clk )
 	begin
 	
 	if (reset)
@@ -314,7 +320,7 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
-		if ( `get_cpu_rp_pc >= 20 )
+		if ( `get_cpu_rp_pc >= 20 * 2 )
 		begin
 			$display("\ndone");
 			$finish;
@@ -327,14 +333,13 @@ module spcpu
 	begin
 		
 		//$display( "%h", `get_cpu_rp_pc );
+		//$display( "%h", curr_state == pkg_cpu::cpu_st_load_instr_hi );
 		
 		if (!ready)
 		begin
 			ready <= 1;
 			advance_pc_etc_after_reg_instr_16();
 			prepare_to_load_16_no_addr();
-			
-			//$display(ig1_instr_changes_pc);
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
@@ -387,6 +392,41 @@ module spcpu
 			finish_exec_instr();
 			
 			//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+		end
+		
+	end
+	
+	
+	
+	always @ ( curr_state )
+	begin
+		if ( ready && curr_state == pkg_cpu::cpu_st_load_instr_hi )
+		begin
+			if ( init_instr_grp == pkg_instr_dec::instr_grp_1 )
+			begin
+				check_grp_1_instr_for_pc_change();
+			end
+			
+			else if ( init_instr_grp == pkg_instr_dec::instr_grp_2 )
+			begin
+				check_grp_2_instr_for_pc_change();
+			end
+			
+			else if ( init_instr_grp == pkg_instr_dec::instr_grp_3 )
+			begin
+				check_grp_3_instr_for_pc_change();
+			end
+			
+			else if ( init_instr_grp == pkg_instr_dec::instr_grp_4 )
+			begin
+				check_grp_4_instr_for_pc_change();
+			end
+			
+			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
+			begin
+				check_grp_5_instr_for_pc_change();
+			end
+			
 		end
 		
 	end

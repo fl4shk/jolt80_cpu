@@ -25,7 +25,8 @@ wire [`instr_g1_op_msb_pos:0] ig1_opcode;
 wire [`instr_g1_ra_index_msb_pos:0] ig1_ra_index;
 wire [`instr_g1_imm_value_msb_pos:0] ig1_imm_value_8;
 
-wire ig1_instr_changes_pc, ig1_pc_contains_ra;
+//wire ig1_instr_changes_pc;
+wire ig1_pc_contains_ra;
 
 
 
@@ -36,8 +37,11 @@ wire [`instr_g2_ra_index_msb_pos:0] ig2_ra_index;
 wire [`instr_g2_rb_index_msb_pos:0] ig2_rb_index;
 wire ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair;
 
-wire ig2_instr_changes_pc, ig2_pc_contains_ra, ig2_pc_contains_rb,
-	ig2_rap_is_pc, ig2_rbp_is_pc;
+//wire ig2_pc_check_ra, ig2_pc_check_rb, ig2_pc_check_rap, ig2_pc_check_rbp;
+
+//wire ig2_instr_changes_pc;
+
+wire ig2_pc_contains_ra, ig2_pc_contains_rb, ig2_rap_is_pc, ig2_rbp_is_pc;
 
 
 
@@ -48,8 +52,8 @@ wire [`instr_g3_ra_index_msb_pos:0] ig3_ra_index;
 wire [`instr_g3_rbp_index_msb_pos:0] ig3_rbp_index;
 wire [`instr_g3_rcp_index_msb_pos:0] ig3_rcp_index;
 
-wire ig3_instr_changes_pc, ig3_pc_contains_ra, ig3_rbp_is_pc,
-	ig3_rcp_is_pc;
+//wire ig3_instr_changes_pc;
+wire ig3_pc_contains_ra, ig3_rbp_is_pc, ig3_rcp_is_pc;
 
 
 
@@ -67,7 +71,9 @@ wire [`instr_g5_op_msb_pos:0] ig5_opcode;
 wire [`instr_g5_ihi_ra_index_msb_pos:0] ig5_ra_index;
 wire [`instr_g5_ihi_rbp_index_msb_pos:0] ig5_rbp_index;
 
-wire ig5_instr_changes_pc, ig5_pc_contains_ra, ig5_rbp_is_pc;
+//wire ig5_instr_changes_pc;
+
+wire ig5_pc_contains_ra, ig5_rbp_is_pc;
 
 
 `endif		// extra_wires_svinc

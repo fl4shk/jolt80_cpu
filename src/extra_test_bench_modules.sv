@@ -64,23 +64,65 @@ module tb_memory
 	
 	
 	integer zero_counter;
-	logic [15:0] init_counter;
+	//logic [15:0] init_counter;
+	//
+	//
+	//// 
+	//task init_mem_16;
+	//	input [`cpu_data_inout_16_msb_pos:0] to_write;
+	//	
+	//	`make_mem_pair(init_counter) = to_write;
+	//	init_counter = init_counter + 2;
+	//endtask
+	//task init_mem_32;
+	//	input [31:0] to_write;
+	//	
+	//	`make_mem_quad(init_counter) = to_write;
+	//	init_counter = init_counter + 4;
+	//endtask
 	
 	
-	// 
-	task init_mem_16;
-		input [`cpu_data_inout_16_msb_pos:0] to_write;
-		
-		`make_mem_pair(init_counter) = to_write;
-		init_counter = init_counter + 2;
-	endtask
-	task init_mem_32;
-		input [31:0] to_write;
-		
-		`make_mem_quad(init_counter) = to_write;
-		init_counter = init_counter + 4;
-	endtask
-	
+	//initial
+	//begin
+	//	for ( zero_counter=0; zero_counter<num_bytes; ++zero_counter )
+	//	begin
+	//		mem[zero_counter] = 0;
+	//	end
+	//	
+	//	init_counter = 16'h0;
+	//	
+	//	init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'he, 
+	//		8'h10 });
+	//	init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'hf, 
+	//		8'h10 });
+	//	init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'hd, 
+	//		8'h10 });
+	//	init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'hd, 
+	//		8'h10 });
+	//	init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi, 4'hd, 
+	//		8'h10 });
+	//	init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi, 4'hf, 
+	//		8'h10 });
+	//	init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_addi, 4'hf, 
+	//		8'h10 });
+	//	//init_mem_16({ `instr_g4_id, pkg_instr_dec::instr_g4_op_bra, 
+	//	//	-8'h2 });
+	//	//init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi, 4'h0, 
+	//	//	8'h10 });
+	//	//init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'h3,
+	//	//	8'h3f });
+	//	//init_mem_32({ `instr_g5_ihi_id, pkg_instr_dec::instr_g5_op_calli,
+	//	//	4'h8, 3'h7, 16'hffaa });
+	//	//init_mem_32({ `instr_g5_ihi_id, pkg_instr_dec::instr_g5_op_calli,
+	//	//	4'h8, 3'h7, -16'hffaa });
+	//	//init_mem_16({ `instr_g2_id, pkg_instr_dec::instr_g2_op_str, 4'h3,
+	//	//	4'h9 });
+	//	
+	//	//$display( "tb_memory:  %h %h %h\t\t%h %h %h\t\t%h", 
+	//	//	`make_mem_pair(0), `make_mem_pair(2), `make_mem_pair(4),
+	//	//	`make_mem_pair(6), `make_mem_pair(8), `make_mem_pair(10),
+	//	//	`make_mem_pair(12) );
+	//end
 	
 	initial
 	begin
@@ -89,39 +131,13 @@ module tb_memory
 			mem[zero_counter] = 0;
 		end
 		
-		init_counter = 16'h0;
+		$readmemh( "readmemh_input.txt.ignore", mem, 0, ( num_bytes >> 1 )
+			- 1 );
 		
-		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'he, 
-			8'h10 });
-		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'hf, 
-			8'h10 });
-		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'hd, 
-			8'h10 });
-		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'hd, 
-			8'h10 });
-		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi, 4'hd, 
-			8'h10 });
-		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi, 4'hf, 
-			8'h10 });
-		init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_addi, 4'hf, 
-			8'h10 });
-		//init_mem_16({ `instr_g4_id, pkg_instr_dec::instr_g4_op_bra, 
-		//	-8'h2 });
-		//init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cmpi, 4'h0, 
-		//	8'h10 });
-		//init_mem_16({ `instr_g1_id, pkg_instr_dec::instr_g1_op_cpyi, 4'h3,
-		//	8'h3f });
-		//init_mem_32({ `instr_g5_ihi_id, pkg_instr_dec::instr_g5_op_calli,
-		//	4'h8, 3'h7, 16'hffaa });
-		//init_mem_32({ `instr_g5_ihi_id, pkg_instr_dec::instr_g5_op_calli,
-		//	4'h8, 3'h7, -16'hffaa });
-		//init_mem_16({ `instr_g2_id, pkg_instr_dec::instr_g2_op_str, 4'h3,
-		//	4'h9 });
-		
-		//$display( "tb_memory:  %h %h %h\t\t%h %h %h\t\t%h", 
-		//	`make_mem_pair(0), `make_mem_pair(2), `make_mem_pair(4),
-		//	`make_mem_pair(6), `make_mem_pair(8), `make_mem_pair(10),
-		//	`make_mem_pair(12) );
+		$display( "tb_memory:  %h %h %h\t\t%h %h %h\t\t%h", 
+			`make_mem_pair(0), `make_mem_pair(2), `make_mem_pair(4),
+			`make_mem_pair(6), `make_mem_pair(8), `make_mem_pair(10),
+			`make_mem_pair(12) );
 	end
 	
 	
