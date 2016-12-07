@@ -1,0 +1,98 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef state_changing_tasks_svinc
+`define state_changing_tasks_svinc
+
+// This task exists to help reduce bugs fro
+task set_pc_and_dio_addr;
+	input [`cpu_addr_msb_pos:0] val;
+	
+	`get_cpu_rp_pc <= val;
+	data_inout_addr <= val;
+endtask
+
+// Advance the PC and data_inout_addr after a 16-bit non-PC-changing
+// instruction, which is also known as a "regular" 16-bit instruction
+task advance_pc_etc_after_reg_instr_16;
+	set_pc_and_dio_addr(`get_pc_after_reg_instr_16);
+endtask
+
+// Advance the PC and data_inout_addr after a 32-bit non-PC-changing
+// instruction, which is also known as a "regular" 32-bit instruction
+task advance_pc_etc_after_reg_instr_32;
+	set_pc_and_dio_addr(`get_pc_after_reg_instr_32);
+endtask
+
+
+// Advance data_inout_addr by two bytes so the low 16 bits of a 32-bit
+// instruction can be loaded on the next cycle
+task advance_dio_addr_for_instr_lo;
+	data_inout_addr <= `get_pc_after_reg_instr_16;
+endtask
+
+
+task disable_dio_we;
+	data_inout_we <= 1'b0;
+endtask
+
+task enable_dio_we;
+	data_inout_we <= 1'b1;
+endtask
+
+// Prepare to, on the next cycle, load an 8-bit value
+task prepare_to_load_8_with_addr;
+	input [`cpu_addr_msb_pos:0] read_addr;
+	
+	data_inout_addr <= read_addr;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+	disable_dio_we();
+endtask
+task prepare_to_load_8_no_addr;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+	disable_dio_we();
+endtask
+
+// Prepare to, on the next cycle, write an 8-bit value
+task prepare_to_store_8_with_addr;
+	input [`cpu_addr_msb_pos:0] write_addr;
+	
+	data_inout_addr <= write_addr;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+	enable_dio_we();
+endtask
+task prepare_to_store_8_no_addr;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+	enable_dio_we();
+endtask
+
+// Prepare to, on the next cycle, load a 16-bit value
+task prepare_to_load_16_with_addr;
+	input [`cpu_addr_msb_pos:0] read_addr;
+	
+	data_inout_addr <= read_addr;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
+	disable_dio_we();
+endtask
+task prepare_to_load_16_no_addr;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
+	disable_dio_we();
+endtask
+
+
+`endif		// state_changing_tasks_svinc

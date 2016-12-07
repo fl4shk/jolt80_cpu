@@ -201,6 +201,7 @@ module spcpu
 	
 	
 	
+	// CPU state stuff
 	// For some reason, vvp does weird things when I make cpu_regs part of
 	// the misc_cpu_vars struct, so just get rid of that struct for now.
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
@@ -215,61 +216,13 @@ module spcpu
 	// The current CPU state
 	bit [`cpu_state_msb_pos:0] curr_state;
 	
+	
+	// These are used for communication with the outside world
 	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
 	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
 	
-	
-	// Instruction Group 1 Instruction Execution Things
-	// Get rid of some boilerplate
-	wire [`instr_g1_op_msb_pos:0] ig1_opcode;
-	wire [`instr_g1_ra_index_msb_pos:0] ig1_ra_index;
-	wire [`instr_g1_imm_value_msb_pos:0] ig1_imm_value_8;
-	
-	wire ig1_instr_changes_pc, ig1_pc_contains_ra;
-	
-	
-	
-	// Instruction Group 2 Instruction Execution Things
-	// Get rid of some boilerplate
-	wire [`instr_g2_op_msb_pos:0] ig2_opcode;
-	wire [`instr_g2_ra_index_msb_pos:0] ig2_ra_index;
-	wire [`instr_g2_rb_index_msb_pos:0] ig2_rb_index;
-	wire ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair;
-	
-	wire ig2_instr_changes_pc, ig2_pc_contains_ra, ig2_pc_contains_rb,
-		ig2_rap_is_pc, ig2_rbp_is_pc;
-	
-	
-	
-	// Instruction Group 3 Instruction Execution Things
-	// Get rid of some boilerplate
-	wire [`instr_g3_op_msb_pos:0] ig3_opcode;
-	wire [`instr_g3_ra_index_msb_pos:0] ig3_ra_index;
-	wire [`instr_g3_rbp_index_msb_pos:0] ig3_rbp_index;
-	wire [`instr_g3_rcp_index_msb_pos:0] ig3_rcp_index;
-	
-	wire ig3_instr_changes_pc, ig3_pc_contains_ra, ig3_rbp_is_pc,
-		ig3_rcp_is_pc;
-	
-	
-	
-	// Instruction Group 4 Instruction Execution Things
-	// ALL Instructions in group 4 change the PC
-	// Get rid of some boilerplate
-	wire [`instr_g4_op_msb_pos:0] ig4_opcode;
-	wire [`instr_g4_imm_value_msb_pos:0] ig4_imm_value_8;
-	
-	
-	
-	// Instruction Group 5 Instruction Execution Things
-	// Get rid of some boilerplate
-	wire [`instr_g5_op_msb_pos:0] ig5_opcode;
-	wire [`instr_g5_ihi_ra_index_msb_pos:0] ig5_ra_index;
-	wire [`instr_g5_ihi_rbp_index_msb_pos:0] ig5_rbp_index;
-	
-	wire ig5_instr_changes_pc, ig5_pc_contains_ra, ig5_rbp_is_pc;
-	
+	`include "src/extra_wires.svinc"
 	
 	
 	
@@ -317,140 +270,14 @@ module spcpu
 	
 	
 	
-	// Instruction Group 1 Instruction Execution Things
-	assign { ig1_opcode, ig1_ra_index, ig1_imm_value_8 } 
-		= { ig1d_outputs.opcode, ig1d_outputs.ra_index, 
-		ig1d_outputs.imm_value_8 };
-	
-	assign ig1_pc_contains_ra 
-		= `wire_rhs_pc_indices_contain_reg_index(ig1d_outputs.ra_index);
-	
-	assign ig1_instr_changes_pc = ( ig1_pc_contains_ra 
-		// Arithmetic instructions:
-		? ( ( ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
-		|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
-		
-		// Skip instr_g1_op_cmpi because it CAN'T change registers
-		
-		//Copy instructions:
-		
-		// (CoPY Immediate)
-		|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi ) )
-		: 0 );
-	
-	
-	
-	// Instruction Group 2 Instruction Execution Things
-	assign ig2_pc_contains_ra
-		= `wire_rhs_pc_indices_contain_reg_index(ig2d_outputs.ra_index);
-	assign ig2_pc_contains_rb
-		= `wire_rhs_pc_indices_contain_reg_index(ig2d_outputs.rb_index);
-	assign ig2_rap_is_pc = ( ig2d_outputs.ra_index_is_for_pair
-		&& `wire_rhs_rp_index_is_pc_index(ig2d_outputs.ra_index) );
-	assign ig2_rbp_is_pc = ( ig2d_outputs.rb_index_is_for_pair
-		&& `wire_rhs_rp_index_is_pc_index(ig2d_outputs.rb_index) );
-	
-	
-	
-	// Instruction Group 3 Instruction Execution Things
-	assign ig3_pc_contains_ra
-		= `wire_rhs_pc_indices_contain_reg_index(ig3d_outputs.ra_index);
-	assign ig3_rbp_is_pc 
-		= `wire_rhs_rp_index_is_pc_index(ig3d_outputs.rbp_index);
-	assign ig3_rcp_is_pc 
-		= `wire_rhs_rp_index_is_pc_index(ig3d_outputs.rcp_index);
-	
-	
-	
-	// Instruction Group 4 Instruction Execution Things
-	
-	// Instruction Group 5 Instruction Execution Things
-	assign ig5_pc_contains_ra
-		= `wire_rhs_pc_indices_contain_reg_index(ig5d_outputs.ra_index);
-	assign ig5_rbp_is_pc 
-		= `wire_rhs_rp_index_is_pc_index(ig5d_outputs.rbp_index);
+	`include "src/extra_wire_assignments.svinc"
 	
 	
 	
 	// Tasks
 	`include "src/spcpu_debug_tasks.svinc"
 	
-	
-	
-	// This task exists to help reduce bugs fro
-	task set_pc_and_dio_addr;
-		input [`cpu_addr_msb_pos:0] val;
-		
-		`get_cpu_rp_pc <= val;
-		data_inout_addr <= val;
-	endtask
-	
-	// Advance the PC and data_inout_addr after a 16-bit non-PC-changing
-	// instruction, which is also known as a "regular" 16-bit instruction
-	task advance_pc_etc_after_reg_instr_16;
-		set_pc_and_dio_addr(`get_pc_after_reg_instr_16);
-	endtask
-	
-	// Advance the PC and data_inout_addr after a 32-bit non-PC-changing
-	// instruction, which is also known as a "regular" 32-bit instruction
-	task advance_pc_etc_after_reg_instr_32;
-		set_pc_and_dio_addr(`get_pc_after_reg_instr_32);
-	endtask
-	
-	
-	// Advance data_inout_addr by two bytes so the low 16 bits of a 32-bit
-	// instruction can be loaded on the next cycle
-	task advance_dio_addr_for_instr_lo;
-		data_inout_addr <= `get_pc_after_reg_instr_16;
-	endtask
-	
-	
-	task disable_dio_we;
-		data_inout_we <= 1'b0;
-	endtask
-	
-	task enable_dio_we;
-		data_inout_we <= 1'b1;
-	endtask
-	
-	// Prepare to, on the next cycle, load an 8-bit value
-	task prepare_to_load_8_with_addr;
-		input [`cpu_addr_msb_pos:0] read_addr;
-		
-		data_inout_addr <= read_addr;
-		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-		disable_dio_we();
-	endtask
-	task prepare_to_load_8_no_addr;
-		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-		disable_dio_we();
-	endtask
-	
-	// Prepare to, on the next cycle, write an 8-bit value
-	task prepare_to_store_8_with_addr;
-		input [`cpu_addr_msb_pos:0] write_addr;
-		
-		data_inout_addr <= write_addr;
-		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-		enable_dio_we();
-	endtask
-	task prepare_to_store_8_no_addr;
-		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-		enable_dio_we();
-	endtask
-	
-	// Prepare to, on the next cycle, load a 16-bit value
-	task prepare_to_load_16_with_addr;
-		input [`cpu_addr_msb_pos:0] read_addr;
-		
-		data_inout_addr <= read_addr;
-		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
-		disable_dio_we();
-	endtask
-	task prepare_to_load_16_no_addr;
-		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
-		disable_dio_we();
-	endtask
+	`include "src/state_changing_tasks.svinc"
 	
 	`include "src/spcpu_instr_exec_tasks.svinc"
 	

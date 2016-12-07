@@ -1,0 +1,152 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef extra_wire_assignments_svinc
+`define extra_wire_assignments_svinc
+
+
+
+
+// Instruction Group 1 Instruction Execution Things
+
+// Get rid of some boilerplate
+assign 
+{ 
+	ig1_opcode, 
+	ig1_ra_index, 
+	ig1_imm_value_8
+}
+= { 
+	ig1d_outputs.opcode, 
+	ig1d_outputs.ra_index, 
+	ig1d_outputs.imm_value_8 
+};
+
+assign ig1_pc_contains_ra 
+	= `wire_rhs_pc_indices_contain_reg_index(ig1_ra_index);
+
+assign ig1_instr_changes_pc = ( ig1_pc_contains_ra 
+	// Arithmetic instructions:
+	? ( ( ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+	|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+	
+	// Skip instr_g1_op_cmpi because it CAN'T change registers
+	
+	//Copy instructions:
+	
+	// (CoPY Immediate)
+	|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi ) )
+	: 0 );
+
+
+
+// Instruction Group 2 Instruction Execution Things
+
+// Get rid of some boilerplate
+assign 
+{ 
+	ig2_opcode, 
+	ig2_ra_index, 
+	ig2_rb_index,
+	ig2_ra_index_is_for_pair, 
+	ig2_rb_index_is_for_pair
+} 
+= {
+	ig2d_outputs.opcode, 
+	ig2d_outputs.ra_index, 
+	ig2d_outputs.rb_index,
+	ig2d_outputs.ra_index_is_for_pair, 
+	ig2d_outputs.rb_index_is_for_pair
+};
+
+assign ig2_pc_contains_ra
+	= `wire_rhs_pc_indices_contain_reg_index(ig2_ra_index);
+assign ig2_pc_contains_rb
+	= `wire_rhs_pc_indices_contain_reg_index(ig2_rb_index);
+assign ig2_rap_is_pc = ( ig2_ra_index_is_for_pair
+	&& `wire_rhs_rp_index_is_pc_index(ig2_ra_index) );
+assign ig2_rbp_is_pc = ( ig2_rb_index_is_for_pair
+	&& `wire_rhs_rp_index_is_pc_index(ig2_rb_index) );
+
+
+
+// Instruction Group 3 Instruction Execution Things
+
+// Get rid of some boilerplate
+assign
+{
+	ig3_opcode,
+	ig3_ra_index,
+	ig3_rbp_index,
+	ig3_rcp_index 
+}
+= {
+	ig3d_outputs.opcode,
+	ig3d_outputs.ra_index,
+	ig3d_outputs.rbp_index,
+	ig3d_outputs.rcp_index 
+};
+
+assign ig3_pc_contains_ra
+	= `wire_rhs_pc_indices_contain_reg_index(ig3_ra_index);
+assign ig3_rbp_is_pc 
+	= `wire_rhs_rp_index_is_pc_index(ig3_rbp_index);
+assign ig3_rcp_is_pc 
+	= `wire_rhs_rp_index_is_pc_index(ig3_rcp_index);
+
+
+
+// Instruction Group 4 Instruction Execution Things
+
+// Get rid of some boilerplate
+assign
+{
+	ig4_opcode,
+	ig4_imm_value_8
+}
+= {
+	ig4d_outputs.opcode,
+	ig4d_outputs.imm_value_8
+};
+
+
+
+// Instruction Group 5 Instruction Execution Things
+
+
+// Get rid of some boilerplate
+assign
+{
+	ig5_opcode,
+	ig5_ra_index,
+	ig5_rbp_index
+}
+= {
+	ig5d_outputs.opcode,
+	ig5d_outputs.ra_index,
+	ig5d_outputs.rbp_index
+};
+
+assign ig5_pc_contains_ra
+	= `wire_rhs_pc_indices_contain_reg_index(ig5_ra_index);
+assign ig5_rbp_is_pc 
+	= `wire_rhs_rp_index_is_pc_index(ig5_rbp_index);
+
+
+
+
+`endif		// extra_wire_assignments_svinc

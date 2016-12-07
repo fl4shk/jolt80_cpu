@@ -1,0 +1,73 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef extra_wires_svinc
+`define extra_wires_svinc
+
+// Instruction Group 1 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g1_op_msb_pos:0] ig1_opcode;
+wire [`instr_g1_ra_index_msb_pos:0] ig1_ra_index;
+wire [`instr_g1_imm_value_msb_pos:0] ig1_imm_value_8;
+
+wire ig1_instr_changes_pc, ig1_pc_contains_ra;
+
+
+
+// Instruction Group 2 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g2_op_msb_pos:0] ig2_opcode;
+wire [`instr_g2_ra_index_msb_pos:0] ig2_ra_index;
+wire [`instr_g2_rb_index_msb_pos:0] ig2_rb_index;
+wire ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair;
+
+wire ig2_instr_changes_pc, ig2_pc_contains_ra, ig2_pc_contains_rb,
+	ig2_rap_is_pc, ig2_rbp_is_pc;
+
+
+
+// Instruction Group 3 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g3_op_msb_pos:0] ig3_opcode;
+wire [`instr_g3_ra_index_msb_pos:0] ig3_ra_index;
+wire [`instr_g3_rbp_index_msb_pos:0] ig3_rbp_index;
+wire [`instr_g3_rcp_index_msb_pos:0] ig3_rcp_index;
+
+wire ig3_instr_changes_pc, ig3_pc_contains_ra, ig3_rbp_is_pc,
+	ig3_rcp_is_pc;
+
+
+
+// Instruction Group 4 Instruction Execution Things
+// ALL Instructions in group 4 change the PC
+// Get rid of some boilerplate
+wire [`instr_g4_op_msb_pos:0] ig4_opcode;
+wire [`instr_g4_imm_value_msb_pos:0] ig4_imm_value_8;
+
+
+
+// Instruction Group 5 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g5_op_msb_pos:0] ig5_opcode;
+wire [`instr_g5_ihi_ra_index_msb_pos:0] ig5_ra_index;
+wire [`instr_g5_ihi_rbp_index_msb_pos:0] ig5_rbp_index;
+
+wire ig5_instr_changes_pc, ig5_pc_contains_ra, ig5_rbp_is_pc;
+
+
+`endif		// extra_wires_svinc
