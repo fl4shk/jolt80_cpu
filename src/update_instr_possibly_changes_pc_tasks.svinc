@@ -1,0 +1,182 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef update_instr_possibly_changes_pc_tasks_svinc
+`define update_instr_possibly_changes_pc_tasks_svinc
+
+task update_ipc_pc_for_grp_1_instr;
+	
+	instr_possibly_changes_pc = 0;
+	if (ig1_pc_contains_ra)
+	begin
+		// Arithmetic instructions:
+		if ( ( ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+		|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+		
+		// Skip instr_g1_op_cmpi because it CAN'T change registers
+		//// || ( ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
+		
+		//Copy instructions:
+		
+		// (CoPY Immediate)
+		|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi ) )
+		begin
+			instr_possibly_changes_pc = 1;
+		end
+	end
+	
+endtask
+
+task update_ipc_pc_for_grp_2_instr;
+	
+	temp_ipc_pc_vec[4:0] = 0;
+	
+	
+	// The call instruction ALWAYS changes pc
+	if ( ig2_opcode == pkg_instr_dec::instr_g2_op_call )
+	begin
+		temp_ipc_pc_vec[0] = 1;
+	end
+	
+	if (ig2_pc_contains_ra)
+	begin
+		// Arithmetic instructions:
+		if ( ( ig2_opcode == pkg_instr_dec::instr_g2_op_add )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_adc )
+		
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_sub )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_sbc )
+		
+		// Bitwise instructions with two register operands:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_and )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_orr )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_xor )
+		
+		// Complement instructions with one register operand (rB ignored):
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_inv )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_neg )
+		
+		
+		// Bitshifting (and rotating) instructions that use the value of rB
+		// as the number of bits to shift by:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_lsl )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_lsr )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_asr )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_rol )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_ror )
+		
+		
+		// Bit rotating instructions that use carry as bit 8 for a 9-bit
+		// rotate of { carry, rA } by one bit:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_rolc )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_rorc )
+		
+		
+		// Copy instructions:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_cpy )
+		
+		
+		// 8-bit Load/store instructions:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_ldr ) )
+		begin
+			//instr_possibly_changes_pc = 1;
+			temp_ipc_pc_vec[1] = 1;
+		end
+		
+	end
+	
+	// Don't need to check this
+	//if (ig2_pc_contains_rb)
+	//begin
+	//	
+	//	//if ( ig2_opcode == pkg_instr_dec::instr_g2_op_cpy )
+	//	//begin
+	//	//	instr_possibly_changes_pc = 1;
+	//	//end
+	//	//
+	//	//else
+	//	//begin
+	//		instr_possibly_changes_pc = 0;
+	//	//end
+	//end
+	
+	if (ig2_rap_is_pc)
+	begin
+		// Complement instructions with one register operand (rB ignored):
+		if ( ( ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_negp )
+		
+		// Bitshifting (and rotating) instructions that do a 16-bit shift
+		// or rotate on the reg pair rAp, using rB as the number of bits to
+		// shift by:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_lslp )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_lsrp )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_asrp )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_rolp )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_rorp )
+		
+		
+		// Bit rotating instructions that use carry as bit 16 for a 17-bit
+		// rotate of { carry, rAp } by one bit:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_rolcp )
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_rorcp )
+		
+		// Copy instructions:
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_cpyp )
+		
+		// Swap instructions:
+		// (SWap register Pair, also can be used as a combined "call",
+		// "jump", and "return" instruction by swapping some other register
+		// pair with the "pc" [r14p] register pair)
+			|| ( ig2_opcode == pkg_instr_dec::instr_g2_op_swp ) )
+		begin
+			temp_ipc_pc_vec[2] = 1;
+		end
+		
+	end
+	
+	if (ig2_rbp_is_pc)
+	begin
+		// Swap instructions:
+		if ( ig2_opcode == pkg_instr_dec::instr_g2_op_swp )
+		begin
+			temp_ipc_pc_vec[3] = 1;
+		end
+	end
+	
+	instr_possibly_changes_pc = ( temp_ipc_pc_vec != 0 );
+	
+	
+endtask
+
+task update_ipc_pc_for_grp_3_instr;
+	
+	
+endtask
+
+task update_ipc_pc_for_grp_4_instr;
+	
+	
+endtask
+
+task update_ipc_pc_for_grp_5_instr;
+	
+	
+endtask
+
+
+`endif		// update_instr_possibly_changes_pc_tasks_svinc

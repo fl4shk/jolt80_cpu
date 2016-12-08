@@ -132,10 +132,10 @@ package pkg_instr_dec;
 		
 		// Copy instructions:
 		
-		// (CoPY from one register to another register)
+		// (CoPY from reg rB to reg rA)
 		instr_g2_op_cpy,
 		
-		// (CoPY from reg Pair rAp to reg Pair rBp)
+		// (CoPY from reg Pair rBp to reg Pair rAp)
 		instr_g2_op_cpyp,
 		
 		

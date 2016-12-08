@@ -61,6 +61,11 @@ package pkg_cpu;
 	
 	typedef enum bit [`cpu_state_msb_pos:0]
 	{
+		//// This state exists so the first instruction can be 
+		cpu_st_begin_0,
+		cpu_st_begin_1,
+		//cpu_st_begin_2,
+		
 		// Load a 16-bit instruction, or load the high 16 bits of a 32-bit
 		// instruction
 		cpu_st_load_instr_hi,

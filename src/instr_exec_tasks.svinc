@@ -24,14 +24,12 @@ task start_exec_instr_from_grp_1;
 	
 	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
 	//	ig1_instr_changes_pc );
-	$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
-		instr_changes_pc );
+	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h\t\t%h", 
+	//	ig1_opcode, instr_possibly_changes_pc );
+	$display( "group 1 instr:\t\t%h\t\t%h", ig1_opcode, 
+		instr_possibly_changes_pc );
 	
 	
-	
-	// instr_changes_pc <= 0;
-	
-	//if ( instr_changes_pc )
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	
@@ -43,8 +41,10 @@ task start_exec_instr_from_grp_1;
 endtask
 
 task start_exec_instr_from_grp_2;
-	$display( "start_exec_instr_from_grp_2 is unfinished\t\t%h", 
-		instr_changes_pc );
+	//$display( "start_exec_instr_from_grp_2 is unfinished\t\t%h\t\t%h", 
+	//	ig2_opcode, instr_possibly_changes_pc );
+	$display( "group 2 instr:\t\t%h\t\t%h", ig2_opcode, 
+		instr_possibly_changes_pc );
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_16();
@@ -52,7 +52,10 @@ task start_exec_instr_from_grp_2;
 endtask
 
 task start_exec_instr_from_grp_3;
-	$display("start_exec_instr_from_grp_3 is unfinished");
+	//$display( "start_exec_instr_from_grp_3 is unfinished\t\t%h\t\t%h", 
+	//	ig3_opcode, instr_possibly_changes_pc );
+	$display( "group 3 instr:\t\t%h\t\t%h", ig3_opcode, 
+		instr_possibly_changes_pc );
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_16();
@@ -60,8 +63,10 @@ task start_exec_instr_from_grp_3;
 endtask
 
 task start_exec_instr_from_grp_4;
-	$display( "start_exec_instr_from_grp_4 is unfinished\t\t%h", 
-		instr_changes_pc );
+	//$display( "start_exec_instr_from_grp_4 is unfinished\t\t%h\t\t%h", 
+	//	ig4_opcode, instr_possibly_changes_pc );
+	$display( "group 4 instr:\t\t%h\t\t%h", ig4_opcode, 
+		instr_possibly_changes_pc );
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_16();
@@ -69,8 +74,11 @@ task start_exec_instr_from_grp_4;
 endtask
 
 task start_exec_instr_from_grp_5;
-	$display( "start_exec_instr_from_grp_5 is unfinished\t\t%h", 
-		instr_changes_pc );
+	//$display( "start_exec_instr_from_grp_5 is unfinished\t\t%h\t\t%h", 
+	//	ig5_opcode, instr_possibly_changes_pc );
+	$display( "group 5 instr:\t\t%h\t\t%h", ig5_opcode, 
+		instr_possibly_changes_pc );
+	
 	
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_32();

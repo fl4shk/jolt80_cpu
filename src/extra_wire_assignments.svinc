@@ -57,10 +57,19 @@ assign { ig2_opcode, ig2_ra_index, ig2_rb_index,
 	ig2d_outputs.rb_index_is_for_pair };
 
 
+// For ig2_pc_contains_ra and ig2_pc_contains_rb, there is NO NEED to check
+// if the index is for a reg pair.  This is because a reg pair index is
+// ALWAYS less than 14 (specifically, the range is from 0-7)
 assign ig2_pc_contains_ra
 	= `wire_rhs_pc_indices_contain_reg_index(ig2_ra_index);
 assign ig2_pc_contains_rb
 	= `wire_rhs_pc_indices_contain_reg_index(ig2_rb_index);
+
+// For ig2_rap_is_pc and ig2_rbp_is_pc, it is NECESSARY to check if the
+// index is for a reg pair.  This is because the range of reg pair indices
+// is 0-7.  Specifically, if a reg index is encoded as 7, then NOT checking
+// whether or not the index is for a pair will make the code think that the
+// REG index is THE PC'S REG --PAIR-- index.
 assign ig2_rap_is_pc = ( ig2_ra_index_is_for_pair
 	&& `wire_rhs_rp_index_is_pc_index(ig2_ra_index) );
 assign ig2_rbp_is_pc = ( ig2_rb_index_is_for_pair

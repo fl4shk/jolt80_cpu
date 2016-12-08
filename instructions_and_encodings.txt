@@ -101,8 +101,8 @@ Group 2 (The instruction group with the most opcodes):
       2. rorcp
     
     Copy instructions:
-      1. cpy (CoPY from one register to another register)
-      2. cpyp (CoPY from reg Pair rAp to reg Pair rBp)
+      1. cpy (CoPY from reg rB to reg rA)
+      2. cpyp (CoPY from reg Pair rBp to reg Pair rAp)
       
     Swap instructions:
       1. swp (SWap register Pair, also can be used as a combined "call",
