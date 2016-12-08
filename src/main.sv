@@ -24,7 +24,7 @@
 
 module spcpu_test_bench;
 	
-	bit clk_gen_reset, tb_clk;
+	bit clk_gen_reset, tb_half_clk, tb_mem_clk;
 	
 	bit test_mem_reset;
 	
@@ -37,7 +37,10 @@ module spcpu_test_bench;
 	bit test_cpu_reset;
 	
 	
-	tb_clk_gen clk_gen( .reset(clk_gen_reset), .clk(tb_clk) );
+	tb_half_clk_gen half_clk_gen( .reset(clk_gen_reset), 
+		.half_clk(tb_half_clk) );
+	tb_memory_clk_gen mem_clk_gen( .reset(clk_gen_reset), 
+		.mem_clk(tb_mem_clk) );
 	
 	
 	//alu_test_bench alu_tb( .tb_clk(tb_clk), .reset(alu_tb_reset) );
@@ -46,101 +49,61 @@ module spcpu_test_bench;
 	//instr_decoder_test_bench instr_dec_tb( .tb_clk(tb_clk),
 	//	.reset(instr_dec_tb_reset) );
 	
-	tb_mem_inputs mem_inputs;
-	//logic [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out ;
-	wire [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out ;
 	
-	tb_memory test_mem( .write_clk(tb_clk), .reset(test_mem_reset),
-		.the_inputs(mem_inputs), .read_data_out(tb_mem_read_data_out) );
 	
-	`include "src/test_mem_tasks.svinc"
-	
+	wire [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out;
 	
 	wire [`cpu_data_inout_16_msb_pos:0] test_cpu_data_inout_direct;
 	bit [`cpu_addr_msb_pos:0] test_cpu_data_inout_addr;
 	bit test_cpu_data_acc_sz, test_cpu_data_inout_we;
+	logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_out;
 	
-	spcpu test_cpu( .clk(tb_clk), .reset(test_cpu_reset),
+	spcpu test_cpu( .clk(tb_half_clk), .reset(test_cpu_reset),
 		.data_inout(test_cpu_data_inout_direct),
 		.data_inout_addr(test_cpu_data_inout_addr),
 		.data_acc_sz(test_cpu_data_acc_sz),
 		.data_inout_we(test_cpu_data_inout_we) );
 	
-	//logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_in, 
-	//	test_cpu_data_out;
-	logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_out;
+	//tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset),
+	//	.the_inputs(mem_inputs), .read_data_out(tb_mem_read_data_out) );
+	tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset),
+		.addr_in(test_cpu_data_inout_addr),
+		.write_data_in(test_cpu_data_out),
+		.data_acc_sz(test_cpu_data_acc_sz),
+		.write_data_we(test_cpu_data_inout_we), 
+		.read_data_out(tb_mem_read_data_out) );
+	
+	
+	
 	
 	
 	//assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
 	//	? test_cpu_data_in : `cpu_data_inout_16_width'hz;
 	assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
 		? tb_mem_read_data_out : `cpu_data_inout_16_width'hz;
+	//assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
+	//	? temp_read_data_out : `cpu_data_inout_16_width'hz;
 	
 	assign test_cpu_data_out = (test_cpu_data_inout_we)
 		? test_cpu_data_inout_direct : `cpu_data_inout_16_width'hz;
 	
 	
+	
 	initial
 	begin
-		clk_gen_reset = 1'b0;
-		test_cpu_reset = 1'b0;
-		
-		{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
-			mem_inputs.write_data_acc_sz, mem_inputs.write_data_we } = 0;
-		
-		#2
 		clk_gen_reset = 1'b1;
-		test_cpu_reset = 1'b1;
-		
-		#2
 		test_cpu_reset = 1'b0;
+		//$display(test_cpu_reset);
 		
-	end
-	
-	
-	always @ ( posedge tb_clk )
-	begin
+		#4
+		test_cpu_reset = 1'b1;
+		//$display(test_cpu_reset);
 		
-		// If the CPU wants to read or write 8-bit data
-		if ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
-		begin
-			// If the CPU wants to read 8-bit data
-			if (!test_cpu_data_inout_we)
-			begin
-				read_test_mem_8(test_cpu_data_inout_addr);
-				
-				//$display( "%h", test_cpu_data_in );
-			end
-			
-			// If the CPU wants to write 8-bit data
-			else // if (test_cpu_data_inout_we)
-			begin
-				write_test_mem_8( test_cpu_data_inout_addr, 
-					test_cpu_data_out );
-			end
-		end
+		//{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
+		//	mem_inputs.write_data_acc_sz, mem_inputs.write_data_we } = 0;
 		
-		
-		// If the CPU wants to read or write 16-bit data
-		else // if ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
-		begin
-			// If the CPU wants to read 16-bit data (for Small Practice
-			// CPU, it's used for loading either a 16-bit instruction or
-			// a 16-bit half of a 32-bit instruction)
-			if (!test_cpu_data_inout_we)
-			begin
-				read_test_mem_16(test_cpu_data_inout_addr);
-			end
-			
-			// If the CPU wants to write 16-bit data (which should NOT 
-			// happen with the current design of Small Practice CPU)
-			else // if (test_cpu_data_inout_we)
-			begin
-				$display( "spcpu_test_bench:  Uh oh!  The CPU module ",
-					"wants to store a 16-bit value!  That should NOT ",
-					"happen!" );
-			end
-		end
+		#4
+		test_cpu_reset = 1'b0;
 		
 	end
 	
@@ -223,9 +186,9 @@ module spcpu
 	// The current CPU state
 	bit [`cpu_state_msb_pos:0] curr_state;
 	
+	
 	// If the pc was POSSIBLY changed by an instruction, which is used to
 	// determine whether or not to change the pc automatically.
-	
 	bit [4:0] temp_ipc_pc_vec;
 	bit instr_possibly_changes_pc;
 	
@@ -234,8 +197,9 @@ module spcpu
 	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
 	
-	`include "src/extra_wires.svinc"
+	`include "src/extra_instr_dec_vars.svinc"
 	
+	wire init_instr_is_32_bit, final_instr_is_32_bit;
 	
 	
 	
@@ -280,6 +244,10 @@ module spcpu
 		: `cpu_data_inout_16_width'hz;
 	
 	
+	assign { init_instr_is_32_bit, final_instr_is_32_bit }
+		= { pkg_instr_dec::get_instr_is_32_bit(init_instr_grp),
+		pkg_instr_dec::get_instr_is_32_bit(final_instr_grp) };
+	
 	
 	`include "src/extra_wire_assignments.svinc"
 	
@@ -294,16 +262,21 @@ module spcpu
 	
 	`include "src/update_instr_possibly_changes_pc_tasks.svinc"
 	
+	`include "src/extra_instr_dec_tasks_funcs.svinc"
 	
 	//bit [1:0] ready;
 	//initial ready = 0;
+	
+	bit ready;
+	initial ready = 0;
 	
 	always @ ( posedge clk )
 	begin
 	
 	if (reset)
 	begin
-		//{ data_inout_addr, data_inout_we } = 0;
+		//$display("memes");
+		//{ data_inout_addr, data_inout_we } <= 0;
 		data_inout_addr <= 0;
 		data_inout_we <= 0;
 		
@@ -316,9 +289,11 @@ module spcpu
 			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
 			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
 		
-		curr_state <= pkg_cpu::cpu_st_begin_0;
+		//curr_state <= pkg_cpu::cpu_st_begin_0;
+		curr_state <= 0;
+		ready <= 1;
+		prep_load_16_no_addr();
 		
-		//ready <= 0;
 	end
 	
 	end
@@ -335,56 +310,66 @@ module spcpu
 	end
 	
 	
-	
 	always @ ( posedge clk )
 	begin
-		
-		//$display( "%h", `get_cpu_rp_pc );
-		//$display( "%h", curr_state == pkg_cpu::cpu_st_load_instr_hi );
-		
-		//if (!ready[1])
-		//begin
-		//	ready <= ready + 1;
-		//	
-		//	if (ready[0])
-		//	begin
-		//		advance_pc_etc_after_reg_instr_16();
-		//		curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-		//	end
-		//	prepare_to_load_16_no_addr();
-		//end
-		
+	
+	if (ready)
+	begin
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
 			curr_state <= curr_state + 1;
-			prepare_to_load_16_no_addr();
+			prep_load_16_no_addr();
+			//set_pc_and_dio_addr(0);
 		end
 		
-		else if ( curr_state == pkg_cpu::cpu_st_begin_1 )
-		begin
-			curr_state <= curr_state + 1;
-			advance_pc_etc_after_reg_instr_16();
-			prepare_to_load_16_no_addr();
-		end
 		
-		//else if ( curr_state == pkg_cpu::cpu_st_begin_2 )
+		//else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		//begin
-		//	
+		//	//$display( "%h", temp_data_in );
+		//	$display( "%h %h", temp_data_in, `get_cpu_rp_pc );
+		//	set_pc_and_dio_addr(`get_cpu_rp_pc + 2);
+		//	//$finish;
 		//end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
+			$display();
+			//debug_disp_init_instr();
+			
+			//$display( "%h %h", init_instr_grp, `get_cpu_rp_pc );
+			//$display( "%h", temp_data_in );
+			
+			
+			//prep_load_16_no_addr();
+			//advance_pc_etc_after_reg_instr_16();
+			
+			
+			
 			// Back up temp_data_in, init_instr_grp, and pc
 			instr_in_hi <= temp_data_in;
 			final_instr_grp <= init_instr_grp;
 			prev_pc <= `get_cpu_rp_pc;
 			
-			$display( "%h %h", init_instr_grp, `get_cpu_rp_pc );
-			//advance_pc_etc_after_reg_instr_16();
-			//prepare_to_load_16_no_addr();
+			
+			// Back up the decoded instruction contents to be used on
+			// cycles after the current one.
+			back_up_ig1_instr_contents();
+			back_up_ig2_instr_contents();
+			back_up_ig3_instr_contents();
+			back_up_ig4_instr_contents();
+			back_up_ig5_instr_contents();
 			
 			
-			if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
+			//debug_disp_init_instr();
+			//$display( "%h %h %h", init_instr_grp, final_instr_grp, 
+			//	`get_cpu_rp_pc );
+			
+			//curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+			
+			$display(init_instr_is_32_bit);
+			
+			//if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
+			if (!init_instr_is_32_bit)
 			begin
 				//instr_in_hi <= temp_data_in;
 				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
@@ -394,10 +379,11 @@ module spcpu
 			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
 			begin
 				//instr_in_hi <= temp_data_in;
-				curr_state <= pkg_cpu::cpu_st_load_instr_lo;
+				//curr_state <= pkg_cpu::cpu_st_load_instr_lo;
 				
-				advance_dio_addr_for_instr_lo();
-				prepare_to_load_16_no_addr();
+				//advance_dio_addr_for_instr_lo();
+				//prep_load_16_no_addr();
+				prep_load_instr_lo_reg();
 			end
 			
 			else // if ( init_instr_grp 
@@ -420,23 +406,52 @@ module spcpu
 		// Instruction execution states
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
+			//debug_disp_final_instr();
 			start_exec_instr();
 		end
 		
-		else // if ( curr_state == pkg_cpu::cpu_st_finish_exec_instr )
+		else if ( curr_state == pkg_cpu::cpu_st_finish_exec_instr )
 		begin
 			finish_exec_instr();
 			
 			//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 		end
 		
+		// Check if the pc was ACTUALLY changed
+		else // if ( curr_state 
+			// == pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed
+		begin
+			$display( "Check whether the pc was actually changed %h %h %h", 
+				prev_pc, `get_cpu_rp_pc, ( prev_pc == `get_cpu_rp_pc ) );
+			
+			if ( prev_pc == `get_cpu_rp_pc )
+			begin
+				// Do a regular update of the PC and data_inout_addr (don't
+				// let the CPU get stuck executing an instruction
+				// infinitely!)
+				prep_load_instr_hi_reg();
+			end
+			
+			else
+			begin
+				prep_load_instr_hi_leave_pc();
+			end
+			
+			//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+			
+		end
+		
+	end
+	
 	end
 	
 	
 	
+	//always @ (curr_state)
+	//always @ ( posedge clk )
 	always @ (curr_state)
 	begin
-		if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
+		if ( curr_state != pkg_cpu::cpu_st_load_instr_hi )
 		begin
 			if ( init_instr_grp == pkg_instr_dec::instr_grp_1 )
 			begin
@@ -462,9 +477,7 @@ module spcpu
 			begin
 				update_ipc_pc_for_grp_5_instr();
 			end
-			
 		end
-		
 	end
 	
 	

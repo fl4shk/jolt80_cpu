@@ -16,14 +16,18 @@
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 
-`ifndef extra_wires_svinc
-`define extra_wires_svinc
+`ifndef extra_instr_dec_vars_svinc
+`define extra_instr_dec_vars_svinc
 
 // Instruction Group 1 Instruction Execution Things
 // Get rid of some boilerplate
 wire [`instr_g1_op_msb_pos:0] ig1_opcode;
 wire [`instr_g1_ra_index_msb_pos:0] ig1_ra_index;
 wire [`instr_g1_imm_value_msb_pos:0] ig1_imm_value_8;
+
+bit [`instr_g1_op_msb_pos:0] final_ig1_opcode;
+bit [`instr_g1_ra_index_msb_pos:0] final_ig1_ra_index;
+bit [`instr_g1_imm_value_msb_pos:0] final_ig1_imm_value_8;
 
 //wire ig1_instr_changes_pc;
 wire ig1_pc_contains_ra;
@@ -36,6 +40,11 @@ wire [`instr_g2_op_msb_pos:0] ig2_opcode;
 wire [`instr_g2_ra_index_msb_pos:0] ig2_ra_index;
 wire [`instr_g2_rb_index_msb_pos:0] ig2_rb_index;
 wire ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair;
+
+bit [`instr_g2_op_msb_pos:0] final_ig2_opcode;
+bit [`instr_g2_ra_index_msb_pos:0] final_ig2_ra_index;
+bit [`instr_g2_rb_index_msb_pos:0] final_ig2_rb_index;
+bit final_ig2_ra_index_is_for_pair, final_ig2_rb_index_is_for_pair;
 
 //wire ig2_pc_check_ra, ig2_pc_check_rb, ig2_pc_check_rap, ig2_pc_check_rbp;
 
@@ -52,6 +61,11 @@ wire [`instr_g3_ra_index_msb_pos:0] ig3_ra_index;
 wire [`instr_g3_rbp_index_msb_pos:0] ig3_rbp_index;
 wire [`instr_g3_rcp_index_msb_pos:0] ig3_rcp_index;
 
+bit [`instr_g3_op_msb_pos:0] final_ig3_opcode;
+bit [`instr_g3_ra_index_msb_pos:0] final_ig3_ra_index;
+bit [`instr_g3_rbp_index_msb_pos:0] final_ig3_rbp_index;
+bit [`instr_g3_rcp_index_msb_pos:0] final_ig3_rcp_index;
+
 //wire ig3_instr_changes_pc;
 wire ig3_pc_contains_ra, ig3_rbp_is_pc, ig3_rcp_is_pc;
 
@@ -63,6 +77,8 @@ wire ig3_pc_contains_ra, ig3_rbp_is_pc, ig3_rcp_is_pc;
 wire [`instr_g4_op_msb_pos:0] ig4_opcode;
 wire [`instr_g4_imm_value_msb_pos:0] ig4_imm_value_8;
 
+bit [`instr_g4_op_msb_pos:0] final_ig4_opcode;
+bit [`instr_g4_imm_value_msb_pos:0] final_ig4_imm_value_8;
 
 
 // Instruction Group 5 Instruction Execution Things
@@ -70,10 +86,18 @@ wire [`instr_g4_imm_value_msb_pos:0] ig4_imm_value_8;
 wire [`instr_g5_op_msb_pos:0] ig5_opcode;
 wire [`instr_g5_ihi_ra_index_msb_pos:0] ig5_ra_index;
 wire [`instr_g5_ihi_rbp_index_msb_pos:0] ig5_rbp_index;
+wire ig5_ra_index_is_for_pair;
 
+bit [`instr_g5_op_msb_pos:0] final_ig5_opcode;
+bit [`instr_g5_ihi_ra_index_msb_pos:0] final_ig5_ra_index;
+bit [`instr_g5_ihi_rbp_index_msb_pos:0] final_ig5_rbp_index;
+bit final_ig5_ra_index_is_for_pair;
 //wire ig5_instr_changes_pc;
 
-wire ig5_pc_contains_ra, ig5_rbp_is_pc;
+wire ig5_pc_contains_ra, ig5_rap_is_pc, ig5_rbp_is_pc;
 
 
-`endif		// extra_wires_svinc
+
+
+
+`endif		// extra_instr_dec_vars_svinc

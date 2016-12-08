@@ -77,20 +77,13 @@ endmodule
 module instr_grp_1_decoder
 	import pkg_instr_dec::*;
 	
-	//( input bit [`instr_main_msb_pos:0] instr_hi,
-	//output bit [`instr_op_max_msb_pos:0] opcode_out,
-	//output bit [`instr_g1_ra_index_msb_pos:0] ra_index_out,
-	//output bit [`instr_g1_imm_value_msb_pos:0] imm_value_8_out );
-	
 	( input bit [`instr_main_msb_pos:0] instr_hi,
 	output ig1_dec_outputs ig1d_outputs );
 	
 	assign { ig1d_outputs.opcode, ig1d_outputs.ra_index, 
 		ig1d_outputs.imm_value_8 } = instr_hi[ `instr_g1_op_range_hi
 		: `instr_g1_imm_value_range_lo ];
-	//assign ig1d_outputs = instr_hi[ `instr_g1_op_range_hi
-	//	: `instr_g1_imm_value_range_lo ];
-
+	
 endmodule
 
 
@@ -99,11 +92,6 @@ endmodule
 module instr_grp_2_decoder
 	import pkg_instr_dec::*;
 	
-	//( input bit [`instr_main_msb_pos:0] instr_hi,
-	//output bit [`instr_op_max_msb_pos:0] opcode_out,
-	//output bit [`instr_g2_ra_index_msb_pos:0] ra_index_out, rb_index_out,
-	//output bit ra_index_is_for_pair, rb_index_is_for_pair );
-	
 	( input bit [`instr_main_msb_pos:0] instr_hi,
 	output ig2_dec_outputs ig2d_outputs );
 	
@@ -111,33 +99,13 @@ module instr_grp_2_decoder
 	assign ig2d_outputs.opcode = instr_hi[ `instr_g2_op_range_hi
 		: `instr_g2_op_range_lo ];
 	
-	
 	// ra_index_is_for_pair and rb_index_is_for_pair are created in this
 	// module so that other modules do not have to obtain that information
 	// themselves.
-	assign ig2d_outputs.ra_index_is_for_pair 
-		= ( ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_invp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_negp )
-		
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_lslp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_lsrp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_asrp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_rolp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_rorp )
-		
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_rolcp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_rorcp )
-		
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_cpyp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_swp )
-		
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_call ) );
-	
-	assign ig2d_outputs.rb_index_is_for_pair 
-		= ( ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_cpyp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_swp )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_ldr )
-		|| ( ig2d_outputs.opcode == pkg_instr_dec::instr_g2_op_str ) );
+	assign ig2d_outputs.ra_index_is_for_pair
+		= ig2_get_ra_index_is_for_pair(ig2d_outputs.opcode);
+	assign ig2d_outputs.rb_index_is_for_pair
+		= ig2_get_rb_index_is_for_pair(ig2d_outputs.opcode);
 	
 	
 	// Bitshift to ignore the lower bit if necessary
@@ -156,18 +124,9 @@ endmodule
 module instr_grp_3_decoder
 	import pkg_instr_dec::*;
 	
-	//( input bit [`instr_main_msb_pos:0] instr_hi,
-	//output bit [`instr_op_max_msb_pos:0] opcode_out,
-	//output bit [`instr_g3_ra_index_msb_pos:0] ra_index_out,
-	//output bit [`instr_g3_rbp_index_msb_pos:0] rbp_index_out,
-	//	rcp_index_out );
-	
 	( input bit [`instr_main_msb_pos:0] instr_hi,
 	output ig3_dec_outputs ig3d_outputs );
 	
-	//assign { opcode_out, ra_index_out, rbp_index_out, rcp_index_out }
-	//assign ig3d_outputs = instr_hi[ `instr_g3_op_range_hi 
-	//	: `instr_g3_rcp_index_range_lo ];
 	assign { ig3d_outputs.opcode, ig3d_outputs.ra_index,
 		ig3d_outputs.rbp_index, ig3d_outputs.rcp_index } 
 		= instr_hi[`instr_g3_op_range_hi:`instr_g3_rcp_index_range_lo];
@@ -180,18 +139,9 @@ endmodule
 module instr_grp_4_decoder
 	import pkg_instr_dec::*;
 	
-	//( input bit [`instr_main_msb_pos:0] instr_hi,
-	//output bit [`instr_op_max_msb_pos:0] opcode_out,
-	//output bit [`instr_g4_imm_value_msb_pos:0] imm_value_8_out );
-	
 	( input bit [`instr_main_msb_pos:0] instr_hi,
 	output ig4_dec_outputs ig4d_outputs );
 	
-	//assign { opcode_out, imm_value_8_out }
-	//	= instr_hi[`instr_g4_op_range_hi:`instr_g4_imm_value_range_lo];
-	
-	//assign ig4d_outputs = instr_hi[ `instr_g4_op_range_hi
-	//	: `instr_g4_imm_value_range_lo ];
 	assign { ig4d_outputs.opcode, ig4d_outputs.imm_value_8 } 
 		= instr_hi[`instr_g4_op_range_hi:`instr_g4_imm_value_range_lo];
 	
@@ -203,26 +153,28 @@ endmodule
 module instr_grp_5_decoder
 	import pkg_instr_dec::*;
 	
-	//( input bit [`instr_main_msb_pos:0] instr_hi, instr_lo,
-	//output bit [`instr_op_max_msb_pos:0] opcode_out,
-	//output bit [`instr_g5_ihi_ra_index_msb_pos:0] ra_index_out,
-	//output bit [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index_out,
-	//output bit [`instr_g5_ilo_imm_value_msb_pos:0] imm_value_16_out );
-	
 	( input bit [`instr_main_msb_pos:0] instr_hi,
 	output ig5_dec_outputs ig5d_outputs );
 	
 	
-	//assign { opcode_out, ra_index_out, rbp_index_out, imm_value_16_out }
-	//	= { instr_hi[ `instr_g5_ihi_op_range_hi 
-	//	: `instr_g5_ihi_rbp_index_range_lo ], instr_lo };
+	assign ig5d_outputs.opcode = instr_hi[ `instr_g5_ihi_op_range_hi
+		: `instr_g5_ihi_op_range_lo ];
 	
-	//assign ig5d_outputs = { instr_hi[ `instr_g5_ihi_op_range_hi 
-	//	: `instr_g5_ihi_rbp_index_range_lo ], instr_lo };
-	assign { ig5d_outputs.opcode, ig5d_outputs.ra_index,
-		ig5d_outputs.rbp_index } 
-		= instr_hi[ `instr_g5_ihi_op_range_hi 
+	
+	// ra_index_is_for_pair is created in this module so that other modules
+	// do not have to obtain that information themselves.
+	assign ig5d_outputs.ra_index_is_for_pair 
+		= ig5_get_ra_index_is_for_pair(ig5d_outputs.opcode);
+	
+	assign ig5d_outputs.ra_index 
+		= instr_hi[ `instr_g5_ihi_ra_index_range_hi
+		: `instr_g5_ihi_ra_index_range_lo ]
+		>> ig5d_outputs.ra_index_is_for_pair;
+	
+	assign ig5d_outputs.rbp_index 
+		= instr_hi[ `instr_g5_ihi_rbp_index_range_lo
 		: `instr_g5_ihi_rbp_index_range_lo ];
+	
 	
 endmodule
 

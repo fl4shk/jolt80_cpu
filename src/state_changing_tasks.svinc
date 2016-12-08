@@ -56,43 +56,69 @@ task enable_dio_we;
 endtask
 
 // Prepare to, on the next cycle, load an 8-bit value
-task prepare_to_load_8_with_addr;
+task prep_load_8_with_addr;
 	input [`cpu_addr_msb_pos:0] read_addr;
 	
 	data_inout_addr <= read_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	disable_dio_we();
 endtask
-task prepare_to_load_8_no_addr;
+task prep_load_8_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	disable_dio_we();
 endtask
 
 // Prepare to, on the next cycle, write an 8-bit value
-task prepare_to_store_8_with_addr;
+task prep_store_8_with_addr;
 	input [`cpu_addr_msb_pos:0] write_addr;
 	
 	data_inout_addr <= write_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	enable_dio_we();
 endtask
-task prepare_to_store_8_no_addr;
+task prep_store_8_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	enable_dio_we();
 endtask
 
 // Prepare to, on the next cycle, load a 16-bit value
-task prepare_to_load_16_with_addr;
+task prep_load_16_with_addr;
 	input [`cpu_addr_msb_pos:0] read_addr;
 	
 	data_inout_addr <= read_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
 	disable_dio_we();
 endtask
-task prepare_to_load_16_no_addr;
+task prep_load_16_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
 	disable_dio_we();
 endtask
+
+
+
+task prep_load_instr_hi_reg;
+	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	advance_pc_etc_after_reg_instr_16();
+	prep_load_16_no_addr();
+endtask
+
+task prep_load_instr_lo_reg;
+	curr_state <= pkg_cpu::cpu_st_load_instr_lo;
+	advance_dio_addr_for_instr_lo();
+	prep_load_16_no_addr();
+endtask
+
+task prep_load_instr_hi_leave_pc;
+	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	data_inout_addr <= `get_cpu_rp_pc;
+	prep_load_16_no_addr();
+endtask
+
+
+task prep_update_pc_etc_after_ipc;
+	curr_state <= pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed;
+endtask
+
 
 
 `endif		// state_changing_tasks_svinc

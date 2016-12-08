@@ -1,0 +1,53 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef extra_instr_dec_tasks_funcs_svinc
+`define extra_instr_dec_tasks_funcs_svinc
+
+
+task back_up_ig1_instr_contents;
+	{ final_ig1_opcode, final_ig1_ra_index, final_ig1_imm_value_8 }
+		<= { ig1_opcode, ig1_ra_index, ig1_imm_value_8 };
+endtask
+
+task back_up_ig2_instr_contents;
+	{ final_ig2_opcode, final_ig2_ra_index, final_ig2_rb_index,
+		final_ig2_ra_index_is_for_pair, final_ig2_rb_index_is_for_pair }
+		<= { ig2_opcode, ig2_ra_index, ig2_rb_index, 
+		ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair };
+endtask
+
+task back_up_ig3_instr_contents;
+	{ final_ig3_opcode, final_ig3_ra_index, final_ig3_rbp_index,
+		final_ig3_rcp_index }
+		<= { ig3_opcode, ig3_ra_index, ig3_rbp_index, ig3_rcp_index };
+endtask
+
+task back_up_ig4_instr_contents;
+	{ final_ig4_opcode, final_ig4_imm_value_8 }
+		<= { ig4_opcode, ig4_imm_value_8 };
+endtask
+
+task back_up_ig5_instr_contents;
+	{ final_ig5_opcode, final_ig5_ra_index, final_ig5_rbp_index,
+		final_ig5_ra_index_is_for_pair }
+		<= { ig5_opcode, ig5_ra_index, ig5_rbp_index,
+		ig5_ra_index_is_for_pair };
+endtask
+
+`endif		// extra_instr_dec_tasks_funcs_svinc

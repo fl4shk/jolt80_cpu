@@ -25,69 +25,139 @@ task start_exec_instr_from_grp_1;
 	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
 	//	ig1_instr_changes_pc );
 	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h\t\t%h", 
-	//	ig1_opcode, instr_possibly_changes_pc );
-	$display( "group 1 instr:\t\t%h\t\t%h", ig1_opcode, 
-		instr_possibly_changes_pc );
+	//	final_ig1_opcode, instr_possibly_changes_pc );
+	//$display( "%h, %h", instr_in_hi, final_ig1_opcode );
+	//$display( "group 1 instr:\t\t%h\t\t%h", final_ig1_opcode, 
+	//	instr_possibly_changes_pc );
+	
+	//$display( ig1_opcode == pkg_instr_dec::instr_g1_op_addi );
+	
+	
+	// Arithmetic instructions:
+	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+	begin
+		
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+	begin
+		
+	end
+	
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
+	begin
+		
+	end
+	
+	
+	//Copy instructions:
+	
+	// (CoPY Immediate)
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi )
+	begin
+		
+	end
+	
+	else
+	begin
+		
+	end
 	
 	
 	
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	if (!instr_possibly_changes_pc)
+	begin
+		prep_load_instr_hi_reg();
+	end
+	
+	else // if (instr_possibly_changes_pc)
+	begin
+		prep_update_pc_etc_after_ipc();
+	end
 	
 	
 	
-	advance_pc_etc_after_reg_instr_16();
-	prepare_to_load_16_no_addr();
+	
 	
 endtask
 
 task start_exec_instr_from_grp_2;
 	//$display( "start_exec_instr_from_grp_2 is unfinished\t\t%h\t\t%h", 
 	//	ig2_opcode, instr_possibly_changes_pc );
-	$display( "group 2 instr:\t\t%h\t\t%h", ig2_opcode, 
+	
+	//$display( "%h %h %h", temp_ipc_pc_vec, ( temp_ipc_pc_vec != 0 ), 
+	//	instr_possibly_changes_pc );
+	$display( "group 2 instr:\t\t%h\t\t%h", final_ig2_opcode, 
 		instr_possibly_changes_pc );
 	
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	advance_pc_etc_after_reg_instr_16();
-	prepare_to_load_16_no_addr();
+	if (!instr_possibly_changes_pc)
+	begin
+		prep_load_instr_hi_reg();
+	end
+	
+	else // if (instr_possibly_changes_pc)
+	begin
+		prep_update_pc_etc_after_ipc();
+	end
+	
 endtask
 
 task start_exec_instr_from_grp_3;
 	//$display( "start_exec_instr_from_grp_3 is unfinished\t\t%h\t\t%h", 
-	//	ig3_opcode, instr_possibly_changes_pc );
-	$display( "group 3 instr:\t\t%h\t\t%h", ig3_opcode, 
+	//	final_ig3_opcode, instr_possibly_changes_pc );
+	$display( "group 3 instr:\t\t%h\t\t%h", final_ig3_opcode, 
 		instr_possibly_changes_pc );
 	
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	advance_pc_etc_after_reg_instr_16();
-	prepare_to_load_16_no_addr();
+	if (!instr_possibly_changes_pc)
+	begin
+		prep_load_instr_hi_reg();
+	end
+	
+	else // if (instr_possibly_changes_pc)
+	begin
+		prep_update_pc_etc_after_ipc();
+	end
+	
 endtask
 
 task start_exec_instr_from_grp_4;
 	//$display( "start_exec_instr_from_grp_4 is unfinished\t\t%h\t\t%h", 
-	//	ig4_opcode, instr_possibly_changes_pc );
-	$display( "group 4 instr:\t\t%h\t\t%h", ig4_opcode, 
+	//	final_ig4_opcode, instr_possibly_changes_pc );
+	$display( "group 4 instr:\t\t%h\t\t%h", final_ig4_opcode, 
 		instr_possibly_changes_pc );
 	
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	advance_pc_etc_after_reg_instr_16();
-	prepare_to_load_16_no_addr();
+	if (!instr_possibly_changes_pc)
+	begin
+		prep_load_instr_hi_reg();
+	end
+	
+	else // if (instr_possibly_changes_pc)
+	begin
+		prep_update_pc_etc_after_ipc();
+	end
+	
 endtask
 
 task start_exec_instr_from_grp_5;
 	//$display( "start_exec_instr_from_grp_5 is unfinished\t\t%h\t\t%h", 
-	//	ig5_opcode, instr_possibly_changes_pc );
-	$display( "group 5 instr:\t\t%h\t\t%h", ig5_opcode, 
+	//	final_ig5_opcode, instr_possibly_changes_pc );
+	$display( "group 5 instr:\t\t%h\t\t%h", final_ig5_opcode, 
 		instr_possibly_changes_pc );
 	
+	if (!instr_possibly_changes_pc)
+	begin
+		prep_load_instr_hi_reg();
+	end
 	
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	advance_pc_etc_after_reg_instr_32();
-	prepare_to_load_16_no_addr();
+	else // if (instr_possibly_changes_pc)
+	begin
+		prep_update_pc_etc_after_ipc();
+	end
+	
 endtask
 
 
 // Start executing an instruction.  The instruction MAY only take one
-// cycle.
+// cycle after being loaded.
 task start_exec_instr;
 	//$display("start_exec_instr()");
 	

@@ -63,7 +63,7 @@ package pkg_cpu;
 	{
 		//// This state exists so the first instruction can be 
 		cpu_st_begin_0,
-		cpu_st_begin_1,
+		//cpu_st_begin_1,
 		//cpu_st_begin_2,
 		
 		// Load a 16-bit instruction, or load the high 16 bits of a 32-bit
@@ -79,7 +79,11 @@ package pkg_cpu;
 		
 		// Finish executing a multi-cycle instruction (this is the second
 		// cycle of instruction execution)
-		cpu_st_finish_exec_instr
+		cpu_st_finish_exec_instr,
+		
+		// Check if the PC was changed to a new value before deciding
+		// whether to 
+		cpu_st_update_pc_after_instr_possibly_changed
 		
 	} cpu_state;
 	
