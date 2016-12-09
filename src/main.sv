@@ -512,6 +512,7 @@ module spcpu
 	
 	
 	
+	// Combinational logic for updating instr_possibly_changes_pc
 	always @ (*)
 	//always @ ( posedge clk )
 	begin
