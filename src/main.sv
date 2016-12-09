@@ -197,6 +197,10 @@ module spcpu
 	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
 	
+	
+	
+	`include "src/extra_instr_dec_vars.svinc"
+	
 	// ALU inputs and outputs
 	alu_oper the_alu_op;
 	bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in,
@@ -206,17 +210,16 @@ module spcpu
 	
 	// The CPU flags that the ALU becomes made aware of 
 	bit [`proc_flags_msb_pos:0] true_proc_flags;
-	bit the_alu_was_used;
+	bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded;
+	//wire alu_modded_proc_flags;
 	
-	bit [`cpu_reg_index_ie_msb_pos:0] the_alu_affected_reg_index;
-	bit [`cpu_rp_index_ie_msb_pos:0] the_alu_affected_reg_pair_index;
-	
-	
-	
-	
-	`include "src/extra_instr_dec_vars.svinc"
+	bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_reg_index;
+	bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
 	
 	wire init_instr_is_32_bit, final_instr_is_32_bit;
+	
+	//assign alu_modded_proc_flags = ( true_proc_flags 
+	//	!= alu_proc_flags_out );
 	
 	
 	
@@ -362,17 +365,8 @@ module spcpu
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
+			debug_disp_regs();
 			$display();
-			//$display(init_instr_grp);
-			//debug_disp_init_instr();
-			
-			//$display( "%h %h", init_instr_grp, `get_cpu_rp_pc );
-			//$display( "%h", temp_data_in );
-			
-			
-			//prep_load_16_no_addr();
-			//advance_pc_etc_after_reg_instr_16();
-			
 			
 			
 			// Back up temp_data_in, init_instr_grp, and pc
@@ -405,7 +399,6 @@ module spcpu
 			//if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
 			if (!init_instr_is_32_bit)
 			begin
-				//instr_in_hi <= temp_data_in;
 				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 				
 				prep_alu_if_needed_init();
@@ -415,7 +408,6 @@ module spcpu
 			// Handle 32-bit instructions
 			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
 			begin
-				//instr_in_hi <= temp_data_in;
 				//curr_state <= pkg_cpu::cpu_st_load_instr_lo;
 				
 				//advance_dio_addr_for_instr_lo();
@@ -450,9 +442,6 @@ module spcpu
 		// Instruction execution states
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
-			//$display( "%d", final_ig5_other_rap_index );
-			//$display( "%d", final_ig5_rap_is_pc );
-			//$display( "%d", final_ig5_ra_index );
 			start_exec_instr();
 		end
 		
@@ -466,14 +455,7 @@ module spcpu
 		begin
 			$display("Check whether the pc was actually changed");
 			
-			//$display( "%h"
-			$display( "%h %h", prev_pc, `get_cpu_rp_pc );
-			//$display( "%h %h", prev_pc, 
-			//	`make_reg_pair_w_pi(4'd7) );
-			//$display( "%h %h", prev_pc, 
-			//	`make_reg_pair_w_pi(pkg_cpu::cpu_rp_pc_pind) );
-			//$display( "%h %h", prev_pc, `make_reg_pair_w_pi(7) );
-			//$display( "%h %h", prev_pc, `make_reg_pair(14) );
+			//$display( "%h %h", prev_pc, `get_cpu_rp_pc );
 			
 			prep_load_instr_hi_reg_generic();
 			

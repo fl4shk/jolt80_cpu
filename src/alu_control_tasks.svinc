@@ -18,6 +18,267 @@
 `ifndef alu_control_tasks_svinc
 `define alu_control_tasks_svinc
 
+task set_alu_dest_reg;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input op_affects_ra;
+	
+	alu_a_in_lo <= cpu_regs[some_ra_index];
+	alu_dest_reg_index <= some_ra_index;
+	alu_dest_reg_was_modded <= op_affects_ra;
+endtask
+
+task set_alu_dest_reg_pair;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input op_affects_rap;
+	
+	{ alu_a_in_hi, alu_a_in_lo } <= `make_reg_pair_w_pi(some_rap_index);
+	alu_dest_rpair_index <= some_rap_index;
+	alu_dest_rpair_was_modded <= op_affects_rap;
+endtask
+
+task set_alu_b_in;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	alu_b_in <= some_b_in;
+endtask
+
+
+task set_alu_inputs_no_pair;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	input op_affects_ra;
+	
+	set_alu_dest_reg( some_ra_index, op_affects_ra );
+	set_alu_b_in(some_b_in);
+endtask
+
+task set_alu_inputs_w_pair;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	input op_affects_rap;
+	
+	set_alu_dest_reg_pair( some_rap_index, op_affects_rap );
+	set_alu_b_in(some_b_in);
+endtask
+
+task set_more_alu_config;
+	input [`alu_op_msb_pos:0] some_alu_op;
+	
+	the_alu_op <= some_alu_op;
+	alu_was_used <= 1;
+	alu_proc_flags_in <= true_proc_flags;
+endtask
+
+
+
+// Arithmetic operations
+// Addition operations
+task do_alu_op_add;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_add);
+endtask
+
+task do_alu_op_adc;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_adc);
+endtask
+
+
+// Subtraction operations
+task do_alu_op_sub;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_sub);
+endtask
+task do_alu_op_sbc;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_sbc);
+endtask
+task do_alu_op_cmp;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 0 );
+	set_more_alu_config(pkg_alu::alu_op_cmp);
+endtask
+
+// Bitwise operations
+
+// Operations analogous to logic gates (none of these affect carry)
+task do_alu_op_and;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_and);
+endtask
+task do_alu_op_orr;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_orr);
+endtask
+task do_alu_op_xor;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_xor);
+endtask
+
+// Complement operations
+task do_alu_op_inv;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	
+	set_alu_dest_reg( some_ra_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_inv);
+endtask
+task do_alu_op_invp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	
+	set_alu_dest_reg_pair( some_rap_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_invp);
+endtask
+task do_alu_op_neg;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	
+	set_alu_dest_reg( some_ra_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_neg);
+endtask
+task do_alu_op_negp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	
+	set_alu_dest_reg_pair( some_rap_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_negp);
+endtask
+
+
+
+// 8-bit Bitshifting operations (number of bits specified by b_in)
+task do_alu_op_lsl;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_lsl);
+endtask
+task do_alu_op_lsr;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_lsr);
+endtask
+task do_alu_op_asr;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_asr);
+endtask
+
+// 8-bit Bit rotation operations (number of bits specified by
+// [b_in % inout_width])
+task do_alu_op_rol;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_rol);
+endtask
+task do_alu_op_ror;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_ror);
+endtask
+
+// Bit rotating instructions that use carry as bit 8 for a 9-bit
+// rotate of { carry, a_in_lo } by one bit:
+task do_alu_op_rolc;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	
+	set_alu_dest_reg( some_ra_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_rolc);
+endtask
+task do_alu_op_rorc;
+	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
+	
+	set_alu_dest_reg( some_ra_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_rorc);
+endtask
+
+
+
+// 16-bit Bitshifting operations that shift { a_in_hi, a_in_lo }
+// by b_in bits
+task do_alu_op_lslp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_w_pair( some_rap_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_lslp);
+endtask
+task do_alu_op_lsrp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_w_pair( some_rap_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_lsrp);
+endtask
+task do_alu_op_asrp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_w_pair( some_rap_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_asrp);
+endtask
+
+// 16-bit Bit rotation operations that rotate { a_in_hi, a_in_lo }
+// by [b_in % inout_width] bits
+task do_alu_op_rolp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_w_pair( some_rap_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_rolp);
+endtask
+task do_alu_op_rorp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_w_pair( some_rap_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_rorp);
+endtask
+
+
+// Bit rotating instructions that use carry as bit 16 for a 17-bit
+// rotate of { carry, a_in_hi, a_in_lo } by one bit:
+task do_alu_op_rolcp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	
+	set_alu_dest_reg_pair( some_rap_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_rolcp);
+endtask
+task do_alu_op_rorcp;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	
+	set_alu_dest_reg_pair( some_rap_index, 1 );
+	set_more_alu_config(pkg_alu::alu_op_rorcp);
+endtask
+
 
 task prep_alu_instr_grp_1_generic;
 	input [`instr_g1_op_msb_pos:0] opcode;
@@ -25,24 +286,21 @@ task prep_alu_instr_grp_1_generic;
 	input [`instr_g1_imm_value_msb_pos:0] imm_value_8;
 	
 	
-	
 	case (opcode)
 		// Arithmetic instructions:
 		pkg_instr_dec::instr_g1_op_addi:
 		begin
-			//the_alu_op <= pkg_alu::alu_op_add;
-			//alu_a_in_lo <= cpu_regs[ra_index];
-			the_alu_was_used <= 1;
+			do_alu_op_add( ra_index, imm_value_8 );
 		end
 		
 		pkg_instr_dec::instr_g1_op_adci:
 		begin
-			the_alu_was_used <= 1;
+			do_alu_op_adc( ra_index, imm_value_8 );
 		end
 		
 		pkg_instr_dec::instr_g1_op_cmpi:
 		begin
-			the_alu_was_used <= 1;
+			do_alu_op_cmp( ra_index, imm_value_8 );
 		end
 		
 		//Copy instructions:
@@ -54,7 +312,7 @@ task prep_alu_instr_grp_1_generic;
 		//end
 		default:
 		begin
-			the_alu_was_used <= 0;
+			alu_was_used <= 0;
 		end
 	endcase
 	

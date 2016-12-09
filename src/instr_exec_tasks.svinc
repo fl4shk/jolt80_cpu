@@ -20,6 +20,42 @@
 `define instr_exec_tasks_svinc
 
 
+`define get_final_ig1_reg_a cpu_regs[final_ig1_ra_index]
+
+`define get_final_ig2_reg_a cpu_regs[final_ig2_ra_index]
+`define get_final_ig2_rpair_a `make_reg_pair_w_pi(final_ig2_ra_index)
+
+`define get_final_ig3_reg_a cpu_regs[final_ig3_ra_index]
+
+`define get_final_ig5_reg_a cpu_regs[final_ig5_ra_index]
+`define get_final_ig5_rpair_a `make_reg_pair_w_pi(final_ig5_ra_index)
+
+
+`define get_alu_out_8 ( alu_out_lo )
+`define get_alu_out_16 ( { alu_out_hi, alu_out_lo } )
+
+
+//task write_reg_after_alu_op;
+//	
+//endtask
+
+task finish_alu_op_with_dest_reg;
+	if ( alu_dest_reg_was_modded )
+	begin
+		cpu_regs[alu_dest_reg_index] <= `get_alu_out_8;
+	end
+	true_proc_flags <= alu_proc_flags_out;
+endtask
+
+task finish_alu_op_with_dest_rpair;
+	if ( alu_dest_rpair_was_modded )
+	begin
+		`make_reg_pair_w_pi(alu_dest_rpair_index) <= `get_alu_out_16;
+	end
+	true_proc_flags <= alu_proc_flags_out;
+endtask
+
+
 task start_exec_instr_from_grp_1;
 	
 	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
@@ -36,39 +72,47 @@ task start_exec_instr_from_grp_1;
 	disassemble_grp_1_instr();
 	
 	// Arithmetic instructions:
-	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
-	begin
-		//$display( "addi r%d, $%h", final_ig1_ra_index,
-		//	final_ig1_imm_value_8 );
+	case (final_ig1_opcode)
+		pkg_instr_dec::instr_g1_op_addi:
+		begin
+			//$display( "addi r%d, $%h", final_ig1_ra_index,
+			//	final_ig1_imm_value_8 );
+			
+			//cpu_regs[final_ig1_ra_index] <= cpu_regs[final_ig1_ra_index]
+			//	+ final_ig1_imm_value_8;
+			
+			//$display( "%h %h %h", alu_was_used
+			
+			//cpu_regs[final_ig1_ra_index]
+			//`get_final_ig1_reg_a <= `get_alu_out_8;
+			//
+			//true_proc_flags
+			finish_alu_op_with_dest_reg();
+		end
 		
-		//cpu_regs[final_ig1_ra_index] <= cpu_regs[final_ig1_ra_index]
-		//	+ final_ig1_imm_value_8;
+		pkg_instr_dec::instr_g1_op_adci:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
 		
+		pkg_instr_dec::instr_g1_op_cmpi:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
 		
-	end
-	
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
-	begin
+		//Copy instructions:
 		
-	end
-	
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
-	begin
+		// (CoPY Immediate)
+		pkg_instr_dec::instr_g1_op_cpyi:
+		begin
+			`get_final_ig1_reg_a <= final_ig1_imm_value_8;
+		end
 		
-	end
-	
-	//Copy instructions:
-	
-	// (CoPY Immediate)
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi  )
-	begin
-		
-	end
-	
-	else
-	begin
-		$display("Unknown group 1 instruction!");
-	end
+		default:
+		begin
+			$display("Unknown group 1 instruction!");
+		end
+	endcase
 	
 	
 	
