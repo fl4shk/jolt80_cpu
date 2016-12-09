@@ -1,0 +1,405 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef debug_disassembly_tasks_svinc
+`define debug_disassembly_tasks_svinc
+
+task disassemble_grp_1_instr;
+	
+	// Arithmetic instructions:
+	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+	begin
+		$display( "addi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+	begin
+		$display( "adci r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
+	begin
+		$display( "cmpi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	
+	
+	//Copy instructions:
+	
+	// (CoPY Immediate)
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi )
+	begin
+		$display( "cpyi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	
+	else
+	begin
+		$display("Unknown group 1 instruction!");
+	end
+	
+endtask
+
+task disassemble_grp_2_instr;
+	
+	// Arithmetic instructions:
+	if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_add )
+	begin
+		$display( "add r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_adc )
+	begin
+		$display( "adc r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_sub )
+	begin
+		$display( "sub r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_sbc )
+	begin
+		$display( "sbc r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cmp )
+	begin
+		$display( "cmp r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	// Bitwise instructions with two register operands:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_and )
+	begin
+		$display( "and r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_orr )
+	begin
+		$display( "orr r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_xor )
+	begin
+		$display( "xor r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	// Complement instructions with one register operand (rB ignored):
+	
+	// (one's complement of rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_inv )
+	begin
+		$display( "inv r%d", final_ig2_ra_index );
+	end
+	
+	// (one's complement of rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
+	begin
+		$display( "invp r%dp", ( final_ig2_ra_index << 1 ) );
+	end
+	
+	// (two's complement of rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_neg )
+	begin
+		$display( "neg r%d", final_ig2_ra_index );
+	end
+	
+	// (two's complement of rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_negp )
+	begin
+		$display( "negp r%dp", ( final_ig2_ra_index << 1 ) );
+	end
+	
+	
+	// Bitshifting (and rotating) instructions that use the value of rB
+	// as the number of bits to shift by:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsl )
+	begin
+		$display( "lsl r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsr )
+	begin
+		$display( "lsr r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_asr )
+	begin
+		$display( "asr r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rol )
+	begin
+		$display( "rol r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ror )
+	begin
+		$display( "ror r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	
+	// Bit rotating instructions that use carry as bit 8 for a 9-bit
+	// rotate of { carry, rA } by one bit:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolc )
+	begin
+		$display( "rolc r%d", final_ig2_ra_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorc )
+	begin
+		$display( "rorc r%d", final_ig2_ra_index );
+	end
+	
+	
+	// Bitshifting (and rotating) instructions that do a 16-bit shift
+	// or rotate on the reg pair rAp, using rB as the number of bits to
+	// shift by:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lslp )
+	begin
+		$display( "lslp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsrp )
+	begin
+		$display( "lsrp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_asrp )
+	begin
+		$display( "asrp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolp )
+	begin
+		$display( "rolp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorp )
+	begin
+		$display( "rorp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+			final_ig2_rb_index );
+	end
+	
+	
+	// Bit rotating instructions that use carry as bit 16 for a 17-bit
+	// rotate of { carry, rAp } by one bit:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolcp )
+	begin
+		$display( "rolcp r%dp", ( final_ig2_ra_index << 1 ) );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorcp )
+	begin
+		$display( "rorcp r%dp", ( final_ig2_ra_index << 1 ) );
+	end
+	
+	
+	// Copy instructions:
+	
+	// (CoPY from reg rB to reg rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpy )
+	begin
+		$display( "cpy r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	// (CoPY from reg Pair rBp to reg Pair rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyp )
+	begin
+		$display( "cpyp r%dp, r%dp", ( final_ig2_ra_index << 1 ), 
+			( final_ig2_rb_index << 1 ) );
+	end
+	
+	
+	// Swap instructions:
+	// (SWap register Pair, also can be used as a combined "call",
+	// "jump", and "return" instruction by swapping some other register
+	// pair with the "pc" [r14p] register pair)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_swp )
+	begin
+		$display( "swp r%dp, r%dp", ( final_ig2_ra_index << 1 ), 
+			( final_ig2_rb_index << 1 ) );
+	end
+	
+	
+	// Call instruction (Description:  sets the link register to the
+	// return address, then sets the program counter to the address
+	// contained in the reg pair rAp):
+	
+	// (CALL subroutine at address in reg pair rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_call )
+	begin
+		$display( "call r%dp", ( final_ig2_ra_index << 1 ) );
+	end
+	
+	
+	// 8-bit Load/store instructions:
+	
+	// (LoaD contents into Register rA from memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldr )
+	begin
+		$display( "ldr r%d, r%dp", final_ig2_ra_index, 
+			( final_ig2_rb_index << 1 ) );
+	end
+	
+	// (STore Register rA contents to memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_str  )
+	begin
+		$display( "str r%d, r%dp", final_ig2_ra_index, 
+			( final_ig2_rb_index << 1 ) );
+	end
+	
+	else
+	begin
+		$display("Unknown group 2 instruction!");
+	end
+	
+endtask
+
+task disassemble_grp_3_instr;
+	
+	// Indexed Load/store instructions:
+	
+	// Load 8-bit value from memory at address [rBp + rCp] into rA
+	if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_ldrx )
+	begin
+		$display( "ldrx r%d, r%dp, r%dp", final_ig3_ra_index,
+			final_ig3_rbp_index, final_ig3_rcp_index );
+	end
+	
+	// Store rA to memory at address [rBp + rCp]
+	else if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_strx )
+	begin
+		$display( "strx r%d, r%dp, r%dp", final_ig3_ra_index,
+			final_ig3_rbp_index, final_ig3_rcp_index );
+	end
+	
+	else
+	begin
+		$display("Unknown group 3 instruction!");
+	end
+	
+endtask
+
+
+task disassemble_grp_4_instr;
+	
+	// Branching instructions (note that iiii iiii is a SIGNED 8-bit
+	// integer):
+	
+	// (branch always)
+	if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bra )
+	begin
+		$display( "bra $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch never, a form of NOP)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bnv )
+	begin
+		$display( "bnv $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when Z == 0)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bne )
+	begin
+		$display( "bne $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when Z == 1)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_beq )
+	begin
+		$display( "beq $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when C == 0 [unsigned less than])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bcc )
+	begin
+		$display( "bcc $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when C == 1 [unsigned greater than or equal])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bcs )
+	begin
+		$display( "bcs $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when C == 0 and Z == 1 [unsigned less than or equal])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bls )
+	begin
+		$display( "bls $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when C == 1 and Z == 0 [unsigned greater than])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bhi )
+	begin
+		$display( "bhi $%h", final_ig4_imm_value_8 );
+	end
+	
+	else
+	begin
+		$display("Unknown group 4 instruction!");
+	end
+	
+endtask
+
+
+task disassemble_grp_5_instr;
+	
+	// Extended copy instructions:
+	
+	// (COPY Pair Immediate, which sets the a register pair rAp to a
+	// 16-bit value in one instruction, but in twice the number of
+	// cycles due to using more than two bytes [can be used a as a jump
+	// immediate by copying a 16-bit immediate value to the pc] [this
+	// instruction ONLY has an advantage over using two successive cpyi
+	// instructions when used to copy a 16-bit immediate value to the
+	// pc])
+	if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
+	begin
+		$display( "cpypi r%dp, $%h", ( final_ig5_ra_index << 1 ),
+			instr_in_lo );
+	end
+	
+	// Call instructions
+	
+	// (CALL Immediate, which sets the link register to the return
+	// address, then sets the program counter to the destination
+	// address)
+	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_calli )
+	begin
+		$display( "calli $%h", instr_in_lo );
+	end
+	
+	// Indexed Load/store instructions:
+	
+	// (Load 8-bit value from memory at address [rBp + 16-bit Immediate
+	// value] into rA)
+	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_ldrxi )
+	begin
+		$display( "ldrxi r%d, r%dp, $%h", final_ig5_ra_index,
+			final_ig5_rbp_index, instr_in_lo );
+	end
+	
+	// (Store rA to memory at address [rBp + 16-bit Immediate value])
+	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_strxi )
+	begin
+		$display( "strxi r%d, r%dp, $%h", final_ig5_ra_index,
+			final_ig5_rbp_index, instr_in_lo );
+	end
+	
+	else
+	begin
+		$display("Unknown group 5 instruction!");
+	end
+	
+endtask
+
+
+
+`endif		// debug_disassembly_tasks_svinc

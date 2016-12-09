@@ -189,8 +189,8 @@ module spcpu
 	
 	// If the pc was POSSIBLY changed by an instruction, which is used to
 	// determine whether or not to change the pc automatically.
-	bit [4:0] temp_ipc_pc_vec;
-	wire instr_possibly_changes_pc;
+	//bit [4:0] temp_ipc_pc_vec;
+	bit instr_possibly_changes_pc;
 	
 	// These are used for communication with the outside world
 	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
@@ -244,7 +244,7 @@ module spcpu
 		: `cpu_data_inout_16_width'hz;
 	
 	
-	assign instr_possibly_changes_pc = ( temp_ipc_pc_vec > 0 );
+	//assign instr_possibly_changes_pc = ( temp_ipc_pc_vec > 0 );
 	assign { init_instr_is_32_bit, final_instr_is_32_bit }
 		= { pkg_instr_dec::get_instr_is_32_bit(init_instr_grp),
 		pkg_instr_dec::get_instr_is_32_bit(final_instr_grp) };
@@ -259,11 +259,14 @@ module spcpu
 	
 	`include "src/state_changing_tasks.svinc"
 	
-	`include "src/instr_exec_tasks.svinc"
-	
 	`include "src/update_instr_possibly_changes_pc_tasks.svinc"
 	
 	`include "src/extra_instr_dec_tasks_funcs.svinc"
+	
+	`include "src/debug_disassembly_tasks.svinc"
+	
+	`include "src/instr_exec_tasks.svinc"
+	
 	
 	//bit [1:0] ready;
 	//initial ready = 0;
@@ -368,7 +371,6 @@ module spcpu
 			update_extra_ig5_pc_stuff();
 			
 			
-			//debug_disp_init_instr();
 			//$display( "%h %h %h", init_instr_grp, final_instr_grp, 
 			//	`get_cpu_rp_pc );
 			
@@ -461,13 +463,11 @@ module spcpu
 	
 	
 	
-	//always @ (*)
-	always @ (curr_state)
+	always @ (*)
 	begin
-		//if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
-		if ( curr_state >= pkg_cpu::cpu_st_load_instr_hi )
+		if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
-			temp_ipc_pc_vec = 0;
+			instr_possibly_changes_pc = 0;
 			
 			if ( final_instr_grp == pkg_instr_dec::instr_grp_1 )
 			begin

@@ -33,39 +33,7 @@ task start_exec_instr_from_grp_1;
 	//$display( ig1_opcode == pkg_instr_dec::instr_g1_op_addi );
 	
 	
-	// Arithmetic instructions:
-	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
-	begin
-		$display( "addi r%d, $%h", final_ig1_ra_index,
-			final_ig1_imm_value_8 );
-	end
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
-	begin
-		$display( "adci r%d, $%h", final_ig1_ra_index,
-			final_ig1_imm_value_8 );
-	end
-	
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
-	begin
-		$display( "cmpi r%d, $%h", final_ig1_ra_index,
-			final_ig1_imm_value_8 );
-	end
-	
-	
-	//Copy instructions:
-	
-	// (CoPY Immediate)
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi )
-	begin
-		$display( "cpyi r%d, $%h", final_ig1_ra_index,
-			final_ig1_imm_value_8 );
-	end
-	
-	else
-	begin
-		$display("Unknown group 1 instruction!");
-	end
-	
+	disassemble_grp_1_instr();
 	
 	
 	if (!instr_possibly_changes_pc)
@@ -93,6 +61,12 @@ task start_exec_instr_from_grp_2;
 	//$display( "group 2 instr:\t\t%h\t\t%h", final_ig2_opcode, 
 	//	instr_possibly_changes_pc );
 	
+	//$display( "%h  r%h<p>, r%h<p>", final_ig2_opcode, final_ig2_ra_index,
+	//	final_ig2_rb_index );
+	
+	disassemble_grp_2_instr();
+	
+	
 	if (!instr_possibly_changes_pc)
 	begin
 		prep_load_instr_hi_reg_generic();
@@ -110,6 +84,8 @@ task start_exec_instr_from_grp_3;
 	//	final_ig3_opcode, instr_possibly_changes_pc );
 	//$display( "group 3 instr:\t\t%h\t\t%h", final_ig3_opcode, 
 	//	instr_possibly_changes_pc );
+	
+	disassemble_grp_3_instr();
 	
 	if (!instr_possibly_changes_pc)
 	begin
@@ -129,6 +105,8 @@ task start_exec_instr_from_grp_4;
 	//$display( "group 4 instr:\t\t%h\t\t%h", final_ig4_opcode, 
 	//	instr_possibly_changes_pc );
 	
+	disassemble_grp_4_instr();
+	
 	if (!instr_possibly_changes_pc)
 	begin
 		prep_load_instr_hi_reg_generic();
@@ -146,6 +124,8 @@ task start_exec_instr_from_grp_5;
 	//	final_ig5_opcode, instr_possibly_changes_pc );
 	//$display( "group 5 instr:\t\t%h\t\t%h", final_ig5_opcode, 
 	//	instr_possibly_changes_pc );
+	
+	disassemble_grp_5_instr();
 	
 	if (!instr_possibly_changes_pc)
 	begin
