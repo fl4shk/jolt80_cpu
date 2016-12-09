@@ -110,14 +110,11 @@ module instr_grp_2_decoder
 	
 	// Bitshift to ignore the lower bit if necessary
 	assign ig2d_outputs.ra_index = instr_hi[ `instr_g2_ra_index_range_hi
-		: `instr_g2_ra_index_range_lo ];
+		: `instr_g2_ra_index_range_lo ] 
+		>> ig2d_outputs.ra_index_is_for_pair;
 	assign ig2d_outputs.rb_index = instr_hi[ `instr_g2_rb_index_range_hi
-		: `instr_g2_rb_index_range_lo ];
-	
-	assign ig2d_outputs.other_rap_index 
-		= `make_pair_ind_from_ri(ig2d_outputs.ra_index);
-	assign ig2d_outputs.other_rbp_index 
-		= `make_pair_ind_from_ri(ig2d_outputs.rb_index);
+		: `instr_g2_rb_index_range_lo ] 
+		>> ig2d_outputs.rb_index_is_for_pair;
 	
 endmodule
 
@@ -169,28 +166,15 @@ module instr_grp_5_decoder
 	assign ig5d_outputs.ra_index_is_for_pair 
 		= ig5_get_ra_index_is_for_pair(ig5d_outputs.opcode);
 	
-	//assign ig5d_outputs.ra_index 
-	//	= instr_hi[ `instr_g5_ihi_ra_index_range_hi
-	//	: `instr_g5_ihi_ra_index_range_lo ]
-	//	<< ig5d_outputs.ra_index_is_for_pair;
 	assign ig5d_outputs.ra_index 
 		= instr_hi[ `instr_g5_ihi_ra_index_range_hi
 		: `instr_g5_ihi_ra_index_range_lo ]
-		<< ig5d_outputs.ra_index_is_for_pair;
+		>> ig5d_outputs.ra_index_is_for_pair;
 	
 	assign ig5d_outputs.rbp_index 
 		= instr_hi[ `instr_g5_ihi_rbp_index_range_lo
 		: `instr_g5_ihi_rbp_index_range_lo ];
 	
-	//assign ig5d_outputs.other_rap_index 
-	//	= `make_pair_ind_from_ri(ig5d_outputs.ra_index);
-	//assign ig5d_outputs.other_rap_index
-	//	= ig5d_outputs.ra_index
-	//	<< ig5d_outputs.ra_index_is_for_pair;
-	assign ig5d_outputs.other_rap_index
-		= instr_hi[ `instr_g5_ihi_ra_index_range_hi
-		: `instr_g5_ihi_ra_index_range_lo ]
-	//assign ig5d_outputs.other_rap_index = 9;
 	
 endmodule
 
