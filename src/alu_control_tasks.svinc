@@ -308,7 +308,6 @@ task prep_alu_instr_grp_1_generic;
 		// (CoPY Immediate)
 		//pkg_instr_dec::instr_g1_op_cpyi:
 		//begin
-		//	the_alu_was_used <= 
 		//end
 		default:
 		begin
@@ -325,7 +324,184 @@ task prep_alu_instr_grp_2_generic;
 	input [`instr_g2_rb_index_msb_pos:0] rb_index;
 	input ra_index_is_for_pair, rb_index_is_for_pair;
 	
-	
+	case (opcode)
+		// Arithmetic instructions:
+		pkg_instr_dec::instr_g2_op_add:
+		begin
+			do_alu_op_add( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_adc:
+		begin
+			do_alu_op_adc( ra_index, cpu_regs[rb_index] );
+		end
+		
+		pkg_instr_dec::instr_g2_op_sub:
+		begin
+			do_alu_op_sub( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_sbc:
+		begin
+			do_alu_op_sbc( ra_index, cpu_regs[rb_index] );
+		end
+		
+		pkg_instr_dec::instr_g2_op_cmp:
+		begin
+			do_alu_op_cmp( ra_index, cpu_regs[rb_index] );
+		end
+		
+		// Bitwise instructions with two register operands:
+		pkg_instr_dec::instr_g2_op_and:
+		begin
+			do_alu_op_and( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_orr:
+		begin
+			do_alu_op_orr( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_xor:
+		begin
+			do_alu_op_xor( ra_index, cpu_regs[rb_index] );
+		end
+		
+		// Complement instructions with one register operand (rB ignored):
+		pkg_instr_dec::instr_g2_op_inv:
+		begin
+			do_alu_op_inv(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_invp:
+		begin
+			do_alu_op_invp(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_neg:
+		begin
+			do_alu_op_neg(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_negp:
+		begin
+			do_alu_op_negp(ra_index);
+		end
+		
+		
+		// Bitshifting (and rotating) instructions that use the value of rB
+		// as the number of bits to shift by:
+		pkg_instr_dec::instr_g2_op_lsl:
+		begin
+			do_alu_op_lsl( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_lsr:
+		begin
+			do_alu_op_lsr( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_asr:
+		begin
+			do_alu_op_asr( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_rol:
+		begin
+			do_alu_op_rol( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_ror:
+		begin
+			do_alu_op_ror( ra_index, cpu_regs[rb_index] );
+		end
+		
+		
+		// Bit rotating instructions that use carry as bit 8 for a 9-bit
+		// rotate of { carry, rA } by one bit:
+		pkg_instr_dec::instr_g2_op_rolc:
+		begin
+			do_alu_op_rolc(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_rorc:
+		begin
+			do_alu_op_rorc(ra_index);
+		end
+		
+		
+		// Bitshifting (and rotating) instructions that do a 16-bit shift
+		// or rotate on the reg pair rAp, using rB as the number of bits to
+		// shift by:
+		pkg_instr_dec::instr_g2_op_lslp:
+		begin
+			do_alu_op_lslp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_lsrp:
+		begin
+			do_alu_op_lsrp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_asrp:
+		begin
+			do_alu_op_asrp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_rolp:
+		begin
+			do_alu_op_rolp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_rorp:
+		begin
+			do_alu_op_rorp( ra_index, cpu_regs[rb_index] );
+		end
+		
+		
+		// Bit rotating instructions that use carry as bit 16 for a 17-bit
+		// rotate of { carry, rAp } by one bit:
+		pkg_instr_dec::instr_g2_op_rolcp:
+		begin
+			do_alu_op_rolcp(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_rorcp:
+		begin
+			do_alu_op_rorcp(ra_index);
+		end
+		
+		
+		//// Copy instructions:
+		//
+		//// (CoPY from reg rB to reg rA)
+		//pkg_instr_dec::instr_g2_op_cpy:
+		//begin
+		//end
+		//// (CoPY from reg Pair rBp to reg Pair rAp)
+		//pkg_instr_dec::instr_g2_op_cpyp:
+		//begin
+		//end
+		//
+		//
+		//// Swap instructions:
+		//// (SWap register Pair, also can be used as a combined "call",
+		//// "jump", and "return" instruction by swapping some other register
+		//// pair with the "pc" [r14p] register pair)
+		//pkg_instr_dec::instr_g2_op_swp:
+		//begin
+		//end
+		//
+		//
+		//// Call instruction (Description:  sets the link register to the
+		//// return address, then sets the program counter to the address
+		//// contained in the reg pair rAp):
+		//
+		//// (CALL subroutine at address in reg pair rAp)
+		//pkg_instr_dec::instr_g2_op_call:
+		//begin
+		//end
+		//
+		//
+		//// 8-bit Load/store instructions:
+		//
+		//// (LoaD contents into Register rA from memory at address in rBp)
+		//pkg_instr_dec::instr_g2_op_ldr:
+		//begin
+		//end
+		//// (STore Register rA contents to memory at address in rBp)
+		//pkg_instr_dec::instr_g2_op_str :
+		//begin
+		//end
+		default:
+		begin
+			alu_was_used <= 0;
+		end
+		
+	endcase
 	
 endtask
 

@@ -136,12 +136,14 @@ task debug_disp_final_instr;
 endtask
 
 
-task debug_disp_regs;
-	$display( "%h %h %h %h\t\t%h %h %h %h\t\t%h %h %h %h\t\t%h %h %h %h",
+task debug_disp_regs_and_proc_flags;
+	$display
+		( "%h %h %h %h\t\t%h %h %h %h\t\t%h %h %h %h\t\t%h %h %h %h\t\t%b", 
 		cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3],
 		cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
 		cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
-		cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] );
+		cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15],
+		true_proc_flags );
 endtask
 
 `endif		// debug_tasks_svinc

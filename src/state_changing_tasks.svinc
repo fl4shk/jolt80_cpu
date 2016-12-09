@@ -56,42 +56,39 @@ task enable_dio_we;
 endtask
 
 // Prepare to, on the next cycle, load an 8-bit value
-task prep_load_8_with_addr;
-	input [`cpu_addr_msb_pos:0] read_addr;
-	
-	data_inout_addr <= read_addr;
-	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-	disable_dio_we();
-endtask
 task prep_load_8_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	disable_dio_we();
 endtask
+task prep_load_8_with_addr;
+	input [`cpu_addr_msb_pos:0] read_addr;
+	
+	data_inout_addr <= read_addr;
+	prep_load_8_no_addr();
+endtask
 
 // Prepare to, on the next cycle, write an 8-bit value
-task prep_store_8_with_addr;
-	input [`cpu_addr_msb_pos:0] write_addr;
-	
-	data_inout_addr <= write_addr;
-	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-	enable_dio_we();
-endtask
 task prep_store_8_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	enable_dio_we();
 endtask
+task prep_store_8_with_addr;
+	input [`cpu_addr_msb_pos:0] write_addr;
+	
+	data_inout_addr <= write_addr;
+	prep_store_8_no_addr();
+endtask
 
 // Prepare to, on the next cycle, load a 16-bit value
+task prep_load_16_no_addr;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
+	disable_dio_we();
+endtask
 task prep_load_16_with_addr;
 	input [`cpu_addr_msb_pos:0] read_addr;
 	
 	data_inout_addr <= read_addr;
-	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
-	disable_dio_we();
-endtask
-task prep_load_16_no_addr;
-	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
-	disable_dio_we();
+	prep_load_16_no_addr();
 endtask
 
 
@@ -111,10 +108,12 @@ endtask
 task prep_load_instr_hi_reg_generic;
 	if (!final_instr_is_32_bit)
 	begin
+		$display("16-bit instruction");
 		prep_load_instr_hi_reg_after_16();
 	end
 	else // if (final_instr_is_32_bit)
 	begin
+		$display("32-bit instruction");
 		prep_load_instr_hi_reg_after_32();
 	end
 endtask

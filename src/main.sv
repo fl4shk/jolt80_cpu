@@ -121,13 +121,18 @@ endmodule
 `define get_cpu_rp_pc `make_reg_pair_w_pi(pkg_cpu::cpu_rp_pc_pind)
 `define get_cpu_rp_lr `make_reg_pair_w_pi(pkg_cpu::cpu_rp_lr_pind)
 
+
+
+`define instr_16_num_bytes 2
+`define instr_32_num_bytes 4
+
 // The next value of the PC after a non-PC-changing 16-bit instruction, or
 // the next value of data_inout_addr after loading the high 16 bits of a
 // 32-bit instruction
-`define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + 2 )
+`define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + `instr_16_num_bytes )
 
 // The next value of the PC after a non-PC-changing 32-bit instruction
-`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + 4 )
+`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + `instr_32_num_bytes )
 
 
 `define wire_rhs_pc_indices_contain_reg_index( reg_index ) \
@@ -333,8 +338,10 @@ module spcpu
 	always @ ( posedge clk )
 	begin
 		//if ( `get_cpu_rp_pc >= 20 * 2 )
-		if ( ( `get_cpu_rp_pc >= ( 10 * 2 ) )
-			&& ( `get_cpu_rp_pc <= ( 200 * 2 ) ) )
+		//if ( ( `get_cpu_rp_pc >= ( 16'h10 * 2 ) )
+		////if ( ( `get_cpu_rp_pc >= ( 30 * 2 ) )
+		//	&& ( `get_cpu_rp_pc <= ( 200 * 2 ) ) )
+		if ( `get_cpu_rp_pc >= ( 16'h8010 ) )
 		begin
 			$display("\ndone");
 			$finish;
@@ -365,7 +372,7 @@ module spcpu
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			debug_disp_regs();
+			debug_disp_regs_and_proc_flags();
 			$display();
 			
 			

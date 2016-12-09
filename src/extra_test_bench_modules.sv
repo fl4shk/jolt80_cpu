@@ -101,8 +101,9 @@ module tb_memory
 			mem[zero_counter] = 0;
 		end
 		
-		$readmemh( "readmemh_input.txt.ignore", mem, 0, ( num_bytes >> 1 )
-			- 1 );
+		//$readmemh( "readmemh_input.txt.ignore", mem, 0, ( num_bytes >> 1 )
+		//	- 1 );
+		$readmemh( "readmemh_input.txt.ignore", mem, 0, num_bytes );
 		
 		$display( "tb_memory:  %h %h %h\t\t%h %h %h\t\t%h", 
 			`make_mem_pair(0), `make_mem_pair(2), `make_mem_pair(4),
