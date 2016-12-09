@@ -30,7 +30,7 @@ bit [`instr_g1_ra_index_msb_pos:0] final_ig1_ra_index;
 bit [`instr_g1_imm_value_msb_pos:0] final_ig1_imm_value_8;
 
 //wire ig1_instr_changes_pc;
-wire ig1_pc_contains_ra;
+bit final_ig1_pc_contains_ra;
 
 
 
@@ -50,7 +50,8 @@ bit final_ig2_ra_index_is_for_pair, final_ig2_rb_index_is_for_pair;
 
 //wire ig2_instr_changes_pc;
 
-wire ig2_pc_contains_ra, ig2_pc_contains_rb, ig2_rap_is_pc, ig2_rbp_is_pc;
+bit final_ig2_pc_contains_ra, final_ig2_pc_contains_rb,
+	final_ig2_rap_is_pc, final_ig2_rbp_is_pc;
 
 
 
@@ -67,7 +68,7 @@ bit [`instr_g3_rbp_index_msb_pos:0] final_ig3_rbp_index;
 bit [`instr_g3_rcp_index_msb_pos:0] final_ig3_rcp_index;
 
 //wire ig3_instr_changes_pc;
-wire ig3_pc_contains_ra, ig3_rbp_is_pc, ig3_rcp_is_pc;
+bit final_ig3_pc_contains_ra, final_ig3_rbp_is_pc, final_ig3_rcp_is_pc;
 
 
 
@@ -94,7 +95,7 @@ bit [`instr_g5_ihi_rbp_index_msb_pos:0] final_ig5_rbp_index;
 bit final_ig5_ra_index_is_for_pair;
 //wire ig5_instr_changes_pc;
 
-wire ig5_pc_contains_ra, ig5_rap_is_pc, ig5_rbp_is_pc;
+bit final_ig5_pc_contains_ra, final_ig5_rap_is_pc, final_ig5_rbp_is_pc;
 
 
 

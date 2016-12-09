@@ -190,7 +190,7 @@ module spcpu
 	// If the pc was POSSIBLY changed by an instruction, which is used to
 	// determine whether or not to change the pc automatically.
 	bit [4:0] temp_ipc_pc_vec;
-	bit instr_possibly_changes_pc;
+	wire instr_possibly_changes_pc;
 	
 	// These are used for communication with the outside world
 	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
@@ -244,6 +244,7 @@ module spcpu
 		: `cpu_data_inout_16_width'hz;
 	
 	
+	assign instr_possibly_changes_pc = ( temp_ipc_pc_vec > 0 );
 	assign { init_instr_is_32_bit, final_instr_is_32_bit }
 		= { pkg_instr_dec::get_instr_is_32_bit(init_instr_grp),
 		pkg_instr_dec::get_instr_is_32_bit(final_instr_grp) };
@@ -275,7 +276,6 @@ module spcpu
 	
 	if (reset)
 	begin
-		//$display("memes");
 		//{ data_inout_addr, data_inout_we } <= 0;
 		data_inout_addr <= 0;
 		data_inout_we <= 0;
@@ -302,7 +302,8 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
-		if ( `get_cpu_rp_pc >= 20 * 2 )
+		//if ( `get_cpu_rp_pc >= 20 * 2 )
+		if ( `get_cpu_rp_pc >= 10 * 2 )
 		begin
 			$display("\ndone");
 			$finish;
@@ -334,6 +335,7 @@ module spcpu
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
 			$display();
+			//$display(init_instr_grp);
 			//debug_disp_init_instr();
 			
 			//$display( "%h %h", init_instr_grp, `get_cpu_rp_pc );
@@ -359,6 +361,12 @@ module spcpu
 			back_up_ig4_instr_contents();
 			back_up_ig5_instr_contents();
 			
+			update_extra_ig1_pc_stuff();
+			update_extra_ig2_pc_stuff();
+			update_extra_ig3_pc_stuff();
+			//update_extra_ig4_pc_stuff();
+			update_extra_ig5_pc_stuff();
+			
 			
 			//debug_disp_init_instr();
 			//$display( "%h %h %h", init_instr_grp, final_instr_grp, 
@@ -366,7 +374,6 @@ module spcpu
 			
 			//curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 			
-			$display(init_instr_is_32_bit);
 			
 			//if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
 			if (!init_instr_is_32_bit)
@@ -406,34 +413,41 @@ module spcpu
 		// Instruction execution states
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
-			//debug_disp_final_instr();
 			start_exec_instr();
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_finish_exec_instr )
 		begin
 			finish_exec_instr();
-			
-			//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 		end
 		
 		// Check if the pc was ACTUALLY changed
 		else // if ( curr_state 
-			// == pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed
+			// == pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed )
 		begin
-			$display( "Check whether the pc was actually changed %h %h %h", 
-				prev_pc, `get_cpu_rp_pc, ( prev_pc == `get_cpu_rp_pc ) );
-			
+			$display("Check whether the pc was actually changed");
 			if ( prev_pc == `get_cpu_rp_pc )
 			begin
+				$display("The pc was not actually changed");
+				
+				
 				// Do a regular update of the PC and data_inout_addr (don't
 				// let the CPU get stuck executing an instruction
 				// infinitely!)
-				prep_load_instr_hi_reg();
+				if (!final_instr_is_32_bit)
+				begin
+					prep_load_instr_hi_reg_after_16();
+				end
+				
+				else // if (final_instr_is_32_bit)
+				begin
+					prep_load_instr_hi_reg_after_32();
+				end
 			end
 			
 			else
 			begin
+				$display("The pc WAS changed");
 				prep_load_instr_hi_leave_pc();
 			end
 			
@@ -447,33 +461,35 @@ module spcpu
 	
 	
 	
-	//always @ (curr_state)
-	//always @ ( posedge clk )
+	//always @ (*)
 	always @ (curr_state)
 	begin
-		if ( curr_state != pkg_cpu::cpu_st_load_instr_hi )
+		//if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
+		if ( curr_state >= pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			if ( init_instr_grp == pkg_instr_dec::instr_grp_1 )
+			temp_ipc_pc_vec = 0;
+			
+			if ( final_instr_grp == pkg_instr_dec::instr_grp_1 )
 			begin
 				update_ipc_pc_for_grp_1_instr();
 			end
 			
-			else if ( init_instr_grp == pkg_instr_dec::instr_grp_2 )
+			else if ( final_instr_grp == pkg_instr_dec::instr_grp_2 )
 			begin
 				update_ipc_pc_for_grp_2_instr();
 			end
 			
-			else if ( init_instr_grp == pkg_instr_dec::instr_grp_3 )
+			else if ( final_instr_grp == pkg_instr_dec::instr_grp_3 )
 			begin
 				update_ipc_pc_for_grp_3_instr();
 			end
 			
-			else if ( init_instr_grp == pkg_instr_dec::instr_grp_4 )
+			else if ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
 			begin
 				update_ipc_pc_for_grp_4_instr();
 			end
 			
-			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
+			else if ( final_instr_grp == pkg_instr_dec::instr_grp_5 )
 			begin
 				update_ipc_pc_for_grp_5_instr();
 			end

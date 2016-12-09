@@ -50,4 +50,47 @@ task back_up_ig5_instr_contents;
 		ig5_ra_index_is_for_pair };
 endtask
 
+
+task update_extra_ig1_pc_stuff;
+	final_ig1_pc_contains_ra 
+		<= `wire_rhs_pc_indices_contain_reg_index(ig1_ra_index);
+endtask
+
+task update_extra_ig2_pc_stuff;
+	
+	// For ig2_pc_contains_ra and ig2_pc_contains_rb, there is NO NEED to
+	// check if the index is for a reg pair.  This is because a reg pair
+	// index is ALWAYS less than 14 (specifically, the range is from 0-7)
+	final_ig2_pc_contains_ra
+		<= `wire_rhs_pc_indices_contain_reg_index(ig2_ra_index);
+	final_ig2_pc_contains_rb
+		<= `wire_rhs_pc_indices_contain_reg_index(ig2_rb_index);
+	
+	// For ig2_rap_is_pc and ig2_rbp_is_pc, it is NECESSARY to check if the
+	// index is for a reg pair.  This is because the range of reg pair
+	// indices is 0-7.  Specifically, if a reg index is encoded as 7, then
+	// NOT checking whether or not the index is for a pair will make the
+	// code think that the REG index is THE PC'S REG --PAIR-- index.
+	final_ig2_rap_is_pc <= ( ig2_ra_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig2_ra_index) );
+	final_ig2_rbp_is_pc <= ( ig2_rb_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig2_rb_index) );
+endtask
+
+task update_extra_ig3_pc_stuff;
+	final_ig3_pc_contains_ra
+		<= `wire_rhs_pc_indices_contain_reg_index(ig3_ra_index);
+	final_ig3_rbp_is_pc <= `wire_rhs_rp_index_is_pc_index(ig3_rbp_index);
+	final_ig3_rcp_is_pc <= `wire_rhs_rp_index_is_pc_index(ig3_rcp_index);
+endtask
+
+task update_extra_ig5_pc_stuff;
+	final_ig5_pc_contains_ra 
+		<= `wire_rhs_pc_indices_contain_reg_index(ig5_ra_index);
+	final_ig5_rap_is_pc <= ( ig5_ra_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig5_ra_index) );
+	final_ig5_rbp_is_pc <= `wire_rhs_rp_index_is_pc_index(ig5_rbp_index);
+endtask
+
+
 `endif		// extra_instr_dec_tasks_funcs_svinc

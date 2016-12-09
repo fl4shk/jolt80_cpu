@@ -36,16 +36,19 @@ task start_exec_instr_from_grp_1;
 	// Arithmetic instructions:
 	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
 	begin
-		
+		$display( "addi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
 	end
 	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
 	begin
-		
+		$display( "adci r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
 	end
 	
 	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
 	begin
-		
+		$display( "cmpi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
 	end
 	
 	
@@ -54,19 +57,20 @@ task start_exec_instr_from_grp_1;
 	// (CoPY Immediate)
 	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi )
 	begin
-		
+		$display( "cpyi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
 	end
 	
 	else
 	begin
-		
+		$display("Unknown group 1 instruction!");
 	end
 	
 	
 	
 	if (!instr_possibly_changes_pc)
 	begin
-		prep_load_instr_hi_reg();
+		prep_load_instr_hi_reg_generic();
 	end
 	
 	else // if (instr_possibly_changes_pc)
@@ -86,12 +90,12 @@ task start_exec_instr_from_grp_2;
 	
 	//$display( "%h %h %h", temp_ipc_pc_vec, ( temp_ipc_pc_vec != 0 ), 
 	//	instr_possibly_changes_pc );
-	$display( "group 2 instr:\t\t%h\t\t%h", final_ig2_opcode, 
-		instr_possibly_changes_pc );
+	//$display( "group 2 instr:\t\t%h\t\t%h", final_ig2_opcode, 
+	//	instr_possibly_changes_pc );
 	
 	if (!instr_possibly_changes_pc)
 	begin
-		prep_load_instr_hi_reg();
+		prep_load_instr_hi_reg_generic();
 	end
 	
 	else // if (instr_possibly_changes_pc)
@@ -104,12 +108,12 @@ endtask
 task start_exec_instr_from_grp_3;
 	//$display( "start_exec_instr_from_grp_3 is unfinished\t\t%h\t\t%h", 
 	//	final_ig3_opcode, instr_possibly_changes_pc );
-	$display( "group 3 instr:\t\t%h\t\t%h", final_ig3_opcode, 
-		instr_possibly_changes_pc );
+	//$display( "group 3 instr:\t\t%h\t\t%h", final_ig3_opcode, 
+	//	instr_possibly_changes_pc );
 	
 	if (!instr_possibly_changes_pc)
 	begin
-		prep_load_instr_hi_reg();
+		prep_load_instr_hi_reg_generic();
 	end
 	
 	else // if (instr_possibly_changes_pc)
@@ -122,12 +126,12 @@ endtask
 task start_exec_instr_from_grp_4;
 	//$display( "start_exec_instr_from_grp_4 is unfinished\t\t%h\t\t%h", 
 	//	final_ig4_opcode, instr_possibly_changes_pc );
-	$display( "group 4 instr:\t\t%h\t\t%h", final_ig4_opcode, 
-		instr_possibly_changes_pc );
+	//$display( "group 4 instr:\t\t%h\t\t%h", final_ig4_opcode, 
+	//	instr_possibly_changes_pc );
 	
 	if (!instr_possibly_changes_pc)
 	begin
-		prep_load_instr_hi_reg();
+		prep_load_instr_hi_reg_generic();
 	end
 	
 	else // if (instr_possibly_changes_pc)
@@ -140,12 +144,12 @@ endtask
 task start_exec_instr_from_grp_5;
 	//$display( "start_exec_instr_from_grp_5 is unfinished\t\t%h\t\t%h", 
 	//	final_ig5_opcode, instr_possibly_changes_pc );
-	$display( "group 5 instr:\t\t%h\t\t%h", final_ig5_opcode, 
-		instr_possibly_changes_pc );
+	//$display( "group 5 instr:\t\t%h\t\t%h", final_ig5_opcode, 
+	//	instr_possibly_changes_pc );
 	
 	if (!instr_possibly_changes_pc)
 	begin
-		prep_load_instr_hi_reg();
+		prep_load_instr_hi_reg_generic();
 	end
 	
 	else // if (instr_possibly_changes_pc)
@@ -248,7 +252,7 @@ task finish_exec_instr;
 	
 	// After finishing an instruction, the next step should ALWAYS be to
 	// load another instruction.
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	
 endtask
 

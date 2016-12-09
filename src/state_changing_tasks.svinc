@@ -96,10 +96,27 @@ endtask
 
 
 
-task prep_load_instr_hi_reg;
+task prep_load_instr_hi_reg_after_16;
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	advance_pc_etc_after_reg_instr_16();
 	prep_load_16_no_addr();
+endtask
+
+task prep_load_instr_hi_reg_after_32;
+	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	advance_pc_etc_after_reg_instr_32();
+	prep_load_16_no_addr();
+endtask
+
+task prep_load_instr_hi_reg_generic;
+	if (!final_instr_is_32_bit)
+	begin
+		prep_load_instr_hi_reg_after_16();
+	end
+	else // if (final_instr_is_32_bit)
+	begin
+		prep_load_instr_hi_reg_after_32();
+	end
 endtask
 
 task prep_load_instr_lo_reg;

@@ -41,8 +41,8 @@ endtask
 task debug_disp_init_instr_from_grp_5;
 	//$display( "Group 5:  %h\t\t%h %h\t\t%h", ig5_opcode, ig5_ra_index, 
 	//	ig5_rbp_index, instr_in_lo );
-	$display( "Group 5:  %h\t\t%h %h", ig5_opcode, ig5_ra_index, 
-		ig5_rbp_index );
+	$display( "Group 5:  %h\t\t%h %h\t\t%h", ig5_opcode, ig5_ra_index, 
+		ig5_rbp_index, ig5_ra_index_is_for_pair );
 endtask
 
 
@@ -100,8 +100,9 @@ endtask
 task debug_disp_final_instr_from_grp_5;
 	//$display( "Group 5:  %h\t\t%h %h\t\t%h", final_ig5_opcode, 
 	//	final_ig5_ra_index, final_ig5_rbp_index, instr_in_lo );
-	$display( "Group 5:  %h\t\t%h %h", final_ig5_opcode, 
-		final_ig5_ra_index, final_ig5_rbp_index );
+	$display( "Group 5:  %h\t\t%h %h\t\t%h", final_ig5_opcode, 
+		final_ig5_ra_index, final_ig5_rbp_index,
+		final_ig5_ra_index_is_for_pair );
 endtask
 
 

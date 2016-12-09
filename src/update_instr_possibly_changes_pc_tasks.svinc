@@ -20,79 +20,79 @@
 
 task update_ipc_pc_for_grp_1_instr;
 	
-	instr_possibly_changes_pc = 0;
-	
-	if (ig1_pc_contains_ra)
+	if (final_ig1_pc_contains_ra)
 	begin
 		if ( pkg_instr_dec::ig1_get_ra_instr_can_change_pc(ig1_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			temp_ipc_pc_vec = 1;
 		end
 	end
+	
 	
 endtask
 
 task update_ipc_pc_for_grp_2_instr;
 	
-	temp_ipc_pc_vec[4:0] = 0;
+	//temp_ipc_pc_vec[4:0] = 0;
 	
 	
 	// The call instruction ALWAYS changes pc
 	if ( pkg_instr_dec::ig2_get_instr_definitely_changes_pc(ig2_opcode) )
 	begin
-		temp_ipc_pc_vec[0] = 1;
+		//temp_ipc_pc_vec[0] = 1;
+		temp_ipc_pc_vec = 1;
 	end
 	
-	if (ig2_pc_contains_ra)
+	else if (final_ig2_pc_contains_ra)
 	begin
 		if ( pkg_instr_dec::ig2_get_ra_instr_can_change_pc(ig2_opcode) )
 		begin
-			//instr_possibly_changes_pc = 1;
-			temp_ipc_pc_vec[1] = 1;
+			//temp_ipc_pc_vec[1] = 1;
+			temp_ipc_pc_vec = 1;
 		end
 		
 	end
 	
 	// Don't need to check this
-	//if (ig2_pc_contains_rb)
+	//else if (final_ig2_pc_contains_rb)
 	//begin
 	//	
 	//end
 	
-	if (ig2_rap_is_pc)
+	else if (final_ig2_rap_is_pc)
 	begin
 		if ( pkg_instr_dec::ig2_get_rap_instr_can_change_pc(ig2_opcode) )
 		begin
-			temp_ipc_pc_vec[2] = 1;
+			//temp_ipc_pc_vec[2] = 1;
+			temp_ipc_pc_vec = 1;
 		end
 		
 	end
 	
-	if (ig2_rbp_is_pc)
+	else if (final_ig2_rbp_is_pc)
 	begin
 		// Swap instructions:
 		if ( pkg_instr_dec::ig2_get_rbp_instr_can_change_pc(ig2_opcode) )
 		begin
-			temp_ipc_pc_vec[3] = 1;
+			//temp_ipc_pc_vec[3] = 1;
+			temp_ipc_pc_vec = 1;
 		end
 	end
 	
 	//$display( "%h", temp_ipc_pc_vec );
 	//$display( "%h", temp_ipc_pc_vec != 0 );
 	
-	instr_possibly_changes_pc = ( temp_ipc_pc_vec != 0 );
+	//instr_possibly_changes_pc = ( temp_ipc_pc_vec != 0 );
 	
 	
 endtask
 
 task update_ipc_pc_for_grp_3_instr;
-	instr_possibly_changes_pc = 0;
-	
-	if (ig3_pc_contains_ra)
+	if (final_ig3_pc_contains_ra)
 	begin
 		if ( pkg_instr_dec::ig3_get_ra_instr_can_change_pc(ig3_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			temp_ipc_pc_vec = 1;
 		end
 	end
 	
@@ -100,36 +100,35 @@ endtask
 
 // ALL Instructions in group 4 change the PC
 task update_ipc_pc_for_grp_4_instr;
-	instr_possibly_changes_pc = 1;
+	temp_ipc_pc_vec[0] = 1;
 endtask
 
 task update_ipc_pc_for_grp_5_instr;
-	instr_possibly_changes_pc = 0;
-	
-	
-	if ( pkg_instr_dec::ig5_get_instr_definitely_changes_pc(ig5_opcode) )
+	if ( pkg_instr_dec::ig5_get_instr_definitely_changes_pc
+		(final_ig5_opcode) )
 	begin
-		instr_possibly_changes_pc = 1;
+		temp_ipc_pc_vec[0] = 1;
 	end
 	
-	if (ig5_pc_contains_ra)
+	if (final_ig5_pc_contains_ra)
 	begin
-		if ( pkg_instr_dec::ig5_get_ra_instr_can_change_pc(ig5_opcode) )
+		if ( pkg_instr_dec::ig5_get_ra_instr_can_change_pc
+			(final_ig5_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			temp_ipc_pc_vec[1] = 1;
 		end
 	end
 	
-	if (ig5_rap_is_pc)
+	else if (final_ig5_rap_is_pc)
 	begin
 		if ( pkg_instr_dec::ig5_get_rap_instr_can_change_pc(ig5_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			temp_ipc_pc_vec[2] = 1;
 		end
 	end
 	
 	// Don't need to check this
-	//if (ig5_rbp_is_pc)
+	//else if (final_ig5_rbp_is_pc)
 	//begin
 	//	
 	//end
