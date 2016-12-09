@@ -35,6 +35,40 @@ task start_exec_instr_from_grp_1;
 	
 	disassemble_grp_1_instr();
 	
+	// Arithmetic instructions:
+	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+	begin
+		//$display( "addi r%d, $%h", final_ig1_ra_index,
+		//	final_ig1_imm_value_8 );
+		
+		//cpu_regs[final_ig1_ra_index] <= cpu_regs[final_ig1_ra_index]
+		//	+ final_ig1_imm_value_8;
+	end
+	
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+	begin
+		
+	end
+	
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
+	begin
+		
+	end
+	
+	//Copy instructions:
+	
+	// (CoPY Immediate)
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi  )
+	begin
+		
+	end
+	
+	else
+	begin
+		$display("Unknown group 1 instruction!");
+	end
+	
+	
 	
 	if (!instr_possibly_changes_pc)
 	begin
@@ -126,6 +160,13 @@ task start_exec_instr_from_grp_5;
 	//	instr_possibly_changes_pc );
 	
 	disassemble_grp_5_instr();
+	
+	if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
+	begin
+		//$display( "%h %h %h %h", final_ig5_other_rap_index,
+		//	final_ig5_rap_is_pc, instr_in_lo, instr_possibly_changes_pc );
+		`make_reg_pair_w_pi(final_ig5_other_rap_index) <= instr_in_lo;
+	end
 	
 	if (!instr_possibly_changes_pc)
 	begin

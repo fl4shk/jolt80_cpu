@@ -200,4 +200,9 @@
 
 
 
+`define make_reg_ind_from_pi( pair_index ) ( pair_index << 1 )
+`define make_pair_ind_from_ri( reg_index ) ( reg_index >> 1 )
+
+
+
 `endif		// instr_decoder_defines_svinc

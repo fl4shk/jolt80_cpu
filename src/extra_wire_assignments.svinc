@@ -27,58 +27,17 @@ assign { ig1_opcode, ig1_ra_index, ig1_imm_value_8 }
 	= { ig1d_outputs.opcode, ig1d_outputs.ra_index, 
 	ig1d_outputs.imm_value_8 };
 
-//assign ig1_pc_contains_ra 
-//	= `wire_rhs_pc_indices_contain_reg_index(ig1_ra_index);
-
-//assign ig1_instr_changes_pc = ( ig1_pc_contains_ra 
-//	// Note the "?" operator
-//	? 
-//	
-//	// Arithmetic instructions:
-//	( ( ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
-//	|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
-//	
-//	// Skip instr_g1_op_cmpi because it CAN'T change registers
-//	
-//	//Copy instructions:
-//	
-//	// (CoPY Immediate)
-//	|| ( ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi ) )
-//	: 0 );
 
 
 
 // Instruction Group 2 Instruction Execution Things
 // Get rid of some boilerplate
-assign { ig2_opcode, ig2_ra_index, ig2_rb_index, 
-	ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair } 
-	= { ig2d_outputs.opcode, ig2d_outputs.ra_index, 
-	ig2d_outputs.rb_index, ig2d_outputs.ra_index_is_for_pair, 
-	ig2d_outputs.rb_index_is_for_pair };
-
-
-//// For ig2_pc_contains_ra and ig2_pc_contains_rb, there is NO NEED to check
-//// if the index is for a reg pair.  This is because a reg pair index is
-//// ALWAYS less than 14 (specifically, the range is from 0-7)
-//assign ig2_pc_contains_ra
-//	= `wire_rhs_pc_indices_contain_reg_index(ig2_ra_index);
-//assign ig2_pc_contains_rb
-//	= `wire_rhs_pc_indices_contain_reg_index(ig2_rb_index);
-//
-//// For ig2_rap_is_pc and ig2_rbp_is_pc, it is NECESSARY to check if the
-//// index is for a reg pair.  This is because the range of reg pair indices
-//// is 0-7.  Specifically, if a reg index is encoded as 7, then NOT checking
-//// whether or not the index is for a pair will make the code think that the
-//// REG index is THE PC'S REG --PAIR-- index.
-//assign ig2_rap_is_pc = ( ig2_ra_index_is_for_pair
-//	&& `wire_rhs_rp_index_is_pc_index(ig2_ra_index) );
-//assign ig2_rbp_is_pc = ( ig2_rb_index_is_for_pair
-//	&& `wire_rhs_rp_index_is_pc_index(ig2_rb_index) );
-
-
-
-//assign ig2_instr_changes_pc = ( ig2_pc_check_ra || ig2_pc_check_rb
-//	|| ig2_pc_check_rap || ig2_pc_check_rbp );
+assign { ig2_opcode, ig2_ra_index, ig2_rb_index, ig2_other_rap_index, 
+	ig2_other_rbp_index, ig2_ra_index_is_for_pair, 
+	ig2_rb_index_is_for_pair } 
+	= { ig2d_outputs.opcode, ig2d_outputs.ra_index, ig2d_outputs.rb_index, 
+	ig2d_outputs.other_rap_index, ig2d_outputs.other_rbp_index,
+	ig2d_outputs.ra_index_is_for_pair, ig2d_outputs.rb_index_is_for_pair };
 
 
 
@@ -87,14 +46,6 @@ assign { ig2_opcode, ig2_ra_index, ig2_rb_index,
 assign { ig3_opcode, ig3_ra_index, ig3_rbp_index, ig3_rcp_index }
 	= { ig3d_outputs.opcode, ig3d_outputs.ra_index,
 	ig3d_outputs.rbp_index, ig3d_outputs.rcp_index };
-
-
-//assign ig3_pc_contains_ra
-//	= `wire_rhs_pc_indices_contain_reg_index(ig3_ra_index);
-//assign ig3_rbp_is_pc 
-//	= `wire_rhs_rp_index_is_pc_index(ig3_rbp_index);
-//assign ig3_rcp_is_pc 
-//	= `wire_rhs_rp_index_is_pc_index(ig3_rcp_index);
 
 
 
@@ -107,18 +58,16 @@ assign { ig4_opcode, ig4_imm_value_8 }
 
 // Instruction Group 5 Instruction Execution Things
 // Get rid of some boilerplate
-assign { ig5_opcode, ig5_ra_index, ig5_rbp_index,
+assign { ig5_opcode, 
+	ig5_ra_index, 
+	ig5_rbp_index, 
+	ig5_other_rap_index,
 	ig5_ra_index_is_for_pair }
-	= { ig5d_outputs.opcode, ig5d_outputs.ra_index,
-	ig5d_outputs.rbp_index, ig5d_outputs.ra_index_is_for_pair };
-
-
-//assign ig5_pc_contains_ra
-//	= `wire_rhs_pc_indices_contain_reg_index(ig5_ra_index);
-//assign ig5_rap_is_pc = ( ig5_ra_index_is_for_pair
-//	&& `wire_rhs_rp_index_is_pc_index(ig5_ra_index) );
-//assign ig5_rbp_is_pc 
-//	= `wire_rhs_rp_index_is_pc_index(ig5_rbp_index);
+	= { ig5d_outputs.opcode, 
+	ig5d_outputs.ra_index,
+	ig5d_outputs.rbp_index, 
+	ig5d_outputs.other_rap_index, 
+	ig5d_outputs.ra_index_is_for_pair };
 
 
 

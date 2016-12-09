@@ -115,8 +115,8 @@ endmodule
 `define make_reg_pair( index_hi ) `make_pair( cpu_regs, index_hi )
 
 // Make reg pair with pair index
-`define make_reg_pair_w_pi( pair_index ) `make_pair( cpu_regs, \
-	pair_index << 1 )
+`define make_reg_pair_w_pi( pair_index ) \
+	`make_reg_pair( `make_reg_ind_from_pi(pair_index) )
 
 `define get_cpu_rp_pc `make_reg_pair_w_pi(pkg_cpu::cpu_rp_pc_pind)
 `define get_cpu_rp_lr `make_reg_pair_w_pi(pkg_cpu::cpu_rp_lr_pind)
@@ -197,6 +197,23 @@ module spcpu
 	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
 	
+	// ALU inputs and outputs
+	alu_oper the_alu_op;
+	bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in,
+		alu_out_hi, alu_out_lo;
+	bit [`proc_flags_msb_pos:0] alu_proc_flags_in, alu_proc_flags_out;
+	
+	
+	// The CPU flags that the ALU becomes made aware of 
+	bit [`proc_flags_msb_pos:0] true_proc_flags;
+	bit the_alu_was_used;
+	
+	bit [`cpu_reg_index_ie_msb_pos:0] the_alu_affected_reg_index;
+	bit [`cpu_rp_index_ie_msb_pos:0] the_alu_affected_reg_pair_index;
+	
+	
+	
+	
 	`include "src/extra_instr_dec_vars.svinc"
 	
 	wire init_instr_is_32_bit, final_instr_is_32_bit;
@@ -221,7 +238,7 @@ module spcpu
 	
 	
 	
-	// Instruction decoder modules
+	// Module instances
 	instr_group_decoder instr_grp_dec( .instr_hi(temp_data_in),
 		.group_out(init_instr_grp) );
 	
@@ -235,6 +252,11 @@ module spcpu
 		.ig4d_outputs(ig4d_outputs) );
 	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(temp_data_in),
 		.ig5d_outputs(ig5d_outputs) );
+	
+	alu the_alu( .oper(the_alu_op), .a_in_hi(alu_a_in_hi),
+		.a_in_lo(alu_a_in_lo), .b_in(alu_b_in), 
+		.proc_flags_in(alu_proc_flags_in), .out_hi(alu_out_hi),
+		.out_lo(alu_out_lo), .proc_flags_out(alu_proc_flags_out) );
 	
 	
 	// Outside world access assign statements
@@ -266,6 +288,8 @@ module spcpu
 	`include "src/debug_disassembly_tasks.svinc"
 	
 	`include "src/instr_exec_tasks.svinc"
+	
+	`include "src/alu_control_tasks.svinc"
 	
 	
 	//bit [1:0] ready;
@@ -306,7 +330,8 @@ module spcpu
 	always @ ( posedge clk )
 	begin
 		//if ( `get_cpu_rp_pc >= 20 * 2 )
-		if ( `get_cpu_rp_pc >= 10 * 2 )
+		if ( ( `get_cpu_rp_pc >= ( 10 * 2 ) )
+			&& ( `get_cpu_rp_pc <= ( 200 * 2 ) ) )
 		begin
 			$display("\ndone");
 			$finish;
@@ -382,6 +407,9 @@ module spcpu
 			begin
 				//instr_in_hi <= temp_data_in;
 				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+				
+				prep_alu_if_needed_init();
+				
 			end
 			
 			// Handle 32-bit instructions
@@ -394,6 +422,12 @@ module spcpu
 				//prep_load_16_no_addr();
 				prep_load_instr_lo_reg();
 			end
+			
+			//else if ( init_instr_grp == pkg_instr_dec::instr_grp_... )
+			//begin
+			//	
+			//end
+			
 			
 			else // if ( init_instr_grp 
 				// == pkg_instr_dec::instr_grp_unknown )
@@ -409,12 +443,16 @@ module spcpu
 		begin
 			curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 			instr_in_lo <= temp_data_in;
+			prep_alu_if_needed_final();
 		end
 		
 		
 		// Instruction execution states
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
+			//$display( "%d", final_ig5_other_rap_index );
+			//$display( "%d", final_ig5_rap_is_pc );
+			//$display( "%d", final_ig5_ra_index );
 			start_exec_instr();
 		end
 		
@@ -423,34 +461,45 @@ module spcpu
 			finish_exec_instr();
 		end
 		
-		// Check if the pc was ACTUALLY changed
 		else // if ( curr_state 
 			// == pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed )
 		begin
 			$display("Check whether the pc was actually changed");
+			
+			//$display( "%h"
+			$display( "%h %h", prev_pc, `get_cpu_rp_pc );
+			//$display( "%h %h", prev_pc, 
+			//	`make_reg_pair_w_pi(4'd7) );
+			//$display( "%h %h", prev_pc, 
+			//	`make_reg_pair_w_pi(pkg_cpu::cpu_rp_pc_pind) );
+			//$display( "%h %h", prev_pc, `make_reg_pair_w_pi(7) );
+			//$display( "%h %h", prev_pc, `make_reg_pair(14) );
+			
+			prep_load_instr_hi_reg_generic();
+			
+			// Check if the pc was ACTUALLY changed
 			if ( prev_pc == `get_cpu_rp_pc )
 			begin
 				$display("The pc was not actually changed");
 				
 				
-				// Do a regular update of the PC and data_inout_addr (don't
-				// let the CPU get stuck executing an instruction
-				// infinitely!)
-				if (!final_instr_is_32_bit)
-				begin
-					prep_load_instr_hi_reg_after_16();
-				end
-				
-				else // if (final_instr_is_32_bit)
-				begin
-					prep_load_instr_hi_reg_after_32();
-				end
+				//// Do a regular update of the PC and data_inout_addr (don't
+				//// let the CPU get stuck executing an instruction
+				//// infinitely!)
+				//if (!final_instr_is_32_bit)
+				//begin
+				//	prep_load_instr_hi_reg_after_16();
+				//end
+				//
+				//else // if (final_instr_is_32_bit)
+				//begin
+				//	prep_load_instr_hi_reg_after_32();
+				//end
 			end
 			
 			else
 			begin
 				$display("The pc WAS changed");
-				prep_load_instr_hi_leave_pc();
 			end
 			
 			//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
@@ -464,6 +513,7 @@ module spcpu
 	
 	
 	always @ (*)
+	//always @ ( posedge clk )
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin

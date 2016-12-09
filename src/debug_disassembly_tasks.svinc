@@ -107,7 +107,8 @@ task disassemble_grp_2_instr;
 	// (one's complement of rAp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
 	begin
-		$display( "invp r%dp", ( final_ig2_ra_index << 1 ) );
+		$display( "invp r%dp", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index) );
 	end
 	
 	// (two's complement of rA)
@@ -119,7 +120,8 @@ task disassemble_grp_2_instr;
 	// (two's complement of rAp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_negp )
 	begin
-		$display( "negp r%dp", ( final_ig2_ra_index << 1 ) );
+		$display( "negp r%dp", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index) );
 	end
 	
 	
@@ -164,27 +166,32 @@ task disassemble_grp_2_instr;
 	// shift by:
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lslp )
 	begin
-		$display( "lslp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+		$display( "lslp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsrp )
 	begin
-		$display( "lsrp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+		$display( "lsrp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_asrp )
 	begin
-		$display( "asrp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+		$display( "asrp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolp )
 	begin
-		$display( "rolp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+		$display( "rolp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorp )
 	begin
-		$display( "rorp r%dp, r%d", ( final_ig2_ra_index << 1 ), 
+		$display( "rorp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index), 
 			final_ig2_rb_index );
 	end
 	
@@ -193,11 +200,13 @@ task disassemble_grp_2_instr;
 	// rotate of { carry, rAp } by one bit:
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolcp )
 	begin
-		$display( "rolcp r%dp", ( final_ig2_ra_index << 1 ) );
+		$display( "rolcp r%dp", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index ));
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorcp )
 	begin
-		$display( "rorcp r%dp", ( final_ig2_ra_index << 1 ) );
+		$display( "rorcp r%dp", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index ));
 	end
 	
 	
@@ -212,8 +221,9 @@ task disassemble_grp_2_instr;
 	// (CoPY from reg Pair rBp to reg Pair rAp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyp )
 	begin
-		$display( "cpyp r%dp, r%dp", ( final_ig2_ra_index << 1 ), 
-			( final_ig2_rb_index << 1 ) );
+		$display( "cpyp r%dp, r%dp", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index), 
+			`make_reg_ind_from_pi(final_ig2_other_rbp_index) );
 	end
 	
 	
@@ -223,8 +233,9 @@ task disassemble_grp_2_instr;
 	// pair with the "pc" [r14p] register pair)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_swp )
 	begin
-		$display( "swp r%dp, r%dp", ( final_ig2_ra_index << 1 ), 
-			( final_ig2_rb_index << 1 ) );
+		$display( "swp r%dp, r%dp", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index), 
+			`make_reg_ind_from_pi(final_ig2_other_rbp_index) );
 	end
 	
 	
@@ -235,7 +246,8 @@ task disassemble_grp_2_instr;
 	// (CALL subroutine at address in reg pair rAp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_call )
 	begin
-		$display( "call r%dp", ( final_ig2_ra_index << 1 ) );
+		$display( "call r%dp", 
+			`make_reg_ind_from_pi(final_ig2_other_rap_index) );
 	end
 	
 	
@@ -245,14 +257,14 @@ task disassemble_grp_2_instr;
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldr )
 	begin
 		$display( "ldr r%d, r%dp", final_ig2_ra_index, 
-			( final_ig2_rb_index << 1 ) );
+			`make_reg_ind_from_pi(final_ig2_other_rbp_index) );
 	end
 	
 	// (STore Register rA contents to memory at address in rBp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_str  )
 	begin
 		$display( "str r%d, r%dp", final_ig2_ra_index, 
-			( final_ig2_rb_index << 1 ) );
+			`make_reg_ind_from_pi(final_ig2_other_rbp_index) );
 	end
 	
 	else
@@ -362,8 +374,16 @@ task disassemble_grp_5_instr;
 	// pc])
 	if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
 	begin
-		$display( "cpypi r%dp, $%h", ( final_ig5_ra_index << 1 ),
+		//$display( "%h", final_ig5_other_rap_index );
+		//$display( "cpypi r%dp, $%h", 
+		//	`make_reg_ind_from_pi(final_ig5_other_rap_index),
+		//	instr_in_lo );
+		$display( "cpypi r%dp, $%h", final_ig5_other_rap_index,
 			instr_in_lo );
+		//$display( "cpypi %d %d", final_ig5_ra_index, 
+		//	final_ig5_other_rap_index );
+		//$display( "cpypi %d %d", ( final_ig5_other_rap_index << 1 ),
+		//	final_ig5_other_rap_index );
 	end
 	
 	// Call instructions

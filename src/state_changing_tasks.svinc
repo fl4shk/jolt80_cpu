@@ -125,11 +125,11 @@ task prep_load_instr_lo_reg;
 	prep_load_16_no_addr();
 endtask
 
-task prep_load_instr_hi_leave_pc;
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	data_inout_addr <= `get_cpu_rp_pc;
-	prep_load_16_no_addr();
-endtask
+//task prep_load_instr_hi_leave_pc;
+//	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+//	data_inout_addr <= `get_cpu_rp_pc;
+//	prep_load_16_no_addr();
+//endtask
 
 
 task prep_update_pc_etc_after_ipc;

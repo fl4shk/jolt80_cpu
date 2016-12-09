@@ -23,18 +23,18 @@ package pkg_cpu;
 	// Special general purpose register pairs
 	
 	// The pc register pair occupies the register pair r14p ({ r14, r15 })
-	parameter cpu_rp_pc_hi_rind = `cpu_reg_index_ie_width'd14;
-	parameter cpu_rp_pc_lo_rind = `cpu_reg_index_ie_width'd15;
+	parameter cpu_rp_pc_hi_rind = 14;
+	parameter cpu_rp_pc_lo_rind = 15;
 	
 	// The register pair index of the program counter
-	parameter cpu_rp_pc_pind = `cpu_rp_index_ie_width'd7;
+	parameter cpu_rp_pc_pind = 7;
 	
 	// The lr register pair occupies the register pair r12p ({ r12, r13 })
-	parameter cpu_rp_lr_hi_rind = `cpu_reg_index_ie_width'd12;
-	parameter cpu_rp_lr_lo_rind = `cpu_reg_index_ie_width'd13;
+	parameter cpu_rp_lr_hi_rind = 12;
+	parameter cpu_rp_lr_lo_rind = 13;
 	
 	// The register pair index of the link register
-	parameter cpu_rp_lr_pind = `cpu_rp_index_ie_width'd6;
+	parameter cpu_rp_lr_pind = 6;
 	
 	
 	//typedef enum bit [`cpu_state_msb_pos:0]

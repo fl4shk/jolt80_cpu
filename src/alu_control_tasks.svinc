@@ -1,0 +1,189 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef alu_control_tasks_svinc
+`define alu_control_tasks_svinc
+
+
+task prep_alu_instr_grp_1_generic;
+	input [`instr_g1_op_msb_pos:0] opcode;
+	input [`instr_g1_ra_index_msb_pos:0] ra_index;
+	input [`instr_g1_imm_value_msb_pos:0] imm_value_8;
+	
+	
+	
+	case (opcode)
+		// Arithmetic instructions:
+		pkg_instr_dec::instr_g1_op_addi:
+		begin
+			//the_alu_op <= pkg_alu::alu_op_add;
+			//alu_a_in_lo <= cpu_regs[ra_index];
+			the_alu_was_used <= 1;
+		end
+		
+		pkg_instr_dec::instr_g1_op_adci:
+		begin
+			the_alu_was_used <= 1;
+		end
+		
+		pkg_instr_dec::instr_g1_op_cmpi:
+		begin
+			the_alu_was_used <= 1;
+		end
+		
+		//Copy instructions:
+		
+		// (CoPY Immediate)
+		//pkg_instr_dec::instr_g1_op_cpyi:
+		//begin
+		//	the_alu_was_used <= 
+		//end
+		default:
+		begin
+			the_alu_was_used <= 0;
+		end
+	endcase
+	
+	
+endtask
+
+task prep_alu_instr_grp_2_generic;
+	input [`instr_g2_op_msb_pos:0] opcode;
+	input [`instr_g2_ra_index_msb_pos:0] ra_index;
+	input [`instr_g2_rb_index_msb_pos:0] rb_index;
+	input ra_index_is_for_pair, rb_index_is_for_pair;
+	
+	
+	
+endtask
+
+task prep_alu_instr_grp_3_generic;
+	input [`instr_g3_op_msb_pos:0] opcode;
+	input [`instr_g3_ra_index_msb_pos:0] ra_index;
+	input [`instr_g3_rbp_index_msb_pos:0] rbp_index;
+	input [`instr_g3_rcp_index_msb_pos:0] rcp_index;
+	
+	
+endtask
+
+task prep_alu_instr_grp_4_generic;
+	input [`instr_g4_op_msb_pos:0] opcode;
+	input [`instr_g4_imm_value_msb_pos:0] imm_value_8;
+	
+	
+endtask
+
+task prep_alu_instr_grp_5_generic;
+	input [`instr_g5_op_msb_pos:0] opcode;
+	input [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
+	input [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;
+	input ra_index_is_for_pair;
+	
+	
+	
+endtask
+
+
+
+// This task uses (non-final_) igX_... and treats temp_data_in as instr_hi
+
+task prep_alu_if_needed_init;
+	
+	if ( init_instr_grp == pkg_instr_dec::instr_grp_1 )
+	begin
+		prep_alu_instr_grp_1_generic( ig1_opcode, ig1_ra_index, 
+			ig1_imm_value_8 );
+	end
+	
+	else if ( init_instr_grp == pkg_instr_dec::instr_grp_2 )
+	begin
+		prep_alu_instr_grp_2_generic( ig2_opcode, ig2_ra_index, 
+			ig2_rb_index, ig2_ra_index_is_for_pair, 
+			ig2_rb_index_is_for_pair );
+	end
+	
+	else if ( init_instr_grp == pkg_instr_dec::instr_grp_3 )
+	begin
+		prep_alu_instr_grp_3_generic( ig3_opcode, ig3_ra_index,
+			ig3_rbp_index, ig3_rcp_index );
+	end
+	
+	else if ( init_instr_grp == pkg_instr_dec::instr_grp_4 )
+	begin
+		prep_alu_instr_grp_4_generic( ig4_opcode, ig4_imm_value_8 );
+	end
+	
+	else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
+	begin
+		prep_alu_instr_grp_5_generic( ig5_opcode, ig5_ra_index,
+			ig5_rbp_index, ig5_ra_index_is_for_pair );
+	end
+	
+	
+	else // if ( init_instr_grp == pkg_instr_dec::instr_grp_unknown )
+	begin
+		
+	end
+	
+endtask
+
+
+
+// This task uses final_igX_... and treats temp_data_in as instr_lo
+task prep_alu_if_needed_final;
+	
+	if ( final_instr_grp == pkg_instr_dec::instr_grp_1 )
+	begin
+		prep_alu_instr_grp_1_generic( final_ig1_opcode, final_ig1_ra_index, 
+			final_ig1_imm_value_8 );
+	end
+	
+	else if ( final_instr_grp == pkg_instr_dec::instr_grp_2 )
+	begin
+		prep_alu_instr_grp_2_generic( final_ig2_opcode, final_ig2_ra_index, 
+			final_ig2_rb_index, final_ig2_ra_index_is_for_pair, 
+			final_ig2_rb_index_is_for_pair );
+	end
+	
+	else if ( final_instr_grp == pkg_instr_dec::instr_grp_3 )
+	begin
+		prep_alu_instr_grp_3_generic( final_ig3_opcode, final_ig3_ra_index,
+			final_ig3_rbp_index, final_ig3_rcp_index );
+	end
+	
+	else if ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
+	begin
+		prep_alu_instr_grp_4_generic( final_ig4_opcode, 
+			final_ig4_imm_value_8 );
+	end
+	
+	else if ( final_instr_grp == pkg_instr_dec::instr_grp_5 )
+	begin
+		prep_alu_instr_grp_5_generic( final_ig5_opcode, final_ig5_ra_index,
+			final_ig5_rbp_index, final_ig5_ra_index_is_for_pair );
+	end
+	
+	
+	else // if ( final_instr_grp == pkg_instr_dec::instr_grp_unknown )
+	begin
+		
+	end
+	
+endtask
+
+
+`endif		// alu_control_tasks_svinc
