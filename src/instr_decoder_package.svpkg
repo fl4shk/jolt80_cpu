@@ -247,51 +247,6 @@ package pkg_instr_dec;
 	} instr_grp_5_oper;
 	
 	
-	// instr_grp_1_decoder outputs
-	typedef struct packed
-	{
-		bit [`instr_g1_op_msb_pos:0] opcode;
-		bit [`instr_g1_ra_index_msb_pos:0] ra_index;
-		bit [`instr_g1_imm_value_msb_pos:0] imm_value_8;
-	} ig1_dec_outputs;
-	
-	
-	// instr_grp_2_decoder outputs
-	typedef struct packed
-	{
-		bit [`instr_g2_op_msb_pos:0] opcode;
-		bit [`instr_g2_ra_index_msb_pos:0] ra_index;
-		bit [`instr_g2_rb_index_msb_pos:0] rb_index;
-		bit ra_index_is_for_pair, rb_index_is_for_pair;
-	} ig2_dec_outputs;
-	
-	
-	// instr_grp_3_decoder outputs
-	typedef struct packed
-	{
-		bit [`instr_g3_op_msb_pos:0] opcode;
-		bit [`instr_g3_ra_index_msb_pos:0] ra_index;
-		bit [`instr_g3_rbp_index_msb_pos:0] rbp_index;
-		bit [`instr_g3_rcp_index_msb_pos:0] rcp_index;
-	} ig3_dec_outputs;
-	
-	
-	// instr_grp_4_decoder outputs
-	typedef struct packed
-	{
-		bit [`instr_g4_op_msb_pos:0] opcode;
-		bit [`instr_g4_imm_value_msb_pos:0] imm_value_8;
-	} ig4_dec_outputs;
-	
-	
-	// instr_grp_5_decoder outputs
-	typedef struct packed
-	{
-		bit [`instr_g5_op_msb_pos:0] opcode;
-		bit [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
-		bit [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;
-		bit ra_index_is_for_pair;
-	} ig5_dec_outputs;
 	
 	function get_instr_is_32_bit;
 		input [`instr_grp_msb_pos:0] test_instr_grp;
@@ -476,6 +431,37 @@ package pkg_instr_dec;
 		input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
 		ig5_get_rap_instr_can_change_pc
 			= ( test_ig5_opcode == instr_g5_op_cpypi );
+	endfunction
+	
+	
+	// Functions for checking whether an instruction is a load or store
+	// instruction
+	function ig1_get_instr_is_ldst;
+		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
+		ig1_get_instr_is_ldst = 0;
+	endfunction
+	
+	function ig2_get_instr_is_ldst;
+		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+		ig2_get_instr_is_ldst = ( ( test_ig2_opcode == instr_g2_op_ldr )
+			|| ( test_ig2_opcode == instr_g2_op_str ) );
+	endfunction
+	
+	function ig3_get_instr_is_ldst;
+		input [`instr_g3_op_msb_pos:0] test_ig3_opcode;
+		ig3_get_instr_is_ldst = ( ( test_ig3_opcode == instr_g3_op_ldrx )
+			|| ( test_ig3_opcode == instr_g3_op_strx ) );
+	endfunction
+	
+	function ig4_get_instr_is_ldst;
+		input [`instr_g4_op_msb_pos:0] test_ig4_opcode;
+		ig4_get_instr_is_ldst = 0;
+	endfunction
+	
+	function ig5_get_instr_is_ldst;
+		input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
+		ig5_get_instr_is_ldst = ( ( test_ig5_opcode == instr_g5_op_ldrxi )
+			|| ( test_ig5_opcode == instr_g5_op_strxi ) );
 	endfunction
 	
 endpackage

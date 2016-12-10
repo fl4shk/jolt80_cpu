@@ -15,27 +15,22 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
-`ifndef extra_wire_assignments_svinc
-`define extra_wire_assignments_svinc
+`ifndef alu_vars_svinc
+`define alu_vars_svinc
+
+// ALU inputs and outputs
+alu_oper the_alu_op;
+bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in,
+	alu_out_hi, alu_out_lo;
+bit [`proc_flags_msb_pos:0] alu_proc_flags_in, alu_proc_flags_out;
 
 
+// The CPU flags that the ALU becomes made aware of 
+bit [`proc_flags_msb_pos:0] true_proc_flags;
+bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded;
+//wire alu_modded_proc_flags;
 
+bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_reg_index;
+bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
 
-
-
-assign { init_instr_is_32_bit, final_instr_is_32_bit }
-	= { pkg_instr_dec::get_instr_is_32_bit(init_instr_grp),
-	pkg_instr_dec::get_instr_is_32_bit(final_instr_grp) };
-
-assign final_ig1_instr_is_ldst
-	= pkg_instr_dec::ig1_get_instr_is_ldst(final_ig1_opcode);
-assign final_ig2_instr_is_ldst
-	= pkg_instr_dec::ig2_get_instr_is_ldst(final_ig2_opcode);
-assign final_ig3_instr_is_ldst
-	= pkg_instr_dec::ig3_get_instr_is_ldst(final_ig3_opcode);
-assign final_ig4_instr_is_ldst
-	= pkg_instr_dec::ig4_get_instr_is_ldst(final_ig4_opcode);
-assign final_ig5_instr_is_ldst
-	= pkg_instr_dec::ig5_get_instr_is_ldst(final_ig5_opcode);
-
-`endif		// extra_wire_assignments_svinc
+`endif		// alu_vars_svinc

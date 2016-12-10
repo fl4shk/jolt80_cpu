@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
-`ifndef update_instr_possibly_changes_pc_tasks_svinc
-`define update_instr_possibly_changes_pc_tasks_svinc
+`ifndef update_non_bc_instr_possibly_changes_pc_tasks_svinc
+`define update_non_bc_instr_possibly_changes_pc_tasks_svinc
 
 task update_ipc_pc_for_grp_1_instr;
 	
@@ -24,7 +24,7 @@ task update_ipc_pc_for_grp_1_instr;
 	begin
 		if ( pkg_instr_dec::ig1_get_ra_instr_can_change_pc(ig1_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			non_bc_instr_possibly_changes_pc = 1;
 		end
 	end
 	
@@ -39,7 +39,8 @@ task update_ipc_pc_for_grp_2_instr;
 	if ( pkg_instr_dec::ig2_get_instr_definitely_changes_pc(ig2_opcode) )
 	begin
 		//$display("The call instruction");
-		instr_possibly_changes_pc = 1;
+		//non_bc_instr_possibly_changes_pc = 1;
+		instr_is_branch_or_call = 1;
 	end
 	
 	else if (final_ig2_pc_contains_ra)
@@ -47,7 +48,7 @@ task update_ipc_pc_for_grp_2_instr;
 		if ( pkg_instr_dec::ig2_get_ra_instr_can_change_pc(ig2_opcode) )
 		begin
 			//$display("final_ig2_pc_contains_ra and stuff");
-			instr_possibly_changes_pc = 1;
+			non_bc_instr_possibly_changes_pc = 1;
 		end
 		
 	end
@@ -63,7 +64,7 @@ task update_ipc_pc_for_grp_2_instr;
 		if ( pkg_instr_dec::ig2_get_rap_instr_can_change_pc(ig2_opcode) )
 		begin
 			//$display("final_ig2_rap_is_pc and stuff");
-			instr_possibly_changes_pc = 1;
+			non_bc_instr_possibly_changes_pc = 1;
 		end
 		
 	end
@@ -74,7 +75,7 @@ task update_ipc_pc_for_grp_2_instr;
 		if ( pkg_instr_dec::ig2_get_rbp_instr_can_change_pc(ig2_opcode) )
 		begin
 			//$display("final_ig2_rbp_is_pc and stuff");
-			instr_possibly_changes_pc = 1;
+			non_bc_instr_possibly_changes_pc = 1;
 		end
 	end
 	
@@ -87,7 +88,7 @@ task update_ipc_pc_for_grp_3_instr;
 	begin
 		if ( pkg_instr_dec::ig3_get_ra_instr_can_change_pc(ig3_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			non_bc_instr_possibly_changes_pc = 1;
 		end
 	end
 	
@@ -95,7 +96,7 @@ endtask
 
 // ALL Instructions in group 4 change the PC
 task update_ipc_pc_for_grp_4_instr;
-	instr_possibly_changes_pc = 1;
+	non_bc_instr_possibly_changes_pc = 1;
 endtask
 
 task update_ipc_pc_for_grp_5_instr;
@@ -104,7 +105,8 @@ task update_ipc_pc_for_grp_5_instr;
 	if ( pkg_instr_dec::ig5_get_instr_definitely_changes_pc
 		(final_ig5_opcode) )
 	begin
-		instr_possibly_changes_pc = 1;
+		//non_bc_instr_possibly_changes_pc = 1;
+		instr_is_branch_or_call = 1;
 	end
 	
 	else if (final_ig5_pc_contains_ra)
@@ -112,7 +114,7 @@ task update_ipc_pc_for_grp_5_instr;
 		if ( pkg_instr_dec::ig5_get_ra_instr_can_change_pc
 			(final_ig5_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			non_bc_instr_possibly_changes_pc = 1;
 		end
 	end
 	
@@ -121,7 +123,7 @@ task update_ipc_pc_for_grp_5_instr;
 		if ( pkg_instr_dec::ig5_get_rap_instr_can_change_pc
 			(final_ig5_opcode) )
 		begin
-			instr_possibly_changes_pc = 1;
+			non_bc_instr_possibly_changes_pc = 1;
 		end
 	end
 	
@@ -134,4 +136,4 @@ task update_ipc_pc_for_grp_5_instr;
 endtask
 
 
-`endif		// update_instr_possibly_changes_pc_tasks_svinc
+`endif		// update_non_bc_instr_possibly_changes_pc_tasks_svinc

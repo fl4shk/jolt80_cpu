@@ -77,13 +77,14 @@ package pkg_cpu;
 		// finish executing on this clock cycle)
 		cpu_st_start_exec_instr,
 		
-		// Finish executing a multi-cycle instruction (this is the second
-		// cycle of instruction execution)
-		cpu_st_finish_exec_instr,
+		//// Finish executing a multi-cycle instruction (this is the second
+		//// cycle of instruction execution)
+		//cpu_st_finish_exec_instr,
+		cpu_st_finish_exec_ldst_instr,
 		
 		// Check if the PC was changed to a new value before deciding
 		// whether to 
-		cpu_st_update_pc_after_instr_possibly_changed
+		cpu_st_update_pc_after_non_bc_ipc
 		
 	} cpu_state;
 	

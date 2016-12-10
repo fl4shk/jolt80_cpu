@@ -69,6 +69,8 @@ module tb_memory
 	// The memory (DON'T change this to a bit array!)
 	logic [`cpu_data_inout_8_msb_pos:0] mem[0:num_bytes];
 	
+	//bit can_write;
+	bit can_rdwr;
 	
 	//assign read_data_out = ( the_inputs.read_data_acc_sz 
 	//	== pkg_cpu::cpu_data_acc_sz_8 ) ? mem[the_inputs.read_addr_in]
@@ -101,6 +103,9 @@ module tb_memory
 			mem[zero_counter] = 0;
 		end
 		
+		//can_write = 1;
+		can_rdwr = 1;
+		
 		//$readmemh( "readmemh_input.txt.ignore", mem, 0, ( num_bytes >> 1 )
 		//	- 1 );
 		$readmemh( "readmemh_input.txt.ignore", mem, 0, num_bytes );
@@ -115,36 +120,51 @@ module tb_memory
 	
 	always @ ( posedge clk )
 	begin
-		if ( write_data_we == 1'b0 )
+		can_rdwr <= can_rdwr + 1;
+		
+		if (can_rdwr )
 		begin
-			// Read 8-bit data
-			if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+			//$display( "mem[4], mem[5]:  %h %h", mem[4], mem[5] );
+			
+			if ( write_data_we == 1'b0 )
 			begin
-				read_data_out <= { `cpu_data_inout_8_width'h0,
-					mem[addr_in] };
+				//$display("helo");
+				// Read 8-bit data
+				if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+				begin
+					$display( "8-bit read:  %h", mem[addr_in] );
+					read_data_out <= { `cpu_data_inout_8_width'h0,
+						mem[addr_in] };
+				end
+				
+				// Read 16-bit data
+				else // if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
+				begin
+					read_data_out <= `make_mem_pair(addr_in);
+				end
 			end
 			
-			// Read 16-bit data
-			else // if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
+			else // if ( write_data_we == 1'b1 )
 			begin
-				read_data_out <= `make_mem_pair(addr_in);
+				//$display("nice");
+				// Write 8-bit data
+				if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+				begin
+					mem[addr_in] 
+						<= write_data_in[`cpu_data_inout_8_msb_pos:0];
+					$display( "8-bit write:  %h, %h", write_data_in,
+						write_data_in[`cpu_data_inout_8_msb_pos:0] );
+				end
+				
+				// Write 16-bit data
+				else // if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
+				begin
+					`make_mem_pair(addr_in) <= write_data_in;
+					$display( "16-bit write:  %h", write_data_in );
+				end
 			end
 		end
 		
-		else // if ( write_data_we == 1'b1 )
-		begin
-			// Write 8-bit data
-			if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
-			begin
-				mem[addr_in] <= write_data_in[`cpu_data_inout_8_msb_pos:0];
-			end
-			
-			// Write 16-bit data
-			else // if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
-			begin
-				`make_mem_pair(addr_in) <= write_data_in;
-			end
-		end
 	end
 	
 endmodule

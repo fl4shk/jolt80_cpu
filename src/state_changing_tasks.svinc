@@ -29,8 +29,11 @@ endtask
 
 // Advance the PC and data_inout_addr after a 16-bit non-PC-changing
 // instruction, which is also known as a "regular" 16-bit instruction
-task advance_pc_etc_after_reg_instr_16;
-	set_pc_and_dio_addr(`get_pc_after_reg_instr_16);
+//task advance_pc_etc_after_reg_instr_16;
+//	set_pc_and_dio_addr(`get_pc_after_reg_instr_16);
+//endtask
+task advance_pc_etc_after_reg_instr;
+	set_pc_and_dio_addr(`get_pc_after_reg_instr);
 endtask
 
 //// Advance the PC and data_inout_addr after a 32-bit non-PC-changing
@@ -68,15 +71,15 @@ task prep_load_8_with_addr;
 endtask
 
 // Prepare to, on the next cycle, write an 8-bit value
-task prep_store_8_no_addr;
-	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-	enable_dio_we();
-endtask
-task prep_store_8_with_addr;
+task prep_store_8;
+	input [`cpu_data_inout_8_msb_pos:0] write_data;
 	input [`cpu_addr_msb_pos:0] write_addr;
 	
 	data_inout_addr <= write_addr;
-	prep_store_8_no_addr();
+	//data_inout <= write_data;
+	temp_data_out <= write_data;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
+	enable_dio_we();
 endtask
 
 // Prepare to, on the next cycle, load a 16-bit value
@@ -93,11 +96,11 @@ endtask
 
 
 
-task prep_load_instr_hi_reg_after_16;
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	advance_pc_etc_after_reg_instr_16();
-	prep_load_16_no_addr();
-endtask
+//task prep_load_instr_hi_reg_after_16;
+//	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+//	advance_pc_etc_after_reg_instr_16();
+//	prep_load_16_no_addr();
+//endtask
 
 //task prep_load_instr_hi_reg_after_32;
 //	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
@@ -105,25 +108,46 @@ endtask
 //	prep_load_16_no_addr();
 //endtask
 
-task prep_load_instr_hi_reg_generic;
-	if (!final_instr_is_32_bit)
+
+// Advance the PC after a non-branch, non-call instruction
+task prep_load_instr_hi_after_reg;
+	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	advance_pc_etc_after_reg_instr();
+	prep_load_16_no_addr();
+endtask
+
+task prep_load_instr_hi_after_bc;
+	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	prep_load_16_no_addr();
+endtask
+
+task prep_load_instr_hi_generic;
+	//if (!final_instr_is_32_bit)
+	//begin
+	//	$display("16-bit instruction");
+	//	//prep_load_instr_hi_reg_after_16();
+	//end
+	//else // if (final_instr_is_32_bit)
+	//begin
+	//	$display("32-bit instruction");
+	//	//prep_load_instr_hi_reg_after_32();
+	//end
+	
+	if (!instr_is_branch_or_call)
 	begin
-		$display("16-bit instruction");
-		//prep_load_instr_hi_reg_after_16();
-	end
-	else // if (final_instr_is_32_bit)
-	begin
-		$display("32-bit instruction");
-		//prep_load_instr_hi_reg_after_32();
+		prep_load_instr_hi_after_reg();
 	end
 	
-	prep_load_instr_hi_reg_after_16();
+	else // if (instr_is_branch_or_call)
+	begin
+		prep_load_instr_hi_after_bc();
+	end
 endtask
 
 task prep_load_instr_lo_reg;
 	curr_state <= pkg_cpu::cpu_st_load_instr_lo;
 	//advance_dio_addr_for_instr_lo();
-	advance_pc_etc_after_reg_instr_16();
+	advance_pc_etc_after_reg_instr();
 	prep_load_16_no_addr();
 endtask
 
@@ -135,7 +159,7 @@ endtask
 
 
 task prep_update_pc_etc_after_ipc;
-	curr_state <= pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed;
+	curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
 endtask
 
 

@@ -107,6 +107,13 @@ module spcpu_test_bench;
 		
 	end
 	
+	//always @ ( posedge tb_half_clk )
+	//begin
+	//	$display( "%h %h %h %h", test_cpu_data_inout_direct,
+	//		test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
+	//		test_cpu_data_inout_we );
+	//end
+	
 	
 endmodule
 
@@ -129,7 +136,8 @@ endmodule
 // The next value of the PC after a non-PC-changing 16-bit instruction, or
 // the next value of data_inout_addr after loading the high 16 bits of a
 // 32-bit instruction
-`define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + `instr_16_num_bytes )
+//`define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + `instr_16_num_bytes )
+`define get_pc_after_reg_instr ( `get_cpu_rp_pc + `instr_16_num_bytes )
 
 // The next value of the PC after a non-PC-changing 32-bit instruction
 //`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + `instr_32_num_bytes )
@@ -192,10 +200,6 @@ module spcpu
 	bit [`cpu_state_msb_pos:0] curr_state;
 	
 	
-	// If the pc was POSSIBLY changed by an instruction, which is used to
-	// determine whether or not to change the pc automatically.
-	//bit [4:0] temp_ipc_pc_vec;
-	bit instr_possibly_changes_pc;
 	
 	// These are used for communication with the outside world
 	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
@@ -204,24 +208,10 @@ module spcpu
 	
 	
 	
+	
 	`include "src/extra_instr_dec_vars.svinc"
+	`include "src/alu_vars.svinc"
 	
-	// ALU inputs and outputs
-	alu_oper the_alu_op;
-	bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in,
-		alu_out_hi, alu_out_lo;
-	bit [`proc_flags_msb_pos:0] alu_proc_flags_in, alu_proc_flags_out;
-	
-	
-	// The CPU flags that the ALU becomes made aware of 
-	bit [`proc_flags_msb_pos:0] true_proc_flags;
-	bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded;
-	//wire alu_modded_proc_flags;
-	
-	bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_reg_index;
-	bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
-	
-	wire init_instr_is_32_bit, final_instr_is_32_bit;
 	
 	//assign alu_modded_proc_flags = ( true_proc_flags 
 	//	!= alu_proc_flags_out );
@@ -238,11 +228,6 @@ module spcpu
 	// bits of an instruction
 	instr_group final_instr_grp;
 	
-	ig1_dec_outputs ig1d_outputs;
-	ig2_dec_outputs ig2d_outputs;
-	ig3_dec_outputs ig3d_outputs;
-	ig4_dec_outputs ig4d_outputs;
-	ig5_dec_outputs ig5d_outputs;
 	
 	
 	
@@ -251,15 +236,27 @@ module spcpu
 		.group_out(init_instr_grp) );
 	
 	instr_grp_1_decoder instr_grp_1_dec( .instr_hi(temp_data_in),
-		.ig1d_outputs(ig1d_outputs) );
+		.opcode(ig1_opcode), .ra_index(ig1_ra_index),
+		.imm_value_8(ig1_imm_value_8) );
 	instr_grp_2_decoder instr_grp_2_dec( .instr_hi(temp_data_in),
-		.ig2d_outputs(ig2d_outputs) );
+		.opcode(ig2_opcode), 
+		.ra_index(ig2_ra_index),
+		.rb_index(ig2_rb_index),
+		.ra_index_is_for_pair(ig2_ra_index_is_for_pair),
+		.rb_index_is_for_pair(ig2_rb_index_is_for_pair) );
 	instr_grp_3_decoder instr_grp_3_dec( .instr_hi(temp_data_in),
-		.ig3d_outputs(ig3d_outputs) );
+		.opcode(ig3_opcode), 
+		.ra_index(ig3_ra_index),
+		.rbp_index(ig3_rbp_index), 
+		.rcp_index(ig3_rcp_index) );
 	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(temp_data_in),
-		.ig4d_outputs(ig4d_outputs) );
+		.opcode(ig4_opcode), 
+		.imm_value_8(ig4_imm_value_8) );
 	instr_grp_5_decoder instr_grp_5_dec( .instr_hi(temp_data_in),
-		.ig5d_outputs(ig5d_outputs) );
+		.opcode(ig5_opcode), 
+		.ra_index(ig5_ra_index),
+		.rbp_index(ig5_rbp_index),
+		.ra_index_is_for_pair(ig5_ra_index_is_for_pair) );
 	
 	alu the_alu( .oper(the_alu_op), .a_in_hi(alu_a_in_hi),
 		.a_in_lo(alu_a_in_lo), .b_in(alu_b_in), 
@@ -274,10 +271,8 @@ module spcpu
 		: `cpu_data_inout_16_width'hz;
 	
 	
-	//assign instr_possibly_changes_pc = ( temp_ipc_pc_vec > 0 );
-	assign { init_instr_is_32_bit, final_instr_is_32_bit }
-		= { pkg_instr_dec::get_instr_is_32_bit(init_instr_grp),
-		pkg_instr_dec::get_instr_is_32_bit(final_instr_grp) };
+	
+	
 	
 	
 	`include "src/extra_wire_assignments.svinc"
@@ -337,14 +332,21 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
-		//if ( `get_cpu_rp_pc >= 20 * 2 )
-		//if ( ( `get_cpu_rp_pc >= ( 16'h10 * 2 ) )
-		////if ( ( `get_cpu_rp_pc >= ( 30 * 2 ) )
-		//	&& ( `get_cpu_rp_pc <= ( 200 * 2 ) ) )
-		if ( `get_cpu_rp_pc >= ( 16'h8010 ) )
+		if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			$display("\ndone");
-			$finish;
+			//if ( `get_cpu_rp_pc >= 20 * 2 )
+			//if ( ( `get_cpu_rp_pc >= ( 16'h10 * 2 ) )
+			////if ( ( `get_cpu_rp_pc >= ( 30 * 2 ) )
+			//	&& ( `get_cpu_rp_pc <= ( 200 * 2 ) ) )
+			//if ( `get_cpu_rp_pc >= ( 16'h8010 ) )
+			//if ( ( `get_cpu_rp_pc >= ( 16'h8010 ) )
+			if ( ( `get_cpu_rp_pc >= ( 16'h8020 ) )
+				|| ( ( `get_cpu_rp_pc > 16'h4 ) 
+				&& ( `get_cpu_rp_pc < 16'h8000 ) ) )
+			begin
+				$display("\ndone");
+				$finish;
+			end
 		end
 	end
 	
@@ -357,8 +359,11 @@ module spcpu
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
 			curr_state <= curr_state + 1;
-			prep_load_16_no_addr();
+			//prep_load_16_no_addr();
+			//prep_load_16_with_addr
 			//set_pc_and_dio_addr(0);
+			//prep_load_instr_hi_generic();
+			prep_load_16_no_addr();
 		end
 		
 		
@@ -375,12 +380,18 @@ module spcpu
 			debug_disp_regs_and_proc_flags();
 			$display();
 			
+			//debug_disp_init_instr();
 			
 			// Back up temp_data_in, init_instr_grp, and pc
 			instr_in_hi <= temp_data_in;
 			final_instr_grp <= init_instr_grp;
 			prev_pc <= `get_cpu_rp_pc;
 			
+			//$display( "%h, init_ig5_opcode:  %d", 
+			//	temp_data_in[ `instr_g5_ihi_op_range_hi 
+			//	: `instr_g5_ihi_op_range_lo ], ig5_opcode );
+			//
+			//$finish;
 			
 			// Back up the decoded instruction contents to be used on
 			// cycles after the current one.
@@ -452,19 +463,21 @@ module spcpu
 			start_exec_instr();
 		end
 		
-		else if ( curr_state == pkg_cpu::cpu_st_finish_exec_instr )
+		else if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
 		begin
-			finish_exec_instr();
+			finish_exec_ldst_instr();
 		end
 		
 		else // if ( curr_state 
 			// == pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed )
 		begin
-			$display("Check whether the pc was actually changed");
+			$display( "Check whether the pc was actually changed by a ",
+				"non-branch, non-call instruction" );
 			
 			//$display( "%h %h", prev_pc, `get_cpu_rp_pc );
 			
-			prep_load_instr_hi_reg_generic();
+			//prep_load_instr_hi_reg_generic();
+			prep_load_instr_hi_generic();
 			
 			// Check if the pc was ACTUALLY changed
 			if ( prev_pc == `get_cpu_rp_pc )
@@ -507,7 +520,8 @@ module spcpu
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
-			instr_possibly_changes_pc = 0;
+			{ instr_is_branch_or_call, non_bc_instr_possibly_changes_pc }
+				= 0;
 			
 			if ( final_instr_grp == pkg_instr_dec::instr_grp_1 )
 			begin

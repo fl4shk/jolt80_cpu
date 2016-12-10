@@ -28,8 +28,12 @@
 `define get_final_ig2_rpair_b `make_reg_pair_w_pi(final_ig2_rb_index)
 
 `define get_final_ig3_reg_a cpu_regs[final_ig3_ra_index]
+`define get_final_ig3_rpair_b `make_reg_pair_w_pi(final_ig3_rbp_index)
+`define get_final_ig3_rpair_c `make_reg_pair_w_pi(final_ig3_rcp_index)
+
 
 `define get_final_ig5_reg_a cpu_regs[final_ig5_ra_index]
+`define get_final_ig5_rpair_b `make_reg_pair_w_pi(final_ig5_rbp_index)
 `define get_final_ig5_rpair_a `make_reg_pair_w_pi(final_ig5_ra_index)
 
 
@@ -57,16 +61,40 @@ task finish_alu_op_with_dest_rpair;
 	true_proc_flags <= alu_proc_flags_out;
 endtask
 
+task start_exec_shared_non_ldst_suffix;
+	if (!non_bc_instr_possibly_changes_pc)
+	begin
+		prep_load_instr_hi_generic();
+	end
+	
+	else // if (non_bc_instr_possibly_changes_pc)
+	begin
+		prep_update_pc_etc_after_ipc();
+	end
+endtask
+
+task exec_ig4_branch;
+	// If it's negative
+	if (final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
+	begin
+		`get_cpu_rp_pc <= `get_cpu_rp_pc
+			+ { 8'hff, final_ig4_imm_value_8 };
+	end
+	else //if (!final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
+	begin
+		`get_cpu_rp_pc <= `get_cpu_rp_pc + final_ig4_imm_value_8;
+	end
+endtask
 
 task start_exec_instr_from_grp_1;
 	
 	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
 	//	ig1_instr_changes_pc );
 	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h\t\t%h", 
-	//	final_ig1_opcode, instr_possibly_changes_pc );
+	//	final_ig1_opcode, non_bc_instr_possibly_changes_pc );
 	//$display( "%h, %h", instr_in_hi, final_ig1_opcode );
 	//$display( "group 1 instr:\t\t%h\t\t%h", final_ig1_opcode, 
-	//	instr_possibly_changes_pc );
+	//	non_bc_instr_possibly_changes_pc );
 	
 	//$display( ig1_opcode == pkg_instr_dec::instr_g1_op_addi );
 	
@@ -117,15 +145,9 @@ task start_exec_instr_from_grp_1;
 	endcase
 	
 	
-	
-	if (!instr_possibly_changes_pc)
+	if (!final_ig1_instr_is_ldst)
 	begin
-		prep_load_instr_hi_reg_generic();
-	end
-	
-	else // if (instr_possibly_changes_pc)
-	begin
-		prep_update_pc_etc_after_ipc();
+		start_exec_shared_non_ldst_suffix();
 	end
 	
 	
@@ -136,12 +158,12 @@ endtask
 
 task start_exec_instr_from_grp_2;
 	//$display( "start_exec_instr_from_grp_2 is unfinished\t\t%h\t\t%h", 
-	//	ig2_opcode, instr_possibly_changes_pc );
+	//	ig2_opcode, non_bc_instr_possibly_changes_pc );
 	
 	//$display( "%h %h %h", temp_ipc_pc_vec, ( temp_ipc_pc_vec != 0 ), 
-	//	instr_possibly_changes_pc );
+	//	non_bc_instr_possibly_changes_pc );
 	//$display( "group 2 instr:\t\t%h\t\t%h", final_ig2_opcode, 
-	//	instr_possibly_changes_pc );
+	//	non_bc_instr_possibly_changes_pc );
 	
 	//$display( "%h  r%h<p>, r%h<p>", final_ig2_opcode, final_ig2_ra_index,
 	//	final_ig2_rb_index );
@@ -313,9 +335,8 @@ task start_exec_instr_from_grp_2;
 		// (CALL subroutine at address in reg pair rAp)
 		pkg_instr_dec::instr_g2_op_call:
 		begin
-			`get_cpu_rp_lr <= `get_pc_after_reg_instr_16; 
-			`get_cpu_rp_pc <= ( `get_final_ig2_rpair_a - 
-				`instr_16_num_bytes );
+			`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
+			`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
 		end
 		
 		
@@ -324,100 +345,203 @@ task start_exec_instr_from_grp_2;
 		// (LoaD contents into Register rA from memory at address in rBp)
 		pkg_instr_dec::instr_g2_op_ldr:
 		begin
-			//prep_load_8_with_addr(`get_final_ig
+			prep_load_8_with_addr(`get_final_ig2_rpair_b);
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// (STore Register rA contents to memory at address in rBp)
 		pkg_instr_dec::instr_g2_op_str :
 		begin
-			
+			prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		default:
+		begin
+			$display("Illegal Group 2 Instruction!");
 		end
 		
 	endcase
 	
-	if (!instr_possibly_changes_pc)
+	if (!final_ig2_instr_is_ldst)
 	begin
-		prep_load_instr_hi_reg_generic();
-	end
-	
-	else // if (instr_possibly_changes_pc)
-	begin
-		prep_update_pc_etc_after_ipc();
+		start_exec_shared_non_ldst_suffix();
 	end
 	
 endtask
 
 task start_exec_instr_from_grp_3;
 	//$display( "start_exec_instr_from_grp_3 is unfinished\t\t%h\t\t%h", 
-	//	final_ig3_opcode, instr_possibly_changes_pc );
+	//	final_ig3_opcode, non_bc_instr_possibly_changes_pc );
 	//$display( "group 3 instr:\t\t%h\t\t%h", final_ig3_opcode, 
-	//	instr_possibly_changes_pc );
+	//	non_bc_instr_possibly_changes_pc );
 	
 	disassemble_grp_3_instr();
 	
-	if (!instr_possibly_changes_pc)
-	begin
-		prep_load_instr_hi_reg_generic();
-	end
+	case (final_ig3_opcode)
+		// Indexed Load/store instructions:
+		
+		// Load 8-bit value from memory at address [rBp + rCp] into rA
+		pkg_instr_dec::instr_g3_op_ldrx:
+		begin
+			//$display( "ldrx:  %h %h", final_ig3_rbp_index,
+			//	final_ig3_rcp_index );
+			prep_load_8_with_addr( `get_final_ig3_rpair_b 
+				+ `get_final_ig3_rpair_c );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		// Store rA to memory at address [rBp + rCp]
+		pkg_instr_dec::instr_g3_op_strx:
+		begin
+			//$display( "strx:  %d %d %d\t\t%h %h %h", final_ig3_ra_index,
+			//	final_ig3_rbp_index, final_ig3_rcp_index, 
+			//	`get_final_ig3_reg_a, `get_final_ig3_rpair_b, 
+			//	`get_final_ig3_rpair_c );
+			//$display( "%d %d\t\t%d %d", final_ig3_rbp_index, 
+			//	final_ig3_rcp_index,
+			//	`make_reg_ind_from_pi(final_ig3_rbp_index), 
+			//	`make_reg_ind_from_pi(final_ig3_rcp_index) );
+			prep_store_8( `get_final_ig3_reg_a, ( `get_final_ig3_rpair_b 
+				+ `get_final_ig3_rpair_c ) );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		default:
+		begin
+			$display("Illegal Group 3 Instruction!");
+		end
+	endcase
 	
-	else // if (instr_possibly_changes_pc)
+	if (!final_ig3_instr_is_ldst)
 	begin
-		prep_update_pc_etc_after_ipc();
+		start_exec_shared_non_ldst_suffix();
 	end
 	
 endtask
 
 task start_exec_instr_from_grp_4;
 	//$display( "start_exec_instr_from_grp_4 is unfinished\t\t%h\t\t%h", 
-	//	final_ig4_opcode, instr_possibly_changes_pc );
+	//	final_ig4_opcode, non_bc_instr_possibly_changes_pc );
 	//$display( "group 4 instr:\t\t%h\t\t%h", final_ig4_opcode, 
-	//	instr_possibly_changes_pc );
+	//	non_bc_instr_possibly_changes_pc );
 	
 	disassemble_grp_4_instr();
 	
-	if (!instr_possibly_changes_pc)
-	begin
-		prep_load_instr_hi_reg_generic();
-	end
+	// Branching instructions (note that iiii iiii is a SIGNED 8-bit
+	// integer):
 	
-	else // if (instr_possibly_changes_pc)
+	// (branch always)
+	case (final_ig4_opcode)
+		pkg_instr_dec::instr_g4_op_bra:
+		begin
+			exec_ig4_branch();
+		end
+		
+		// (branch never, a form of NOP)
+		pkg_instr_dec::instr_g4_op_bnv:
+		begin
+			// Wait a cycle
+		end
+		
+		// (branch when Z == 0)
+		pkg_instr_dec::instr_g4_op_bne:
+		begin
+			if (!true_proc_flags[pkg_pflags::pf_slot_z])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when Z == 1)
+		pkg_instr_dec::instr_g4_op_beq:
+		begin
+			if (true_proc_flags[pkg_pflags::pf_slot_z])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when C == 0 [unsigned less than])
+		pkg_instr_dec::instr_g4_op_bcc:
+		begin
+			if (!true_proc_flags[pkg_pflags::pf_slot_c])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when C == 1 [unsigned greater than or equal])
+		pkg_instr_dec::instr_g4_op_bcs:
+		begin
+			if (true_proc_flags[pkg_pflags::pf_slot_c])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when C == 0 and Z == 1 [unsigned less than or equal])
+		pkg_instr_dec::instr_g4_op_bls:
+		begin
+			if ( !true_proc_flags[pkg_pflags::pf_slot_c]
+				&& true_proc_flags[pkg_pflags::pf_slot_z] )
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when C == 1 and Z == 0 [unsigned greater than])
+		pkg_instr_dec::instr_g4_op_bhi:
+		begin
+			if ( true_proc_flags[pkg_pflags::pf_slot_c]
+				&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		default:
+		begin
+			$display("Illegal Group 4 Instruction!");
+		end
+		
+	endcase
+	
+	
+	if (!final_ig4_instr_is_ldst)
 	begin
-		prep_update_pc_etc_after_ipc();
+		start_exec_shared_non_ldst_suffix();
 	end
 	
 endtask
 
 task start_exec_instr_from_grp_5;
 	//$display( "start_exec_instr_from_grp_5 is unfinished\t\t%h\t\t%h", 
-	//	final_ig5_opcode, instr_possibly_changes_pc );
+	//	final_ig5_opcode, non_bc_instr_possibly_changes_pc );
 	//$display( "group 5 instr:\t\t%h\t\t%h", final_ig5_opcode, 
-	//	instr_possibly_changes_pc );
+	//	non_bc_instr_possibly_changes_pc );
 	
 	disassemble_grp_5_instr();
 	
 	if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
 	begin
 		//$display( "%h %h %h %h", final_ig5_other_rap_index,
-		//	final_ig5_rap_is_pc, instr_in_lo, instr_possibly_changes_pc );
+		//	final_ig5_rap_is_pc, instr_in_lo,
+		//	non_bc_instr_possibly_changes_pc );
 		$display( "%h %h", final_ig5_ra_index, instr_in_lo );
 		`make_reg_pair_w_pi(final_ig5_ra_index) <= instr_in_lo;
 	end
 	
-	if (!instr_possibly_changes_pc)
+	if (!final_ig5_instr_is_ldst)
 	begin
-		prep_load_instr_hi_reg_generic();
-	end
-	
-	else // if (instr_possibly_changes_pc)
-	begin
-		prep_update_pc_etc_after_ipc();
+		start_exec_shared_non_ldst_suffix();
 	end
 	
 endtask
 
 
-// Start executing an instruction.  The instruction MAY only take one
-// cycle after being loaded.
+// Start executing an instruction.  The instruction MAY only take one cycle
+// after being loaded.
 task start_exec_instr;
 	//$display("start_exec_instr()");
 	
@@ -453,63 +577,101 @@ endtask
 
 
 
-task finish_exec_instr_from_grp_1;
-	$display("finish_exec_instr_from_grp_1 is unfinished");
-endtask
-
-task finish_exec_instr_from_grp_2;
-	$display("finish_exec_instr_from_grp_2 is unfinished");
-endtask
-
-task finish_exec_instr_from_grp_3;
-	$display("finish_exec_instr_from_grp_3 is unfinished");
-endtask
-
-task finish_exec_instr_from_grp_4;
-	$display("finish_exec_instr_from_grp_4 is unfinished");
-endtask
-
-task finish_exec_instr_from_grp_5;
-	$display("finish_exec_instr_from_grp_5 is unfinished");
-endtask
 
 // Finish executing a instruction (second execution cycle of a multi-cycle
 // instruction)
-task finish_exec_instr;
+task finish_exec_ldst_instr;
 	//debug_disp_instr();
 	//$display();
 	
 	case (final_instr_grp)
 		pkg_instr_dec::instr_grp_1:
 		begin
-			finish_exec_instr_from_grp_1();
+			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid Group 1 ",
+				"Load Instruction!" );
 		end
 		
 		pkg_instr_dec::instr_grp_2:
 		begin
-			finish_exec_instr_from_grp_2();
+			case (final_ig2_opcode)
+				pkg_instr_dec::instr_g2_op_ldr:
+				begin
+					`get_final_ig2_reg_a <= temp_data_in;
+				end
+				pkg_instr_dec::instr_g2_op_str:
+				begin
+					// Wait a cycle
+				end
+				
+				default:
+				begin
+					$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
+						"Group 2 Load Instruction!" );
+				end
+			endcase
 		end
 		
 		pkg_instr_dec::instr_grp_3:
 		begin
-			finish_exec_instr_from_grp_3();
+			case (final_ig3_opcode)
+				pkg_instr_dec::instr_g3_op_ldrx:
+				begin
+					$display( "ldrx:  %h %h", final_ig3_ra_index,
+						temp_data_in );
+					`get_final_ig3_reg_a <= temp_data_in;
+				end
+				
+				pkg_instr_dec::instr_g3_op_strx:
+				begin
+					// Wait a cycle
+				end
+				
+				default:
+				begin
+					$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
+						"Group 5 Load Instruction!" );
+				end
+			endcase
 		end
 		
 		pkg_instr_dec::instr_grp_4:
 		begin
-			finish_exec_instr_from_grp_4();
+			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid Group 4 ",
+				"Load Instruction!" );
 		end
 		
 		pkg_instr_dec::instr_grp_5:
 		begin
-			finish_exec_instr_from_grp_5();
+			case (final_ig5_opcode)
+				pkg_instr_dec::instr_g5_op_ldrxi:
+				begin
+					`get_final_ig5_reg_a <= temp_data_in;
+				end
+				
+				pkg_instr_dec::instr_g5_op_strxi:
+				begin
+					// Wait a cycle
+				end
+				
+				default:
+				begin
+					$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
+						"Group 5 Load Instruction!" );
+				end
+			endcase
 		end
 	endcase
 	
-	// After finishing an instruction, the next step should ALWAYS be to
-	// load another instruction.
-	//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	
+	if (!non_bc_instr_possibly_changes_pc)
+	begin
+		prep_load_instr_hi_generic();
+	end
+	
+	else // if (non_bc_instr_possibly_changes_pc)
+	begin
+		prep_update_pc_etc_after_ipc();
+	end
 endtask
 
 
