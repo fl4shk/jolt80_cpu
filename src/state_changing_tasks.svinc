@@ -33,18 +33,18 @@ task advance_pc_etc_after_reg_instr_16;
 	set_pc_and_dio_addr(`get_pc_after_reg_instr_16);
 endtask
 
-// Advance the PC and data_inout_addr after a 32-bit non-PC-changing
-// instruction, which is also known as a "regular" 32-bit instruction
-task advance_pc_etc_after_reg_instr_32;
-	set_pc_and_dio_addr(`get_pc_after_reg_instr_32);
-endtask
+//// Advance the PC and data_inout_addr after a 32-bit non-PC-changing
+//// instruction, which is also known as a "regular" 32-bit instruction
+//task advance_pc_etc_after_reg_instr_32;
+//	set_pc_and_dio_addr(`get_pc_after_reg_instr_32);
+//endtask
 
 
-// Advance data_inout_addr by two bytes so the low 16 bits of a 32-bit
-// instruction can be loaded on the next cycle
-task advance_dio_addr_for_instr_lo;
-	data_inout_addr <= `get_pc_after_reg_instr_16;
-endtask
+//// Advance data_inout_addr by two bytes so the low 16 bits of a 32-bit
+//// instruction can be loaded on the next cycle
+//task advance_dio_addr_for_instr_lo;
+//	data_inout_addr <= `get_pc_after_reg_instr_16;
+//endtask
 
 
 task disable_dio_we;
@@ -99,28 +99,31 @@ task prep_load_instr_hi_reg_after_16;
 	prep_load_16_no_addr();
 endtask
 
-task prep_load_instr_hi_reg_after_32;
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	advance_pc_etc_after_reg_instr_32();
-	prep_load_16_no_addr();
-endtask
+//task prep_load_instr_hi_reg_after_32;
+//	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+//	advance_pc_etc_after_reg_instr_32();
+//	prep_load_16_no_addr();
+//endtask
 
 task prep_load_instr_hi_reg_generic;
 	if (!final_instr_is_32_bit)
 	begin
 		$display("16-bit instruction");
-		prep_load_instr_hi_reg_after_16();
+		//prep_load_instr_hi_reg_after_16();
 	end
 	else // if (final_instr_is_32_bit)
 	begin
 		$display("32-bit instruction");
-		prep_load_instr_hi_reg_after_32();
+		//prep_load_instr_hi_reg_after_32();
 	end
+	
+	prep_load_instr_hi_reg_after_16();
 endtask
 
 task prep_load_instr_lo_reg;
 	curr_state <= pkg_cpu::cpu_st_load_instr_lo;
-	advance_dio_addr_for_instr_lo();
+	//advance_dio_addr_for_instr_lo();
+	advance_pc_etc_after_reg_instr_16();
 	prep_load_16_no_addr();
 endtask
 

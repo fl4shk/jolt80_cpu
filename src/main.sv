@@ -132,7 +132,7 @@ endmodule
 `define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + `instr_16_num_bytes )
 
 // The next value of the PC after a non-PC-changing 32-bit instruction
-`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + `instr_32_num_bytes )
+//`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + `instr_32_num_bytes )
 
 
 `define wire_rhs_pc_indices_contain_reg_index( reg_index ) \
