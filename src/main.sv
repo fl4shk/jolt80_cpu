@@ -340,7 +340,7 @@ module spcpu
 			//	&& ( `get_cpu_rp_pc <= ( 200 * 2 ) ) )
 			//if ( `get_cpu_rp_pc >= ( 16'h8010 ) )
 			//if ( ( `get_cpu_rp_pc >= ( 16'h8010 ) )
-			if ( ( `get_cpu_rp_pc >= ( 16'h8020 ) )
+			if ( ( `get_cpu_rp_pc >= ( 16'h8030 ) )
 				|| ( ( `get_cpu_rp_pc > 16'h4 ) 
 				&& ( `get_cpu_rp_pc < 16'h8000 ) ) )
 			begin

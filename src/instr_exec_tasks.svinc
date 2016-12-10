@@ -462,7 +462,7 @@ task start_exec_instr_from_grp_4;
 			end
 		end
 		
-		// (branch when C == 0 [unsigned less than])
+		// (branch when C == 0 [unsigned greater than or equal])
 		pkg_instr_dec::instr_g4_op_bcc:
 		begin
 			if (!true_proc_flags[pkg_pflags::pf_slot_c])
@@ -471,7 +471,7 @@ task start_exec_instr_from_grp_4;
 			end
 		end
 		
-		// (branch when C == 1 [unsigned greater than or equal])
+		// (branch when C == 1 [unsigned less than])
 		pkg_instr_dec::instr_g4_op_bcs:
 		begin
 			if (true_proc_flags[pkg_pflags::pf_slot_c])
@@ -480,20 +480,22 @@ task start_exec_instr_from_grp_4;
 			end
 		end
 		
-		// (branch when C == 0 and Z == 1 [unsigned less than or equal])
+		// (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
+		// [unsigned less than or equal])
 		pkg_instr_dec::instr_g4_op_bls:
 		begin
-			if ( !true_proc_flags[pkg_pflags::pf_slot_c]
-				&& true_proc_flags[pkg_pflags::pf_slot_z] )
+			if ( ( true_proc_flags[pkg_pflags::pf_slot_c]
+				&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+				||  true_proc_flags[pkg_pflags::pf_slot_z] )
 			begin
 				exec_ig4_branch();
 			end
 		end
 		
-		// (branch when C == 1 and Z == 0 [unsigned greater than])
+		// (branch when C == 0 and Z == 0 [unsigned greater than])
 		pkg_instr_dec::instr_g4_op_bhi:
 		begin
-			if ( true_proc_flags[pkg_pflags::pf_slot_c]
+			if ( !true_proc_flags[pkg_pflags::pf_slot_c]
 				&& !true_proc_flags[pkg_pflags::pf_slot_z] )
 			begin
 				exec_ig4_branch();
@@ -523,14 +525,67 @@ task start_exec_instr_from_grp_5;
 	
 	disassemble_grp_5_instr();
 	
-	if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
-	begin
-		//$display( "%h %h %h %h", final_ig5_other_rap_index,
-		//	final_ig5_rap_is_pc, instr_in_lo,
-		//	non_bc_instr_possibly_changes_pc );
-		$display( "%h %h", final_ig5_ra_index, instr_in_lo );
-		`make_reg_pair_w_pi(final_ig5_ra_index) <= instr_in_lo;
-	end
+	//if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
+	//begin
+	//	//$display( "%h %h %h %h", final_ig5_other_rap_index,
+	//	//	final_ig5_rap_is_pc, instr_in_lo,
+	//	//	non_bc_instr_possibly_changes_pc );
+	//	$display( "%h %h", final_ig5_ra_index, instr_in_lo );
+	//	`make_reg_pair_w_pi(final_ig5_ra_index) <= instr_in_lo;
+	//end
+	
+	case (final_ig5_opcode)
+		
+		// Extended copy instructions:
+		
+		// (COPY Pair Immediate, which sets the a register pair rAp to a
+		// 16-bit value in one instruction, but in twice the number of
+		// cycles due to using more than two bytes [can be used a as a jump
+		// immediate by copying a 16-bit immediate value to the pc] [this
+		// instruction ONLY has an advantage over using two successive cpyi
+		// instructions when used to copy a 16-bit immediate value to the
+		// pc])
+		pkg_instr_dec::instr_g5_op_cpypi:
+		begin
+			`get_final_ig5_rpair_a <= instr_in_lo;
+		end
+		
+		// Call instructions
+		
+		// (CALL Immediate, which sets the link register to the return
+		// address, then sets the program counter to the destination
+		// address)
+		pkg_instr_dec::instr_g5_op_calli:
+		begin
+			`get_cpu_rp_lr <= `get_pc_after_reg_instr;
+			`get_cpu_rp_pc <= instr_in_lo;
+		end
+		
+		// Indexed Load/store instructions:
+		
+		// (Load 8-bit value from memory at address [rBp + 16-bit Immediate
+		// value] into rA)
+		pkg_instr_dec::instr_g5_op_ldrxi:
+		begin
+			prep_load_8_with_addr( `get_final_ig5_rpair_b
+				+ instr_in_lo );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		// (Store rA to memory at address [rBp + 16-bit Immediate value])
+		pkg_instr_dec::instr_g5_op_strxi:
+		begin
+			prep_store_8( `get_final_ig5_reg_a, ( `get_final_ig5_rpair_b 
+				+ instr_in_lo ) );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		default:
+		begin
+			$display("Illegal Group 5 Instruction!");
+		end
+		
+	endcase
 	
 	if (!final_ig5_instr_is_ldst)
 	begin

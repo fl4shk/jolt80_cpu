@@ -338,13 +338,14 @@ task disassemble_grp_4_instr;
 		$display( "bcs $%h", final_ig4_imm_value_8 );
 	end
 	
-	// (branch when C == 0 and Z == 1 [unsigned less than or equal])
+	// (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
+	// [unsigned less than or equal])
 	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bls )
 	begin
 		$display( "bls $%h", final_ig4_imm_value_8 );
 	end
 	
-	// (branch when C == 1 and Z == 0 [unsigned greater than])
+	// (branch when C == 0 and Z == 0 [unsigned greater than])
 	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bhi )
 	begin
 		$display( "bhi $%h", final_ig4_imm_value_8 );
@@ -393,14 +394,14 @@ task disassemble_grp_5_instr;
 	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_ldrxi )
 	begin
 		$display( "ldrxi r%d, r%dp, $%h", final_ig5_ra_index,
-			final_ig5_rbp_index, instr_in_lo );
+			`make_reg_ind_from_pi(final_ig5_rbp_index), instr_in_lo );
 	end
 	
 	// (Store rA to memory at address [rBp + 16-bit Immediate value])
 	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_strxi )
 	begin
 		$display( "strxi r%d, r%dp, $%h", final_ig5_ra_index,
-			final_ig5_rbp_index, instr_in_lo );
+			`make_reg_ind_from_pi(final_ig5_rbp_index), instr_in_lo );
 	end
 	
 	else
