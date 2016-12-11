@@ -349,9 +349,10 @@ task start_exec_instr_from_grp_2;
 		// (CALL subroutine at address in reg pair rAp)
 		pkg_instr_dec::instr_g2_op_call:
 		begin
-			`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
+			//`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
 			//`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
 			
+			`get_cpu_rp_lr <= `get_cpu_rp_pc; 
 			
 			// Add `instr_16_num_bytes (2) to the destination address
 			set_pc_and_dio_addr( `get_final_ig2_rpair_a 
@@ -579,8 +580,10 @@ task start_exec_instr_from_grp_5;
 			//$display( "calli:  %h %h %h %h", `get_cpu_rp_pc,
 			//	`get_pc_after_reg_instr, instr_in_lo,
 			//	instr_is_branch_or_call );
-			`get_cpu_rp_lr <= `get_pc_after_reg_instr;
+			//`get_cpu_rp_lr <= `get_pc_after_reg_instr;
 			//`get_cpu_rp_pc <= instr_in_lo;
+			
+			`get_cpu_rp_lr <= `get_cpu_rp_pc;
 			
 			// No need to do anything to instr_in_lo because
 			set_pc_and_dio_addr(instr_in_lo);
