@@ -318,7 +318,8 @@ module spcpu
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			if ( ( `get_cpu_rp_pc >= ( 16'h8030 ) )
+			//if ( ( `get_cpu_rp_pc >= ( 16'h8030 ) )
+			if ( ( `get_cpu_rp_pc >= ( 16'h8040 ) )
 				|| ( ( `get_cpu_rp_pc > 16'h4 ) 
 				&& ( `get_cpu_rp_pc < 16'h8000 ) ) )
 			begin

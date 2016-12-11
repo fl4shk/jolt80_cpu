@@ -34,12 +34,14 @@ task disassemble_grp_1_instr;
 	end
 	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addpbi )
 	begin
-		$display( "addpbi r%dp, $%h", final_ig1_ra_index,
+		$display( "addpbi r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
 			final_ig1_imm_value_8 );
 	end
 	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_subpbi )
 	begin
-		$display( "subpbi r%dp, $%h", final_ig1_ra_index,
+		$display( "subpbi r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
 			final_ig1_imm_value_8 );
 	end
 	

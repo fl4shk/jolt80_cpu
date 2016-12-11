@@ -207,7 +207,7 @@ module instr_grp_5_decoder
 	assign ra_index = instr_hi[ `instr_g5_ihi_ra_index_range_hi
 		: `instr_g5_ihi_ra_index_range_lo ] >> ra_index_is_for_pair;
 	
-	assign rbp_index = instr_hi[ `instr_g5_ihi_rbp_index_range_lo
+	assign rbp_index = instr_hi[ `instr_g5_ihi_rbp_index_range_hi
 		: `instr_g5_ihi_rbp_index_range_lo ];
 	
 	

@@ -125,6 +125,8 @@ module tb_memory
 		if (can_rdwr )
 		begin
 			//$display( "mem[4], mem[5]:  %h %h", mem[4], mem[5] );
+			//$display( "mem[0x7ffc], mem[0x7ffb], mem[0x7ffa]:  %h %h %h",
+			//	mem[16'h7ffc], mem[16'h7ffb], mem[16'h7ffa] );
 			
 			if ( write_data_we == 1'b0 )
 			begin
@@ -132,7 +134,8 @@ module tb_memory
 				// Read 8-bit data
 				if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
 				begin
-					$display( "8-bit read:  %h", mem[addr_in] );
+					$display( "8-bit read:  %h, %h", addr_in, 
+						mem[addr_in] );
 					read_data_out <= { `cpu_data_inout_8_width'h0,
 						mem[addr_in] };
 				end
@@ -152,7 +155,7 @@ module tb_memory
 				begin
 					mem[addr_in] 
 						<= write_data_in[`cpu_data_inout_8_msb_pos:0];
-					$display( "8-bit write:  %h, %h", write_data_in,
+					$display( "8-bit write:  %h, %h", addr_in,
 						write_data_in[`cpu_data_inout_8_msb_pos:0] );
 				end
 				
