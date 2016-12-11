@@ -285,6 +285,10 @@ module spcpu
 	bit ready;
 	initial ready = 0;
 	
+	
+	// This is used to determine when to stop simulation
+	logic [5:0] data_in_is_0_counter;
+	
 	always @ ( posedge clk )
 	begin
 	
@@ -307,6 +311,8 @@ module spcpu
 		curr_state <= 0;
 		ready <= 1;
 		
+		data_in_is_0_counter <= 0;
+		
 		prep_load_16_no_addr();
 	end
 	
@@ -314,15 +320,22 @@ module spcpu
 	
 	
 	
+	// End CPU simulation if there are a bunch of 0000's in a row
 	always @ ( posedge clk )
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			//if ( ( `get_cpu_rp_pc >= ( 16'h8030 ) )
-			if ( ( `get_cpu_rp_pc >= ( 16'h8040 ) )
-			//if ( ( `get_cpu_rp_pc >= ( 16'h8050 ) )
-				|| ( ( `get_cpu_rp_pc > 16'h4 ) 
-				&& ( `get_cpu_rp_pc < 16'h8000 ) ) )
+			if ( temp_data_in == 0 )
+			begin
+				data_in_is_0_counter <= data_in_is_0_counter + 1;
+			end
+			
+			else
+			begin
+				data_in_is_0_counter <= 0;
+			end
+			
+			if ( data_in_is_0_counter >= 4 )
 			begin
 				$display("\ndone");
 				$finish;

@@ -33,7 +33,7 @@ Group 1 (Non-branching instructions with 8-bit immediate values):
     Arithmetic instructions:
       1. addi
       2. adci
-      3. addpbi (ADd 8-bit Immediate value to reg Pair rAp)
+      3. addpbi (ADD 8-bit Immediate value to reg Pair rAp)
       
       4. subi (ASSEMBLER ALIAS for addi with the two's complement of the
       immediate value)
@@ -146,7 +146,7 @@ Group 4 (Branching instructions):
       5. bcc (branch when C == 0 [unsigned less than])
       6. bcs (branch when C == 1 [unsigned greater than or equal])
       7. bls (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
-          [unsigned less than or equal])
+      [unsigned less than or equal])
       8. bhi (branch when C == 0 and Z == 0 [unsigned greater than])
 
 

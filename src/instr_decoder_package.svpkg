@@ -57,7 +57,7 @@ package pkg_instr_dec;
 		instr_g1_op_addi,
 		instr_g1_op_adci,
 		
-		// (ADd 8-bit Immediate value to reg Pair rAp)
+		// (ADD 8-bit Immediate value to reg Pair rAp)
 		instr_g1_op_addpbi,
 		// (SuBtract 8-bit Immediate value from reg Pair rAp [NOT an
 		// assembler alias for addpbi])
