@@ -320,6 +320,7 @@ module spcpu
 		begin
 			//if ( ( `get_cpu_rp_pc >= ( 16'h8030 ) )
 			if ( ( `get_cpu_rp_pc >= ( 16'h8040 ) )
+			//if ( ( `get_cpu_rp_pc >= ( 16'h8050 ) )
 				|| ( ( `get_cpu_rp_pc > 16'h4 ) 
 				&& ( `get_cpu_rp_pc < 16'h8000 ) ) )
 			begin
@@ -423,7 +424,7 @@ module spcpu
 			// == pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed )
 		begin
 			$display( "Check whether the pc was actually changed by a ",
-				"non-branch, non-call instruction" );
+				 "non-branch, non-call instruction" );
 			
 			
 			// Check if the pc was ACTUALLY changed

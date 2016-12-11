@@ -107,11 +107,13 @@ task prep_load_instr_hi_generic;
 	
 	if (!instr_is_branch_or_call)
 	begin
+		//$display("!instr_is_branch_or_call");
 		prep_load_instr_hi_after_reg();
 	end
 	
 	else // if (instr_is_branch_or_call)
 	begin
+		//$display("instr_is_branch_or_call");
 		prep_load_instr_hi_after_bc();
 	end
 endtask

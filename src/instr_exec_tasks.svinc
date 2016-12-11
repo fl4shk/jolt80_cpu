@@ -78,12 +78,15 @@ task exec_ig4_branch;
 	// If it's negative
 	if (final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
 	begin
-		`get_cpu_rp_pc <= `get_cpu_rp_pc
-			+ { 8'hff, final_ig4_imm_value_8 };
+		//`get_cpu_rp_pc <= `get_cpu_rp_pc
+		//	+ { 8'hff, final_ig4_imm_value_8 };
+		set_pc_and_dio_addr( `get_cpu_rp_pc
+			+ { 8'hff, final_ig4_imm_value_8 } );
 	end
 	else //if (!final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
 	begin
-		`get_cpu_rp_pc <= `get_cpu_rp_pc + final_ig4_imm_value_8;
+		//`get_cpu_rp_pc <= `get_cpu_rp_pc + final_ig4_imm_value_8;
+		set_pc_and_dio_addr( `get_cpu_rp_pc + final_ig4_imm_value_8 );
 	end
 endtask
 
@@ -347,7 +350,12 @@ task start_exec_instr_from_grp_2;
 		pkg_instr_dec::instr_g2_op_call:
 		begin
 			`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
-			`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
+			//`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
+			
+			
+			// Add `instr_16_num_bytes (2) to the destination address
+			set_pc_and_dio_addr( `get_final_ig2_rpair_a 
+				+ `instr_16_num_bytes );
 		end
 		
 		
@@ -568,8 +576,14 @@ task start_exec_instr_from_grp_5;
 		// address)
 		pkg_instr_dec::instr_g5_op_calli:
 		begin
+			//$display( "calli:  %h %h %h %h", `get_cpu_rp_pc,
+			//	`get_pc_after_reg_instr, instr_in_lo,
+			//	instr_is_branch_or_call );
 			`get_cpu_rp_lr <= `get_pc_after_reg_instr;
-			`get_cpu_rp_pc <= instr_in_lo;
+			//`get_cpu_rp_pc <= instr_in_lo;
+			
+			// No need to do anything to instr_in_lo because
+			set_pc_and_dio_addr(instr_in_lo);
 		end
 		
 		// Indexed Load/store instructions:

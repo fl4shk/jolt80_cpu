@@ -31,6 +31,7 @@ bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded;
 //wire alu_modded_proc_flags;
 
 bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_reg_index;
-bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
+//bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
+bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_rpair_index;
 
 `endif		// alu_vars_svinc
