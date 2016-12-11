@@ -330,6 +330,13 @@ package pkg_instr_dec;
 			|| ( test_ig1_opcode == instr_g1_op_cpyi ) );
 		
 	endfunction
+	function ig1_get_rap_instr_can_change_pc;
+		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
+		
+		ig1_get_rap_instr_can_change_pc
+			= ( test_ig1_opcode == instr_g1_op_addpbi )
+			|| ( test_ig1_opcode == instr_g1_op_subpbi );
+	endfunction
 	
 	// The call instruction ALWAYS changes the pc
 	function ig2_get_instr_definitely_changes_pc;

@@ -139,6 +139,9 @@ endmodule
 	( rp_index == pkg_cpu::cpu_rp_pc_pind )
 
 
+`define get_alu_out_8 ( alu_out_lo )
+`define get_alu_out_16 ( { alu_out_hi, alu_out_lo } )
+
 // The CPU itself
 module spcpu
 	
@@ -266,20 +269,36 @@ module spcpu
 	
 	
 	
-	// Tasks
-	`include "src/debug_tasks.svinc"
 	
+	// Tasks
 	`include "src/state_changing_tasks.svinc"
 	
-	`include "src/update_instr_possibly_changes_pc_tasks.svinc"
+	`include "src/instr_g1_tasks.svinc"
+	`include "src/instr_g2_tasks.svinc"
+	`include "src/instr_g3_tasks.svinc"
+	`include "src/instr_g4_tasks.svinc"
+	`include "src/instr_g5_tasks.svinc"
 	
-	`include "src/extra_instr_dec_tasks_funcs.svinc"
+	// 1, 2, 3, 4, 5
+	`include "src/debug_tasks.svinc"
 	
+	// 1, 2, 3, 4, 5
 	`include "src/debug_disassembly_tasks.svinc"
 	
+	
+	// 1, 2, 3, 4, 5
+	`include "src/update_instr_possibly_changes_pc_tasks.svinc"
+	
+	// 1, 2, 3, 4, 5
+	`include "src/extra_instr_dec_tasks_funcs.svinc"
+	
+	// 1, 2, 3, 4, 5
+	`include "src/alu_control_tasks.svinc"
+	
+	// 1, 2, 3, 4, 5
 	`include "src/instr_exec_tasks.svinc"
 	
-	`include "src/alu_control_tasks.svinc"
+	
 	
 	
 	bit ready;

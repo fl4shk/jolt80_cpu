@@ -1,0 +1,214 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef instr_g4_tasks_svinc
+`define instr_g4_tasks_svinc
+
+
+task debug_disp_init_instr_from_grp_4;
+	$display( "Group 4:  %h %h", ig4_opcode, ig4_imm_value_8 );
+endtask
+
+task debug_disp_final_instr_from_grp_4;
+	$display( "Group 4:  %h %h", final_ig4_opcode, final_ig4_imm_value_8 );
+endtask
+
+
+task disassemble_grp_4_instr;
+	
+	// Branching instructions (note that iiii iiii is a SIGNED 8-bit
+	// integer):
+	
+	// (branch always)
+	if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bra )
+	begin
+		$display( "bra $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch never, a form of NOP)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bnv )
+	begin
+		$display( "bnv $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when Z == 0)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bne )
+	begin
+		$display( "bne $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when Z == 1)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_beq )
+	begin
+		$display( "beq $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when C == 0 [unsigned less than])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bcc )
+	begin
+		$display( "bcc $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when C == 1 [unsigned greater than or equal])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bcs )
+	begin
+		$display( "bcs $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
+	// [unsigned less than or equal])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bls )
+	begin
+		$display( "bls $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when C == 0 and Z == 0 [unsigned greater than])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bhi )
+	begin
+		$display( "bhi $%h", final_ig4_imm_value_8 );
+	end
+	
+	else
+	begin
+		$display("Unknown group 4 instruction!");
+	end
+	
+endtask
+
+
+// ALL Instructions in group 4 change the PC
+task update_ipc_pc_for_grp_4_instr;
+	//non_bc_instr_possibly_changes_pc = 1;
+	instr_is_branch_or_call = 1;
+endtask
+
+
+
+task back_up_ig4_instr_contents;
+	{ final_ig4_opcode, final_ig4_imm_value_8 }
+		<= { ig4_opcode, ig4_imm_value_8 };
+endtask
+
+task prep_alu_instr_grp_4_generic;
+	input [`instr_g4_op_msb_pos:0] opcode;
+	input [`instr_g4_imm_value_msb_pos:0] imm_value_8;
+	
+	// This task intentionally left blank
+	
+endtask
+
+task start_exec_instr_from_grp_4;
+	//$display( "start_exec_instr_from_grp_4 is unfinished\t\t%h\t\t%h", 
+	//	final_ig4_opcode, non_bc_instr_possibly_changes_pc );
+	//$display( "group 4 instr:\t\t%h\t\t%h", final_ig4_opcode, 
+	//	non_bc_instr_possibly_changes_pc );
+	
+	disassemble_grp_4_instr();
+	
+	// Branching instructions (note that iiii iiii is a SIGNED 8-bit
+	// integer):
+	
+	// (branch always)
+	case (final_ig4_opcode)
+		pkg_instr_dec::instr_g4_op_bra:
+		begin
+			exec_ig4_branch();
+		end
+		
+		// (branch never, a form of NOP)
+		pkg_instr_dec::instr_g4_op_bnv:
+		begin
+			// Wait a cycle
+		end
+		
+		// (branch when Z == 0)
+		pkg_instr_dec::instr_g4_op_bne:
+		begin
+			if (!true_proc_flags[pkg_pflags::pf_slot_z])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when Z == 1)
+		pkg_instr_dec::instr_g4_op_beq:
+		begin
+			if (true_proc_flags[pkg_pflags::pf_slot_z])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when C == 0 [unsigned greater than or equal])
+		pkg_instr_dec::instr_g4_op_bcc:
+		begin
+			if (!true_proc_flags[pkg_pflags::pf_slot_c])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when C == 1 [unsigned less than])
+		pkg_instr_dec::instr_g4_op_bcs:
+		begin
+			if (true_proc_flags[pkg_pflags::pf_slot_c])
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
+		// [unsigned less than or equal])
+		pkg_instr_dec::instr_g4_op_bls:
+		begin
+			if ( ( true_proc_flags[pkg_pflags::pf_slot_c]
+				&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+				||  true_proc_flags[pkg_pflags::pf_slot_z] )
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		// (branch when C == 0 and Z == 0 [unsigned greater than])
+		pkg_instr_dec::instr_g4_op_bhi:
+		begin
+			if ( !true_proc_flags[pkg_pflags::pf_slot_c]
+				&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+			begin
+				exec_ig4_branch();
+			end
+		end
+		
+		default:
+		begin
+			$display("Illegal Group 4 Instruction!");
+		end
+		
+	endcase
+	
+	
+	if (!final_ig4_instr_is_ldst)
+	begin
+		start_exec_shared_non_ldst_suffix();
+	end
+	
+endtask
+
+
+
+
+`endif		// instr_g4_tasks_svinc

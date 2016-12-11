@@ -16,7 +16,7 @@
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 
-//`include "src/cpu_extras_defines.svinc"
+`include "src/cpu_extras_defines.svinc"
 `include "src/instr_decoder_defines.svinc"
 
 

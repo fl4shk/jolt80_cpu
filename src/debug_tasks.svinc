@@ -19,32 +19,6 @@
 `ifndef debug_tasks_svinc
 `define debug_tasks_svinc
 
-task debug_disp_init_instr_from_grp_1;
-	$display( "Group 1:  %h %h %h", ig1_opcode, ig1_ra_index, 
-		ig1_imm_value_8 );
-endtask
-
-task debug_disp_init_instr_from_grp_2;
-	$display( "Group 2:  %h %h %h %b %b", ig2_opcode, ig2_ra_index, 
-		ig2_rb_index, ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair );
-endtask
-
-task debug_disp_init_instr_from_grp_3;
-	$display( "Group 3:  %h %h %h %h", ig3_opcode, ig3_ra_index, 
-		ig3_rbp_index, ig3_rcp_index );
-endtask
-
-task debug_disp_init_instr_from_grp_4;
-	$display( "Group 4:  %h %h", ig4_opcode, ig4_imm_value_8 );
-endtask
-
-task debug_disp_init_instr_from_grp_5;
-	//$display( "Group 5:  %h\t\t%h %h\t\t%h", ig5_opcode, ig5_ra_index, 
-	//	ig5_rbp_index, instr_in_lo );
-	$display( "Group 5:  %h\t\t%h %h\t\t%h", ig5_opcode, ig5_ra_index, 
-		ig5_rbp_index, ig5_ra_index_is_for_pair );
-endtask
-
 
 task debug_disp_init_instr;
 	case (init_instr_grp)
@@ -73,36 +47,6 @@ task debug_disp_init_instr;
 			debug_disp_init_instr_from_grp_5();
 		end
 	endcase
-endtask
-
-
-
-task debug_disp_final_instr_from_grp_1;
-	$display( "Group 1:  %h %h %h", final_ig1_opcode, final_ig1_ra_index, 
-		final_ig1_imm_value_8 );
-endtask
-
-task debug_disp_final_instr_from_grp_2;
-	$display( "Group 2:  %h %h %h %b %b", final_ig2_opcode, 
-		final_ig2_ra_index, final_ig2_rb_index, 
-		final_ig2_ra_index_is_for_pair, final_ig2_rb_index_is_for_pair );
-endtask
-
-task debug_disp_final_instr_from_grp_3;
-	$display( "Group 3:  %h %h %h %h", final_ig3_opcode, 
-		final_ig3_ra_index, final_ig3_rbp_index, final_ig3_rcp_index );
-endtask
-
-task debug_disp_final_instr_from_grp_4;
-	$display( "Group 4:  %h %h", final_ig4_opcode, final_ig4_imm_value_8 );
-endtask
-
-task debug_disp_final_instr_from_grp_5;
-	//$display( "Group 5:  %h\t\t%h %h\t\t%h", final_ig5_opcode, 
-	//	final_ig5_ra_index, final_ig5_rbp_index, instr_in_lo );
-	$display( "Group 5:  %h\t\t%h %h\t\t%h", final_ig5_opcode, 
-		final_ig5_ra_index, final_ig5_rbp_index,
-		final_ig5_ra_index_is_for_pair );
 endtask
 
 

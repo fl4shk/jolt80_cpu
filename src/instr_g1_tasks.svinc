@@ -1,0 +1,253 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef instr_g1_tasks_svinc
+`define instr_g1_tasks_svinc
+
+`define get_final_ig1_reg_a cpu_regs[final_ig1_ra_index]
+`define get_final_ig1_rpair_a `make_reg_pair_w_pi(final_ig1_ra_index)
+
+
+task debug_disp_init_instr_from_grp_1;
+	$display( "Group 1:  %h %h %h %h", ig1_opcode, ig1_ra_index, 
+		ig1_imm_value_8, ig1_ra_index_is_for_pair );
+endtask
+
+task debug_disp_final_instr_from_grp_1;
+	$display( "Group 1:  %h %h %h %h", final_ig1_opcode, 
+		final_ig1_ra_index, final_ig1_imm_value_8, 
+		final_ig1_ra_index_is_for_pair );
+endtask
+
+task disassemble_grp_1_instr;
+	
+	// Arithmetic instructions:
+	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+	begin
+		$display( "addi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+	begin
+		$display( "adci r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addpbi )
+	begin
+		$display( "addpbi r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
+			final_ig1_imm_value_8 );
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_subpbi )
+	begin
+		$display( "subpbi r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
+			final_ig1_imm_value_8 );
+	end
+	
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
+	begin
+		$display( "cmpi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	
+	
+	//Copy instructions:
+	
+	// (CoPY Immediate)
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi )
+	begin
+		$display( "cpyi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	
+	else
+	begin
+		$display("Unknown group 1 instruction!");
+	end
+	
+endtask
+
+
+task update_ipc_pc_for_grp_1_instr;
+	
+	if (final_ig1_pc_contains_ra)
+	begin
+		if ( pkg_instr_dec::ig1_get_ra_instr_can_change_pc(ig1_opcode) )
+		begin
+			non_bc_instr_possibly_changes_pc = 1;
+		end
+	end
+	
+	else if (final_ig1_pc_contains_rap)
+	begin
+		if ( pkg_instr_dec::ig1_get_rap_instr_can_change_pc(ig1_opcode) )
+		begin
+			non_bc_instr_possibly_changes_pc = 1;
+		end
+	end
+	
+	
+endtask
+
+
+task back_up_ig1_instr_contents;
+	{ final_ig1_opcode, final_ig1_ra_index, final_ig1_imm_value_8,
+		final_ig1_ra_index_is_for_pair }
+		<= { ig1_opcode, ig1_ra_index, ig1_imm_value_8,
+		ig1_ra_index_is_for_pair };
+endtask
+
+
+task update_extra_ig1_pc_stuff;
+	final_ig1_pc_contains_ra 
+		<= `wire_rhs_pc_indices_contain_reg_index(ig1_ra_index);
+	final_ig1_pc_contains_rap <= ( ig1_ra_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig1_ra_index) );
+endtask
+
+task prep_alu_instr_grp_1_generic;
+	input [`instr_g1_op_msb_pos:0] opcode;
+	input [`instr_g1_ra_index_msb_pos:0] ra_index;
+	input [`instr_g1_imm_value_msb_pos:0] imm_value_8;
+	
+	
+	case (opcode)
+		// Arithmetic instructions:
+		pkg_instr_dec::instr_g1_op_addi:
+		begin
+			do_alu_op_add( ra_index, imm_value_8 );
+		end
+		
+		pkg_instr_dec::instr_g1_op_adci:
+		begin
+			do_alu_op_adc( ra_index, imm_value_8 );
+		end
+		
+		pkg_instr_dec::instr_g1_op_addpbi:
+		begin
+			do_alu_op_addpb( ra_index, imm_value_8 );
+		end
+		pkg_instr_dec::instr_g1_op_subpbi:
+		begin
+			do_alu_op_subpb( ra_index, imm_value_8 );
+		end
+		
+		pkg_instr_dec::instr_g1_op_cmpi:
+		begin
+			do_alu_op_cmp( ra_index, imm_value_8 );
+		end
+		
+		//Copy instructions:
+		
+		// (CoPY Immediate)
+		//pkg_instr_dec::instr_g1_op_cpyi:
+		//begin
+		//end
+		default:
+		begin
+			alu_was_used <= 0;
+		end
+	endcase
+	
+	
+endtask
+
+
+task start_exec_instr_from_grp_1;
+	
+	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h", 
+	//	ig1_instr_changes_pc );
+	//$display( "start_exec_instr_from_grp_1 is unfinished\t\t%h\t\t%h", 
+	//	final_ig1_opcode, non_bc_instr_possibly_changes_pc );
+	//$display( "%h, %h", instr_in_hi, final_ig1_opcode );
+	//$display( "group 1 instr:\t\t%h\t\t%h", final_ig1_opcode, 
+	//	non_bc_instr_possibly_changes_pc );
+	
+	//$display( ig1_opcode == pkg_instr_dec::instr_g1_op_addi );
+	
+	
+	disassemble_grp_1_instr();
+	
+	case (final_ig1_opcode)
+		// Arithmetic instructions:
+		pkg_instr_dec::instr_g1_op_addi:
+		begin
+			//$display( "addi r%d, $%h", final_ig1_ra_index,
+			//	final_ig1_imm_value_8 );
+			
+			//cpu_regs[final_ig1_ra_index] <= cpu_regs[final_ig1_ra_index]
+			//	+ final_ig1_imm_value_8;
+			
+			//$display( "%h %h %h", alu_was_used
+			
+			//cpu_regs[final_ig1_ra_index]
+			//`get_final_ig1_reg_a <= `get_alu_out_8;
+			//
+			//true_proc_flags
+			finish_alu_op_with_dest_reg();
+		end
+		
+		pkg_instr_dec::instr_g1_op_adci:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		pkg_instr_dec::instr_g1_op_addpbi:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g1_op_subpbi:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		
+		
+		pkg_instr_dec::instr_g1_op_cmpi:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		//Copy instructions:
+		
+		// (CoPY Immediate)
+		pkg_instr_dec::instr_g1_op_cpyi:
+		begin
+			`get_final_ig1_reg_a <= final_ig1_imm_value_8;
+		end
+		
+		default:
+		begin
+			$display("Unknown group 1 instruction!");
+		end
+	endcase
+	
+	
+	if (!final_ig1_instr_is_ldst)
+	begin
+		start_exec_shared_non_ldst_suffix();
+	end
+	
+	
+	
+	
+	
+endtask
+
+
+
+`endif		// instr_g1_tasks_svinc

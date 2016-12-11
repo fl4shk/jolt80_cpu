@@ -32,7 +32,7 @@ bit [`instr_g1_imm_value_msb_pos:0] final_ig1_imm_value_8;
 bit final_ig1_ra_index_is_for_pair;
 
 //wire ig1_instr_changes_pc;
-bit final_ig1_pc_contains_ra;
+bit final_ig1_pc_contains_ra, final_ig1_pc_contains_rap;
 
 
 

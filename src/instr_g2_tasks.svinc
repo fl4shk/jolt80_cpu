@@ -1,0 +1,746 @@
+// This file is part of Small Practice CPU.
+// 
+// Copyright 2016 by Andrew Clark (FL4SHK).
+// 
+// Small Practice CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Small Practice CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef instr_g2_tasks_svinc
+`define instr_g2_tasks_svinc
+
+`define get_final_ig2_reg_a cpu_regs[final_ig2_ra_index]
+`define get_final_ig2_reg_b cpu_regs[final_ig2_rb_index]
+`define get_final_ig2_rpair_a `make_reg_pair_w_pi(final_ig2_ra_index)
+`define get_final_ig2_rpair_b `make_reg_pair_w_pi(final_ig2_rb_index)
+
+
+task debug_disp_init_instr_from_grp_2;
+	$display( "Group 2:  %h %h %h %b %b", ig2_opcode, ig2_ra_index, 
+		ig2_rb_index, ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair );
+endtask
+
+task debug_disp_final_instr_from_grp_2;
+	$display( "Group 2:  %h %h %h %b %b", final_ig2_opcode, 
+		final_ig2_ra_index, final_ig2_rb_index, 
+		final_ig2_ra_index_is_for_pair, final_ig2_rb_index_is_for_pair );
+endtask
+
+task disassemble_grp_2_instr;
+	
+	// Arithmetic instructions:
+	if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_add )
+	begin
+		$display( "add r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_adc )
+	begin
+		$display( "adc r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_sub )
+	begin
+		$display( "sub r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_sbc )
+	begin
+		$display( "sbc r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cmp )
+	begin
+		$display( "cmp r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	// Bitwise instructions with two register operands:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_and )
+	begin
+		$display( "and r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_orr )
+	begin
+		$display( "orr r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_xor )
+	begin
+		$display( "xor r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	// Complement instructions with one register operand (rB ignored):
+	
+	// (one's complement of rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_inv )
+	begin
+		$display( "inv r%d", final_ig2_ra_index );
+	end
+	
+	// (one's complement of rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
+	begin
+		$display( "invp r%dp", final_ig2_ra_index );
+	end
+	
+	// (two's complement of rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_neg )
+	begin
+		$display( "neg r%d", final_ig2_ra_index );
+	end
+	
+	// (two's complement of rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_negp )
+	begin
+		$display( "negp r%dp", final_ig2_ra_index );
+	end
+	
+	
+	// Bitshifting (and rotating) instructions that use the value of rB
+	// as the number of bits to shift by:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsl )
+	begin
+		$display( "lsl r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsr )
+	begin
+		$display( "lsr r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_asr )
+	begin
+		$display( "asr r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rol )
+	begin
+		$display( "rol r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ror )
+	begin
+		$display( "ror r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	
+	// Bit rotating instructions that use carry as bit 8 for a 9-bit
+	// rotate of { carry, rA } by one bit:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolc )
+	begin
+		$display( "rolc r%d", final_ig2_ra_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorc )
+	begin
+		$display( "rorc r%d", final_ig2_ra_index );
+	end
+	
+	
+	// Bitshifting (and rotating) instructions that do a 16-bit shift
+	// or rotate on the reg pair rAp, using rB as the number of bits to
+	// shift by:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lslp )
+	begin
+		$display( "lslp r%dp, r%d", final_ig2_ra_index, 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsrp )
+	begin
+		$display( "lsrp r%dp, r%d", final_ig2_ra_index, 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_asrp )
+	begin
+		$display( "asrp r%dp, r%d", final_ig2_ra_index, 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolp )
+	begin
+		$display( "rolp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorp )
+	begin
+		$display( "rorp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
+			final_ig2_rb_index );
+	end
+	
+	
+	// Bit rotating instructions that use carry as bit 16 for a 17-bit
+	// rotate of { carry, rAp } by one bit:
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolcp )
+	begin
+		$display( "rolcp r%dp", 
+			`make_reg_ind_from_pi(final_ig2_ra_index) );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rorcp )
+	begin
+		$display( "rorcp r%dp", 
+			`make_reg_ind_from_pi(final_ig2_ra_index) );
+	end
+	
+	
+	// Copy instructions:
+	
+	// (CoPY from reg rB to reg rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpy )
+	begin
+		$display( "cpy r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	
+	// (CoPY from reg Pair rBp to reg Pair rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyp )
+	begin
+		$display( "cpyp r%dp, r%dp", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	
+	// Swap instructions:
+	// (SWap register Pair, also can be used as a combined "call",
+	// "jump", and "return" instruction by swapping some other register
+	// pair with the "pc" [r14p] register pair)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_swp )
+	begin
+		$display( "swp r%dp, r%dp", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	
+	// Call instruction (Description:  sets the link register to the
+	// return address, then sets the program counter to the address
+	// contained in the reg pair rAp):
+	
+	// (CALL subroutine at address in reg pair rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_call )
+	begin
+		$display( "call r%dp", `make_reg_ind_from_pi(final_ig2_ra_index) );
+	end
+	
+	
+	// 8-bit Load/store instructions:
+	
+	// (LoaD contents into Register rA from memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldr )
+	begin
+		$display( "ldr r%d, r%dp", final_ig2_ra_index, 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	// (STore Register rA contents to memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_str  )
+	begin
+		$display( "str r%d, r%dp", final_ig2_ra_index, 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	else
+	begin
+		$display("Unknown group 2 instruction!");
+	end
+	
+endtask
+
+
+task update_ipc_pc_for_grp_2_instr;
+	
+	
+	// The call instruction ALWAYS changes pc
+	if ( pkg_instr_dec::ig2_get_instr_definitely_changes_pc(ig2_opcode) )
+	begin
+		//$display("The call instruction");
+		//non_bc_instr_possibly_changes_pc = 1;
+		instr_is_branch_or_call = 1;
+	end
+	
+	else if (final_ig2_pc_contains_ra)
+	begin
+		if ( pkg_instr_dec::ig2_get_ra_instr_can_change_pc(ig2_opcode) )
+		begin
+			//$display("final_ig2_pc_contains_ra and stuff");
+			non_bc_instr_possibly_changes_pc = 1;
+		end
+		
+	end
+	
+	// Don't need to check this
+	//else if (final_ig2_pc_contains_rb)
+	//begin
+	//	
+	//end
+	
+	else if (final_ig2_rap_is_pc)
+	begin
+		if ( pkg_instr_dec::ig2_get_rap_instr_can_change_pc(ig2_opcode) )
+		begin
+			//$display("final_ig2_rap_is_pc and stuff");
+			non_bc_instr_possibly_changes_pc = 1;
+		end
+		
+	end
+	
+	else if (final_ig2_rbp_is_pc)
+	begin
+		// Swap instructions:
+		if ( pkg_instr_dec::ig2_get_rbp_instr_can_change_pc(ig2_opcode) )
+		begin
+			//$display("final_ig2_rbp_is_pc and stuff");
+			non_bc_instr_possibly_changes_pc = 1;
+		end
+	end
+	
+	
+	
+endtask
+
+
+task back_up_ig2_instr_contents;
+	{ final_ig2_opcode, final_ig2_ra_index, final_ig2_rb_index,
+		final_ig2_ra_index_is_for_pair, final_ig2_rb_index_is_for_pair }
+		<= { ig2_opcode, ig2_ra_index, ig2_rb_index, 
+		ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair };
+endtask
+
+
+
+task update_extra_ig2_pc_stuff;
+	
+	// For ig2_pc_contains_ra and ig2_pc_contains_rb, there is NO NEED to
+	// check if the index is for a reg pair.  This is because a reg pair
+	// index is ALWAYS less than 14 (specifically, the range is from 0-7)
+	final_ig2_pc_contains_ra
+		<= `wire_rhs_pc_indices_contain_reg_index(ig2_ra_index);
+	final_ig2_pc_contains_rb
+		<= `wire_rhs_pc_indices_contain_reg_index(ig2_rb_index);
+	
+	// For ig2_rap_is_pc and ig2_rbp_is_pc, it is NECESSARY to check if the
+	// index is for a reg pair.  This is because the range of reg pair
+	// indices is 0-7.  Specifically, if a reg index is encoded as 7, then
+	// NOT checking whether or not the index is for a pair will make the
+	// code think that the REG index is THE PC'S REG --PAIR-- index.
+	final_ig2_rap_is_pc <= ( ig2_ra_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig2_ra_index) );
+	final_ig2_rbp_is_pc <= ( ig2_rb_index_is_for_pair
+		&& `wire_rhs_rp_index_is_pc_index(ig2_rb_index) );
+endtask
+
+task prep_alu_instr_grp_2_generic;
+	input [`instr_g2_op_msb_pos:0] opcode;
+	input [`instr_g2_ra_index_msb_pos:0] ra_index;
+	input [`instr_g2_rb_index_msb_pos:0] rb_index;
+	input ra_index_is_for_pair, rb_index_is_for_pair;
+	
+	case (opcode)
+		// Arithmetic instructions:
+		pkg_instr_dec::instr_g2_op_add:
+		begin
+			do_alu_op_add( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_adc:
+		begin
+			do_alu_op_adc( ra_index, cpu_regs[rb_index] );
+		end
+		
+		pkg_instr_dec::instr_g2_op_sub:
+		begin
+			do_alu_op_sub( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_sbc:
+		begin
+			do_alu_op_sbc( ra_index, cpu_regs[rb_index] );
+		end
+		
+		pkg_instr_dec::instr_g2_op_cmp:
+		begin
+			do_alu_op_cmp( ra_index, cpu_regs[rb_index] );
+		end
+		
+		// Bitwise instructions with two register operands:
+		pkg_instr_dec::instr_g2_op_and:
+		begin
+			do_alu_op_and( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_orr:
+		begin
+			do_alu_op_orr( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_xor:
+		begin
+			do_alu_op_xor( ra_index, cpu_regs[rb_index] );
+		end
+		
+		// Complement instructions with one register operand (rB ignored):
+		pkg_instr_dec::instr_g2_op_inv:
+		begin
+			do_alu_op_inv(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_invp:
+		begin
+			do_alu_op_invp(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_neg:
+		begin
+			do_alu_op_neg(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_negp:
+		begin
+			do_alu_op_negp(ra_index);
+		end
+		
+		
+		// Bitshifting (and rotating) instructions that use the value of rB
+		// as the number of bits to shift by:
+		pkg_instr_dec::instr_g2_op_lsl:
+		begin
+			do_alu_op_lsl( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_lsr:
+		begin
+			do_alu_op_lsr( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_asr:
+		begin
+			do_alu_op_asr( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_rol:
+		begin
+			do_alu_op_rol( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_ror:
+		begin
+			do_alu_op_ror( ra_index, cpu_regs[rb_index] );
+		end
+		
+		
+		// Bit rotating instructions that use carry as bit 8 for a 9-bit
+		// rotate of { carry, rA } by one bit:
+		pkg_instr_dec::instr_g2_op_rolc:
+		begin
+			do_alu_op_rolc(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_rorc:
+		begin
+			do_alu_op_rorc(ra_index);
+		end
+		
+		
+		// Bitshifting (and rotating) instructions that do a 16-bit shift
+		// or rotate on the reg pair rAp, using rB as the number of bits to
+		// shift by:
+		pkg_instr_dec::instr_g2_op_lslp:
+		begin
+			do_alu_op_lslp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_lsrp:
+		begin
+			do_alu_op_lsrp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_asrp:
+		begin
+			do_alu_op_asrp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_rolp:
+		begin
+			do_alu_op_rolp( ra_index, cpu_regs[rb_index] );
+		end
+		pkg_instr_dec::instr_g2_op_rorp:
+		begin
+			do_alu_op_rorp( ra_index, cpu_regs[rb_index] );
+		end
+		
+		
+		// Bit rotating instructions that use carry as bit 16 for a 17-bit
+		// rotate of { carry, rAp } by one bit:
+		pkg_instr_dec::instr_g2_op_rolcp:
+		begin
+			do_alu_op_rolcp(ra_index);
+		end
+		pkg_instr_dec::instr_g2_op_rorcp:
+		begin
+			do_alu_op_rorcp(ra_index);
+		end
+		
+		
+		//// Copy instructions:
+		//
+		//// (CoPY from reg rB to reg rA)
+		//pkg_instr_dec::instr_g2_op_cpy:
+		//begin
+		//end
+		//// (CoPY from reg Pair rBp to reg Pair rAp)
+		//pkg_instr_dec::instr_g2_op_cpyp:
+		//begin
+		//end
+		//
+		//
+		//// Swap instructions:
+		//// (SWap register Pair, also can be used as a combined "call",
+		//// "jump", and "return" instruction by swapping some other register
+		//// pair with the "pc" [r14p] register pair)
+		//pkg_instr_dec::instr_g2_op_swp:
+		//begin
+		//end
+		//
+		//
+		//// Call instruction (Description:  sets the link register to the
+		//// return address, then sets the program counter to the address
+		//// contained in the reg pair rAp):
+		//
+		//// (CALL subroutine at address in reg pair rAp)
+		//pkg_instr_dec::instr_g2_op_call:
+		//begin
+		//end
+		//
+		//
+		//// 8-bit Load/store instructions:
+		//
+		//// (LoaD contents into Register rA from memory at address in rBp)
+		//pkg_instr_dec::instr_g2_op_ldr:
+		//begin
+		//end
+		//// (STore Register rA contents to memory at address in rBp)
+		//pkg_instr_dec::instr_g2_op_str :
+		//begin
+		//end
+		default:
+		begin
+			alu_was_used <= 0;
+		end
+		
+	endcase
+	
+endtask
+
+task start_exec_instr_from_grp_2;
+	//$display( "start_exec_instr_from_grp_2 is unfinished\t\t%h\t\t%h", 
+	//	ig2_opcode, non_bc_instr_possibly_changes_pc );
+	
+	//$display( "%h %h %h", temp_ipc_pc_vec, ( temp_ipc_pc_vec != 0 ), 
+	//	non_bc_instr_possibly_changes_pc );
+	//$display( "group 2 instr:\t\t%h\t\t%h", final_ig2_opcode, 
+	//	non_bc_instr_possibly_changes_pc );
+	
+	//$display( "%h  r%h<p>, r%h<p>", final_ig2_opcode, final_ig2_ra_index,
+	//	final_ig2_rb_index );
+	
+	disassemble_grp_2_instr();
+	
+	case (final_ig2_opcode)
+		
+		// Arithmetic instructions:
+		pkg_instr_dec::instr_g2_op_add:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_adc:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		pkg_instr_dec::instr_g2_op_sub:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_sbc:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		pkg_instr_dec::instr_g2_op_cmp:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		// Bitwise instructions with two register operands:
+		pkg_instr_dec::instr_g2_op_and:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_orr:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_xor:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		// Complement instructions with one register operand (rB ignored):
+		pkg_instr_dec::instr_g2_op_inv:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_invp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g2_op_neg:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g2_op_negp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		
+		
+		// Bitshifting (and rotating) instructions that use the value of rB
+		// as the number of bits to shift by:
+		pkg_instr_dec::instr_g2_op_lsl:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_lsr:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_asr:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_rol:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_ror:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		
+		// Bit rotating instructions that use carry as bit 8 for a 9-bit
+		// rotate of { carry, rA } by one bit:
+		pkg_instr_dec::instr_g2_op_rolc:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_rorc:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
+		
+		// Bitshifting (and rotating) instructions that do a 16-bit shift
+		// or rotate on the reg pair rAp, using rB as the number of bits to
+		// shift by:
+		pkg_instr_dec::instr_g2_op_lslp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g2_op_lsrp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g2_op_asrp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g2_op_rolp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g2_op_rorp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		
+		
+		// Bit rotating instructions that use carry as bit 16 for a 17-bit
+		// rotate of { carry, rAp } by one bit:
+		pkg_instr_dec::instr_g2_op_rolcp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g2_op_rorcp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		
+		// Copy instructions:
+		
+		// (CoPY from reg rB to reg rA)
+		pkg_instr_dec::instr_g2_op_cpy:
+		begin
+			`get_final_ig2_reg_a <= `get_final_ig2_reg_b;
+		end
+		
+		// (CoPY from reg Pair rBp to reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_cpyp:
+		begin
+			`get_final_ig2_rpair_a <= `get_final_ig2_rpair_b;
+		end
+		
+		
+		// Swap instructions:
+		// (SWap register Pair, also can be used as a combined "call",
+		// "jump", and "return" instruction by swapping some other register
+		// pair with the "pc" [r14p] register pair)
+		pkg_instr_dec::instr_g2_op_swp:
+		begin
+			// Non-blocking assignments are great
+			`get_final_ig2_rpair_a <= `get_final_ig2_rpair_b;
+			`get_final_ig2_rpair_b <= `get_final_ig2_rpair_a;
+		end
+		
+		
+		// Call instruction (Description:  sets the link register to the
+		// return address, then sets the program counter to the address
+		// contained in the reg pair rAp):
+		
+		// (CALL subroutine at address in reg pair rAp)
+		pkg_instr_dec::instr_g2_op_call:
+		begin
+			//`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
+			//`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
+			
+			//`get_cpu_rp_lr <= `get_cpu_rp_pc; 
+			//
+			//// Add `instr_16_num_bytes (2) to the destination address
+			//set_pc_and_dio_addr( `get_final_ig2_rpair_a 
+			//	+ `instr_16_num_bytes );
+			
+			exec_any_call( `get_final_ig2_rpair_a + `instr_16_num_bytes );
+		end
+		
+		
+		// 8-bit Load/store instructions:
+		
+		// (LoaD contents into Register rA from memory at address in rBp)
+		pkg_instr_dec::instr_g2_op_ldr:
+		begin
+			prep_load_8_with_addr(`get_final_ig2_rpair_b);
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		// (STore Register rA contents to memory at address in rBp)
+		pkg_instr_dec::instr_g2_op_str :
+		begin
+			prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		default:
+		begin
+			$display("Illegal Group 2 Instruction!");
+		end
+		
+	endcase
+	
+	if (!final_ig2_instr_is_ldst)
+	begin
+		start_exec_shared_non_ldst_suffix();
+	end
+	
+endtask
+
+
+
+
+
+`endif		// instr_g2_tasks_svinc
