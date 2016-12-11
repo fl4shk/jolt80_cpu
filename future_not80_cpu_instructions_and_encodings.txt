@@ -33,7 +33,7 @@ Group 1 (Non-branching instructions with 8-bit immediate values):
     Arithmetic instructions:
       1. addi
       2. adci
-      3. addpbi (ADd 8-bit Immediate value to register Pair)
+      3. addpbi (ADd 8-bit Immediate value to reg Pair rAp)
       
       4. subi (ASSEMBLER ALIAS for addi with the two's complement of the
       immediate value)

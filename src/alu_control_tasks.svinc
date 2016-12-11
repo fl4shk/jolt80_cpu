@@ -88,6 +88,14 @@ task do_alu_op_adc;
 	set_more_alu_config(pkg_alu::alu_op_adc);
 endtask
 
+task do_alu_op_addpb;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_w_pair( some_rap_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_addpb);
+endtask
+
 
 // Subtraction operations
 task do_alu_op_sub;
@@ -103,6 +111,13 @@ task do_alu_op_sbc;
 	
 	set_alu_inputs_no_pair( some_ra_index, some_b_in, 1 );
 	set_more_alu_config(pkg_alu::alu_op_sbc);
+endtask
+task do_alu_op_subpb;
+	input [`cpu_rp_index_ie_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in;
+	
+	set_alu_inputs_w_pair( some_rap_index, some_b_in, 1 );
+	set_more_alu_config(pkg_alu::alu_op_subpb);
 endtask
 task do_alu_op_cmp;
 	input [`cpu_reg_index_ie_msb_pos:0] some_ra_index;
@@ -296,6 +311,15 @@ task prep_alu_instr_grp_1_generic;
 		pkg_instr_dec::instr_g1_op_adci:
 		begin
 			do_alu_op_adc( ra_index, imm_value_8 );
+		end
+		
+		pkg_instr_dec::instr_g1_op_addpbi:
+		begin
+			do_alu_op_addpb( ra_index, imm_value_8 );
+		end
+		pkg_instr_dec::instr_g1_op_subpbi:
+		begin
+			do_alu_op_subpb( ra_index, imm_value_8 );
 		end
 		
 		pkg_instr_dec::instr_g1_op_cmpi:

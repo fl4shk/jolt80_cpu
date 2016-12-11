@@ -21,6 +21,7 @@
 
 
 `define get_final_ig1_reg_a cpu_regs[final_ig1_ra_index]
+`define get_final_ig1_rpair_a `make_reg_pair_w_pi(final_ig1_ra_index)
 
 `define get_final_ig2_reg_a cpu_regs[final_ig2_ra_index]
 `define get_final_ig2_reg_b cpu_regs[final_ig2_rb_index]
@@ -124,6 +125,16 @@ task start_exec_instr_from_grp_1;
 		begin
 			finish_alu_op_with_dest_reg();
 		end
+		
+		pkg_instr_dec::instr_g1_op_addpbi:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		pkg_instr_dec::instr_g1_op_subpbi:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		
 		
 		pkg_instr_dec::instr_g1_op_cmpi:
 		begin

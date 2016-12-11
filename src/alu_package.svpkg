@@ -29,11 +29,13 @@ package pkg_alu;
 		// Addition operations
 		alu_op_add,
 		alu_op_adc,
+		alu_op_addpb,
 		
 		
 		// Subtraction operations
 		alu_op_sub,
 		alu_op_sbc,
+		alu_op_subpb,
 		alu_op_cmp,
 		
 		// Bitwise operations

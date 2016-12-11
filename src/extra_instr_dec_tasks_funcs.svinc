@@ -21,8 +21,10 @@
 
 
 task back_up_ig1_instr_contents;
-	{ final_ig1_opcode, final_ig1_ra_index, final_ig1_imm_value_8 }
-		<= { ig1_opcode, ig1_ra_index, ig1_imm_value_8 };
+	{ final_ig1_opcode, final_ig1_ra_index, final_ig1_imm_value_8,
+		final_ig1_ra_index_is_for_pair }
+		<= { ig1_opcode, ig1_ra_index, ig1_imm_value_8,
+		ig1_ra_index_is_for_pair };
 endtask
 
 task back_up_ig2_instr_contents;
@@ -49,6 +51,7 @@ task back_up_ig5_instr_contents;
 		<= { ig5_opcode, ig5_ra_index, ig5_rbp_index,
 		ig5_ra_index_is_for_pair };
 endtask
+
 
 
 task update_extra_ig1_pc_stuff;

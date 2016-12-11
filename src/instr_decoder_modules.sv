@@ -82,7 +82,8 @@ module instr_grp_1_decoder
 	( input bit [`instr_main_msb_pos:0] instr_hi,
 		output bit [`instr_g1_op_msb_pos:0] opcode,
 		output bit [`cpu_reg_index_ie_msb_pos:0] ra_index,
-		output bit [`instr_g1_imm_value_msb_pos:0] imm_value_8 );
+		output bit [`instr_g1_imm_value_msb_pos:0] imm_value_8,
+		output bit ra_index_is_for_pair );
 	
 	//assign { ig1d_outputs.opcode, ig1d_outputs.ra_index, 
 	//	ig1d_outputs.imm_value_8 } = instr_hi[ `instr_g1_op_range_hi
@@ -90,8 +91,11 @@ module instr_grp_1_decoder
 	//assign { opcode, ra_index, imm_value_8 } 
 	//	= instr_hi[ `instr_g1_op_range_hi : `instr_g1_imm_value_range_lo ];
 	assign opcode = instr_hi[`instr_g1_op_range_hi:`instr_g1_op_range_lo];
+	
+	assign ra_index_is_for_pair = ig1_get_ra_index_is_for_pair(opcode);
+	
 	assign ra_index = instr_hi[ `instr_g1_ra_index_range_hi 
-		: `instr_g1_ra_index_range_lo ];
+		: `instr_g1_ra_index_range_lo ] >> ra_index_is_for_pair;
 	assign imm_value_8 = instr_hi[ `instr_g1_imm_value_range_hi
 		: `instr_g1_imm_value_range_lo ];
 	

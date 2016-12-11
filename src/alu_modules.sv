@@ -93,6 +93,14 @@ module alu
 					+ b_in + proc_flags_in[pkg_pflags::pf_slot_c];
 			end
 			
+			pkg_alu::alu_op_addpb:
+			begin
+				oper_cat = `alu_op_addpb_cat;
+				
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { a_in_hi, a_in_lo } + { 8'h0, b_in };
+			end
+			
 			// Subtraction operations
 			pkg_alu::alu_op_sub:
 			begin
@@ -108,6 +116,14 @@ module alu
 				
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
 					+ (~b_in) + proc_flags_in[pkg_pflags::pf_slot_c];
+			end
+			
+			pkg_alu::alu_op_subpb:
+			begin
+				oper_cat = `alu_op_subpb_cat;
+				
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { a_in_hi, a_in_lo } + ~{ 8'h0, b_in } + 1'b1;
 			end
 			
 			pkg_alu::alu_op_cmp:

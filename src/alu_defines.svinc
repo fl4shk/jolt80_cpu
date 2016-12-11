@@ -90,6 +90,13 @@
 
 
 // -- alu_op_cat_16_no_ci --
+// Arithmetic operations
+// Addition operations
+`define alu_op_addpb_cat (alu_op_cat_16_no_ci)
+
+// Subtraction operations
+`define alu_op_subpb_cat (alu_op_cat_16_no_ci)
+
 // Bitwise operations
 // Complement operations
 `define alu_op_invp_cat (alu_op_cat_16_no_ci)

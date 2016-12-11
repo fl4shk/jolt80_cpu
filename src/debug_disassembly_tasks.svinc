@@ -32,6 +32,16 @@ task disassemble_grp_1_instr;
 		$display( "adci r%d, $%h", final_ig1_ra_index,
 			final_ig1_imm_value_8 );
 	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addpbi )
+	begin
+		$display( "addpbi r%dp, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_subpbi )
+	begin
+		$display( "subpbi r%dp, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
 	
 	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
 	begin

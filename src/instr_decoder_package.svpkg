@@ -57,6 +57,12 @@ package pkg_instr_dec;
 		instr_g1_op_addi,
 		instr_g1_op_adci,
 		
+		// (ADd 8-bit Immediate value to reg Pair rAp)
+		instr_g1_op_addpbi,
+		// (SuBtract 8-bit Immediate value from reg Pair rAp [NOT an
+		// assembler alias for addpbi])
+		instr_g1_op_subpbi,
+		
 		instr_g1_op_cmpi,
 		
 		//Copy instructions:
@@ -257,6 +263,14 @@ package pkg_instr_dec;
 	
 	// Functions for checking whether a reg index is actually a reg pair
 	// index
+	function ig1_get_ra_index_is_for_pair;
+		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
+		
+		ig1_get_ra_index_is_for_pair 
+			= ( ( test_ig1_opcode == instr_g1_op_addpbi )
+			|| ( test_ig1_opcode == instr_g1_op_subpbi ) );
+	endfunction
+	
 	function ig2_get_ra_index_is_for_pair;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
 		ig2_get_ra_index_is_for_pair 
