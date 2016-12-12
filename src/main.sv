@@ -283,16 +283,6 @@ module spcpu
 	`include "src/debug_tasks.svinc"
 	
 	// 1, 2, 3, 4, 5
-	`include "src/debug_disassembly_tasks.svinc"
-	
-	
-	// 1, 2, 3, 4, 5
-	`include "src/update_instr_possibly_changes_pc_tasks.svinc"
-	
-	// 1, 2, 3, 4, 5
-	`include "src/extra_instr_dec_tasks_funcs.svinc"
-	
-	// 1, 2, 3, 4, 5
 	`include "src/alu_control_tasks.svinc"
 	
 	// 1, 2, 3, 4, 5
@@ -300,9 +290,6 @@ module spcpu
 	
 	
 	
-	
-	bit ready;
-	initial ready = 0;
 	
 	
 	// This is used to determine when to stop simulation
@@ -328,7 +315,6 @@ module spcpu
 		
 		//curr_state <= pkg_cpu::cpu_st_begin_0;
 		curr_state <= 0;
-		ready <= 1;
 		
 		data_in_is_0_counter <= 0;
 		
@@ -364,9 +350,6 @@ module spcpu
 	
 	
 	always @ ( posedge clk )
-	begin
-	
-	if (ready)
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
@@ -476,11 +459,10 @@ module spcpu
 		
 	end
 	
-	end
 	
 	
-	
-	// Combinational logic for updating instr_possibly_changes_pc
+	// Combinational logic for updating instr_is_branch_or_call and
+	// non_bc_instr_possibly_changes_pc
 	always @ (*)
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )

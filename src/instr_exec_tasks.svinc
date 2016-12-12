@@ -22,9 +22,6 @@
 
 
 
-`define get_final_ig5_reg_a cpu_regs[final_ig5_ra_index]
-`define get_final_ig5_rpair_b `make_reg_pair_w_pi(final_ig5_rbp_index)
-`define get_final_ig5_rpair_a `make_reg_pair_w_pi(final_ig5_ra_index)
 
 
 
