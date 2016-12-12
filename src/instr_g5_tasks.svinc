@@ -146,13 +146,12 @@ task update_extra_ig5_pc_stuff;
 endtask
 
 
-task prep_addsub_and_alu_instr_grp_5_generic;
+task prep_alu_instr_grp_5_generic;
 	input [`instr_g5_op_msb_pos:0] opcode;
 	input [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
 	input [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;
 	input ra_index_is_for_pair;
 	
-	// This task intentionally left blank
 	
 endtask
 
@@ -249,7 +248,8 @@ task start_exec_instr_from_grp_5;
 	
 	if (!final_ig5_instr_is_ldst)
 	begin
-		start_exec_shared_non_ldst_suffix();
+		//start_exec_shared_non_ldst_suffix();
+		prep_load_instr_hi_generic();
 	end
 	
 endtask

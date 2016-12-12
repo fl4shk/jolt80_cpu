@@ -23,6 +23,10 @@ package pkg_alu;
 	
 	typedef enum bit [`addsub_op_msb_pos:0]
 	{
+		// Copy the { proc_flags_in, a_in_hi, a_in_lo } inputs to the 
+		// { proc_flags_out, out_hi, out_lo } outputs
+		addsub_op_follow,
+		
 		// Addition operations
 		addsub_op_add,
 		addsub_op_adc,

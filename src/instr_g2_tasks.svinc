@@ -330,7 +330,7 @@ task update_extra_ig2_pc_stuff;
 		&& `wire_rhs_rp_index_is_pc_index(ig2_rb_index) );
 endtask
 
-task prep_addsub_and_alu_instr_grp_2_generic;
+task prep_alu_instr_grp_2_generic;
 	input [`instr_g2_op_msb_pos:0] opcode;
 	input [`instr_g2_ra_index_msb_pos:0] ra_index;
 	input [`instr_g2_rb_index_msb_pos:0] rb_index;
@@ -738,7 +738,8 @@ task start_exec_instr_from_grp_2;
 	
 	if (!final_ig2_instr_is_ldst)
 	begin
-		start_exec_shared_non_ldst_suffix();
+		//start_exec_shared_non_ldst_suffix();
+		prep_load_instr_hi_generic();
 	end
 	
 endtask

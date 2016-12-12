@@ -178,21 +178,10 @@ module spcpu
 	// 16 programmer-visible CPU regs and 2 registers ONLY for internal use
 	// (mainly for internal ALU usage)
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
-	bit [`cpu_reg_msb_pos:0] temp_regs[0:1];
+	//bit [`cpu_reg_msb_pos:0] temp_pc[0:1];
 	
-	// all_regs is used for ALU operations
-	wire [`cpu_reg_msb_pos:0] all_regs[ 0 : `cpu_reg_arr_msb_pos + 2 ];
+	wire [`cpu_reg_msb_pos:0] pc_adjuster_out_hi, pc_adjuster_out_lo;
 	
-	assign { all_regs[0], all_regs[1], all_regs[2], all_regs[3],
-		all_regs[4], all_regs[5], all_regs[6], all_regs[7],
-		all_regs[8], all_regs[9], all_regs[10], all_regs[11],
-		all_regs[12], all_regs[13], all_regs[14], all_regs[15],
-		all_regs[16], all_regs[17] }
-		= { cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3],
-		cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
-		cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
-		cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15],
-		temp_regs[0], temp_regs[1] };
 	
 	//bit [ `cpu_reg_width + `cpu_reg_msb_pos : 0 ] prev_pc;
 	bit [`cpu_imm_value_16_msb_pos:0] prev_pc;
@@ -267,11 +256,21 @@ module spcpu
 		.rbp_index(ig5_rbp_index),
 		.ra_index_is_for_pair(ig5_ra_index_is_for_pair) );
 	
+	
+	// This is used for adjusting the program counter
+	adder_subtractor pc_adjuster( .oper(pc_adjuster_op), 
+		.a_in_hi(pc_adjuster_a_in_hi), .a_in_lo(pc_adjuster_a_in_lo), 
+		.b_in_hi(pc_adjuster_b_in_hi), .b_in_lo(pc_adjuster_b_in_lo),
+		.proc_flags_in(dummy_pc_adjuster_proc_flags_in), 
+		.out_hi(pc_adjuster_out_hi), .out_lo(pc_adjuster_out_lo), 
+		.proc_flags_out(dummy_pc_adjuster_proc_flags_out) );
+	
 	alu the_alu( .oper(the_alu_op), 
 		.a_in_hi(alu_a_in_hi), .a_in_lo(alu_a_in_lo), 
 		.b_in_hi(alu_b_in_hi), .b_in_lo(alu_b_in_lo),
-		.proc_flags_in(alu_proc_flags_in), .out_hi(alu_out_hi),
-		.out_lo(alu_out_lo), .proc_flags_out(alu_proc_flags_out) );
+		.proc_flags_in(alu_proc_flags_in), 
+		.out_hi(alu_out_hi), .out_lo(alu_out_lo), 
+		.proc_flags_out(alu_proc_flags_out) );
 	
 	
 	// Outside world access assign statements
@@ -360,7 +359,13 @@ module spcpu
 				data_in_is_0_counter <= 0;
 			end
 			
-			if ( data_in_is_0_counter >= 4 )
+			if ( `get_cpu_rp_pc >= 16'h0004 
+				&& `get_cpu_rp_pc < 16'h7ff0 )
+			begin
+				$display("\ndone");
+				$finish;
+			end
+			else if ( data_in_is_0_counter >= 4 )
 			begin
 				$display("\ndone");
 				$finish;
@@ -375,6 +380,7 @@ module spcpu
 		begin
 			//curr_state <= curr_state + 1;
 			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+			//prep_pc_adjuster_before_load_instr_hi();
 			prep_load_16_no_addr();
 		end
 		
@@ -412,13 +418,16 @@ module spcpu
 			begin
 				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 				
-				prep_addsub_and_alu_if_needed_init();
-				
+				prep_alu_if_needed_init();
+				//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
+				//prep_pc_adjuster_during_load_instr_hi();
+				seq_logic_grab_pc_adjuster_outputs();
 			end
 			
 			// Handle 32-bit instructions
 			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
 			begin
+				seq_logic_grab_pc_adjuster_outputs();
 				prep_load_instr_lo_reg();
 			end
 			
@@ -441,8 +450,9 @@ module spcpu
 		begin
 			curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 			instr_in_lo <= temp_data_in;
-			//prep_alu_if_needed_final();
-			prep_addsub_and_alu_if_needed_final();
+			//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
+			seq_logic_grab_pc_adjuster_outputs();
+			prep_alu_if_needed_final();
 		end
 		
 		
@@ -475,7 +485,8 @@ module spcpu
 				$display("The pc WAS changed");
 			end
 			
-			prep_load_instr_hi_generic();
+			//prep_load_instr_hi_generic();
+			prep_load_instr_hi_after_reg();
 			
 		end
 		
@@ -483,10 +494,35 @@ module spcpu
 	
 	
 	
-	// Combinational logic for updating instr_is_branch_or_call and
-	// non_bc_instr_possibly_changes_pc
-	always @ (*)
+	// Combinational logic for various PC-changing stuff
+	//always @ (*)
+	always @ ( curr_state )
 	begin
+		//$display( "comb logic:  %h %h", `get_cpu_rp_pc, `get_temp_pc );
+		
+		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
+		begin
+			pc_adjuster_op = pkg_alu::addsub_op_addp;
+			$display("comb logic begin_0");
+		end
+		
+		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
+		begin
+			//if (init_instr_is_32_bit)
+			//begin
+			//	$display( "comb logic load_instr_hi:  %h %h %h",
+			//		`get_cpu_rp_pc, `get_temp_pc, temp_data_in );
+			//end
+			comb_logic_prep_pc_adjuster_during_load_instr_hi();
+		end
+		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo )
+		begin
+			//$display( "comb logic load_instr_lo:  %h %h %h %h",
+			//	`get_cpu_rp_pc, `get_temp_pc, instr_in_hi, temp_data_in );
+			comb_logic_prep_pc_adjuster_during_load_instr_lo();
+		end
+		
+		else 
 		if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
 			{ instr_is_branch_or_call, non_bc_instr_possibly_changes_pc }
@@ -517,6 +553,21 @@ module spcpu
 				update_ipc_pc_for_grp_5_instr();
 			end
 		end
+		
+		//else
+		//begin
+		//	$display( "comb logic else:  %h %h %h %h %h",
+		//		`get_cpu_rp_pc, `get_temp_pc, 
+		//		{ pc_adjuster_out_hi, pc_adjuster_out_lo }, 
+		//		instr_in_hi, temp_data_in );
+		//	//debug_disp_regs_and_proc_flags();
+		//	
+		//	//if ( `get_cpu_rp_pc >= 16'h8010 )
+		//	//begin
+		//	//	$finish;
+		//	//end
+		//	
+		//end
 	end
 	
 	

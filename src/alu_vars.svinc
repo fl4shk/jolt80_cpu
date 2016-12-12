@@ -18,12 +18,22 @@
 `ifndef alu_vars_svinc
 `define alu_vars_svinc
 
+// Adder-subtractor inputs and outputs
+addsub_oper pc_adjuster_op;
+bit [`alu_inout_msb_pos:0] pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, 
+	pc_adjuster_b_in_hi, pc_adjuster_b_in_lo; 
+bit [`proc_flags_msb_pos:0] dummy_pc_adjuster_proc_flags_in;
+//bit [`alu_inout_msb_pos:0] pc_adjuster_out_hi, pc_adjuster_out_lo;
+bit [`proc_flags_msb_pos:0] dummy_pc_adjuster_proc_flags_out;
+
+
 // ALU inputs and outputs
 alu_oper the_alu_op;
 bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in_hi,
-	alu_b_in_lo, alu_out_hi, alu_out_lo;
-bit [`proc_flags_msb_pos:0] alu_proc_flags_in, alu_proc_flags_out;
-
+	alu_b_in_lo; 
+bit [`proc_flags_msb_pos:0] alu_proc_flags_in;
+bit [`alu_inout_msb_pos:0] alu_out_hi, alu_out_lo;
+bit [`proc_flags_msb_pos:0] alu_proc_flags_out;
 
 // The CPU flags that the ALU becomes made aware of 
 bit [`proc_flags_msb_pos:0] true_proc_flags;
@@ -36,5 +46,9 @@ bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded,
 ////bit alu_dest_reg_is_temp, alu_dest_rpair_is_temp;
 bit [`all_regs_index_msb_pos:0] alu_dest_reg_index;
 bit [`all_regs_index_msb_pos:0] alu_dest_rpair_index;
+
+
+
+
 
 `endif		// alu_vars_svinc

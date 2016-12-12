@@ -30,9 +30,27 @@ module adder_subtractor
 	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
 	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
+	//always
+	//begin
+	//	#4
+	//	//$display("dank");
+	//	//$display( "%h", oper );
+	//	if ( oper == pkg_alu::addsub_op_addp )
+	//	begin
+	//		$display( "adder_subtractor:  %h %h %h", { a_in_hi, a_in_lo }, 
+	//			{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
+	//	end
+	//	
+	//end
+	
 	always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
 	begin
 		case (oper)
+			pkg_alu::addsub_op_follow:
+			begin
+				{ proc_flags_out, out_hi, out_lo } = { proc_flags_in,
+					a_in_hi, a_in_lo };
+			end
 			pkg_alu::addsub_op_add:
 			begin
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 

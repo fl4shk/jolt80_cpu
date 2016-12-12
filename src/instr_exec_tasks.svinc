@@ -53,17 +53,17 @@ task finish_alu_op_with_dest_rpair;
 	end
 endtask
 
-task start_exec_shared_non_ldst_suffix;
-	if (!non_bc_instr_possibly_changes_pc)
-	begin
-		prep_load_instr_hi_generic();
-	end
-	
-	else // if (non_bc_instr_possibly_changes_pc)
-	begin
-		prep_update_pc_etc_after_ipc();
-	end
-endtask
+//task start_exec_shared_non_ldst_suffix;
+//	if (!non_bc_instr_possibly_changes_pc)
+//	begin
+//		prep_load_instr_hi_generic();
+//	end
+//	
+//	else // if (non_bc_instr_possibly_changes_pc)
+//	begin
+//		prep_update_pc_etc_after_ipc();
+//	end
+//endtask
 
 task exec_any_call;
 	input [`cpu_imm_value_16_msb_pos:0] next_pc_and_dio_addr;
@@ -227,7 +227,8 @@ task finish_exec_ldst_instr;
 	//	prep_update_pc_etc_after_ipc();
 	//end
 	
-	start_exec_shared_non_ldst_suffix();
+	//start_exec_shared_non_ldst_suffix();
+	prep_load_instr_hi_generic();
 endtask
 
 

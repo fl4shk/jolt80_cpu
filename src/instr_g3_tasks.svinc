@@ -89,13 +89,12 @@ task update_extra_ig3_pc_stuff;
 	final_ig3_rcp_is_pc <= `wire_rhs_rp_index_is_pc_index(ig3_rcp_index);
 endtask
 
-task prep_addsub_and_alu_instr_grp_3_generic;
+task prep_alu_instr_grp_3_generic;
 	input [`instr_g3_op_msb_pos:0] opcode;
 	input [`instr_g3_ra_index_msb_pos:0] ra_index;
 	input [`instr_g3_rbp_index_msb_pos:0] rbp_index;
 	input [`instr_g3_rcp_index_msb_pos:0] rcp_index;
 	
-	// This task intentionally left blank
 	
 endtask
 
@@ -144,7 +143,8 @@ task start_exec_instr_from_grp_3;
 	
 	if (!final_ig3_instr_is_ldst)
 	begin
-		start_exec_shared_non_ldst_suffix();
+		//start_exec_shared_non_ldst_suffix();
+		prep_load_instr_hi_generic();
 	end
 	
 endtask
