@@ -24,6 +24,13 @@
 
 // ALU constants
 
+
+// Adder-Subtractor operation number of bits and most significant bit
+// position
+`define addsub_op_width 4
+`define addsub_op_msb_pos ( `width_to_msb_pos(`addsub_op_width) )
+
+
 // ALU operation number of bits and most significant bit position
 `define alu_op_width 5
 `define alu_op_msb_pos ( `width_to_msb_pos(`alu_op_width) )
@@ -49,7 +56,7 @@
 
 // Subtraction operations
 `define alu_op_sub_cat (alu_op_cat_8_no_ci)
-`define alu_op_cmp_cat (alu_op_cat_8_no_ci)
+//`define alu_op_cmp_cat (alu_op_cat_8_no_ci)
 
 // Bitwise operations
 // Operations analogous to logic gates (none of these affect carry)
@@ -93,9 +100,12 @@
 // Arithmetic operations
 // Addition operations
 `define alu_op_addpb_cat (alu_op_cat_16_no_ci)
+`define alu_op_addp_cat (alu_op_cat_16_no_ci)
+`define alu_op_addpsnx_cat (alu_op_cat_16_no_ci)
 
 // Subtraction operations
 `define alu_op_subpb_cat (alu_op_cat_16_no_ci)
+`define alu_op_subp_cat (alu_op_cat_16_no_ci)
 
 // Bitwise operations
 // Complement operations

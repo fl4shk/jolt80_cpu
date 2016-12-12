@@ -21,6 +21,25 @@
 
 package pkg_alu;
 	
+	typedef enum bit [`addsub_op_msb_pos:0]
+	{
+		// Addition operations
+		addsub_op_add,
+		addsub_op_adc,
+		addsub_op_addpb,
+		addsub_op_addp,
+		
+		// 16-bit Add that SigN-eEtends b_in_lo to a 16-bit signed value
+		// before performing the addition.
+		addsub_op_addpsnx,
+		
+		// Subtraction operations
+		addsub_op_sub,
+		addsub_op_sbc,
+		addsub_op_subpb,
+		addsub_op_subp
+		
+	} addsub_oper;
 	
 	// ALU operation enum values
 	typedef enum bit [`alu_op_msb_pos:0]
@@ -30,13 +49,21 @@ package pkg_alu;
 		alu_op_add,
 		alu_op_adc,
 		alu_op_addpb,
+		alu_op_addp,
+		
+		// 16-bit Add that SigN-eEtends b_in_lo to a 16-bit signed value
+		// before performing the addition.
+		alu_op_addpsnx,
 		
 		
 		// Subtraction operations
 		alu_op_sub,
 		alu_op_sbc,
 		alu_op_subpb,
-		alu_op_cmp,
+		alu_op_subp,
+		
+		//// There is no need for this to exist because sub covers it
+		//alu_op_cmp,
 		
 		// Bitwise operations
 		
@@ -100,92 +127,10 @@ package pkg_alu;
 		
 		// 16-bit operation with no carry in
 		alu_op_cat_16_no_ci,
+		
+		// 16-bit operation with carry in
 		alu_op_cat_16_ci
 	} alu_oper_cat;
 	
-	
-	// This task is intended to be used only in test benches.
-	task get_alu_oper_cat_tb( input alu_oper to_check, 
-		output alu_oper_cat to_get );
-		
-		// Arithmetic operations
-			// Addition operations
-		if ( ( to_check == alu_op_add ) 
-			
-			// Subtraction operations
-			|| ( to_check == alu_op_sub ) 
-			|| ( to_check == alu_op_cmp ) 
-			
-		// Bitwise operations
-			// Operations analogous to logic gates (none of these affect
-			// carry)
-			|| ( to_check == alu_op_and ) 
-			|| ( to_check == alu_op_orr )
-			|| ( to_check == alu_op_xor )
-			
-			// Complement operations
-			|| ( to_check == alu_op_inv )
-			|| ( to_check == alu_op_neg ) 
-			
-			// 8-bit Bitshifting operations (number of bits specified by
-			// b_in)
-			|| ( to_check == alu_op_lsl )
-			|| ( to_check == alu_op_lsr )
-			|| ( to_check == alu_op_asr )
-			
-			// 8-bit Bit rotation operations (number of bits specified by
-			// [b_in % inout_width])
-			|| ( to_check == alu_op_rol )
-			|| ( to_check == alu_op_ror ) )
-		begin
-			to_get = alu_op_cat_8_no_ci;
-		end
-		
-		
-		
-		// Arithmetic operations
-			// Addition operations
-		else if ( ( to_check == alu_op_adc )
-			
-			// Subtraction operations
-			|| ( to_check == alu_op_sbc )
-			
-		// Bitwise operations
-			// 8-bit Bit rotating operations (with carry as bit 8)
-			// that rotate by [b_in % inout_width] bits
-			|| ( to_check == alu_op_rolc )
-			|| ( to_check == alu_op_rorc ) )
-		begin
-			to_get = alu_op_cat_8_ci;
-		end
-		
-		
-		
-		// Bitwise operations
-			// Complement operations
-		else if ( ( to_check == alu_op_invp )
-			|| ( to_check == alu_op_negp )
-			
-			// 16-bit Bitshifting operations that shift { a_in_hi, a_in_lo }
-			// by b_in bits
-			|| ( to_check == alu_op_lslp )
-			|| ( to_check == alu_op_lsrp )
-			|| ( to_check == alu_op_asrp )
-			
-			// 16-bit Bit rotation operations that rotate { a_in_hi,
-			// a_in_lo } by [b_in % inout_width] bits
-			|| ( to_check == alu_op_rolp )
-			|| ( to_check == alu_op_rorp ) )
-		begin
-			to_get = alu_op_cat_16_no_ci;
-		end
-		
-		else if ( ( to_check == alu_op_rolcp )
-			|| ( to_check == alu_op_rorcp ) )
-		begin
-			to_get = alu_op_cat_16_ci;
-		end
-		
-	endtask
 	
 endpackage

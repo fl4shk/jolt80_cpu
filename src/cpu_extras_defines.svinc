@@ -45,6 +45,10 @@
 `define cpu_rp_index_ie_msb_pos \
 	( `width_to_msb_pos(`cpu_rp_index_ie_width) )
 
+// ALU operations stuff
+`define all_regs_index_width 5
+`define all_regs_index_msb_pos ( `width_to_msb_pos(`all_regs_index_width) )
+
 
 // Register widths and most significant bit positions
 `define cpu_reg_width 8
@@ -62,6 +66,8 @@
 
 
 // CPU Register array size stuff
+//`define cpu_reg_arr_width 16
+
 `define cpu_reg_arr_width 16
 `define cpu_reg_arr_msb_pos ( `width_to_msb_pos(`cpu_reg_arr_width) )
 

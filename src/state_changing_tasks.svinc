@@ -19,6 +19,8 @@
 `ifndef state_changing_tasks_svinc
 `define state_changing_tasks_svinc
 
+`define get_temp_pc { temp_regs[0], temp_regs[1] }
+
 // This task exists to help reduce bugs fro
 task set_pc_and_dio_addr;
 	input [`cpu_addr_msb_pos:0] val;
@@ -28,8 +30,10 @@ task set_pc_and_dio_addr;
 endtask
 
 
-task advance_pc_etc_after_reg_instr;
-	set_pc_and_dio_addr(`get_pc_after_reg_instr);
+//task advance_pc_etc_after_reg_instr;
+task advance_pc_etc_after_instr;
+	//set_pc_and_dio_addr(`get_pc_after_reg_instr);
+	set_pc_and_dio_addr(`get_temp_pc);
 endtask
 
 
@@ -84,11 +88,13 @@ endtask
 // Advance the PC after a non-branch, non-call instruction
 task prep_load_instr_hi_after_reg;
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	advance_pc_etc_after_reg_instr();
+	//advance_pc_etc_after_reg_instr();
+	advance_pc_etc_after_instr();
 	prep_load_16_no_addr();
 endtask
 
 task prep_load_instr_hi_after_bc;
+	$display("prep_load_instr_hi_after_bc");
 	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 	prep_load_16_no_addr();
 endtask
@@ -107,13 +113,13 @@ task prep_load_instr_hi_generic;
 	
 	if (!instr_is_branch_or_call)
 	begin
-		//$display("!instr_is_branch_or_call");
+		$display("!instr_is_branch_or_call");
 		prep_load_instr_hi_after_reg();
 	end
 	
 	else // if (instr_is_branch_or_call)
 	begin
-		//$display("instr_is_branch_or_call");
+		$display("instr_is_branch_or_call");
 		prep_load_instr_hi_after_bc();
 	end
 endtask
@@ -121,7 +127,8 @@ endtask
 task prep_load_instr_lo_reg;
 	curr_state <= pkg_cpu::cpu_st_load_instr_lo;
 	//advance_dio_addr_for_instr_lo();
-	advance_pc_etc_after_reg_instr();
+	//advance_pc_etc_after_reg_instr();
+	advance_pc_etc_after_instr();
 	prep_load_16_no_addr();
 endtask
 

@@ -20,18 +20,21 @@
 
 // ALU inputs and outputs
 alu_oper the_alu_op;
-bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in,
-	alu_out_hi, alu_out_lo;
+bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in_hi,
+	alu_b_in_lo, alu_out_hi, alu_out_lo;
 bit [`proc_flags_msb_pos:0] alu_proc_flags_in, alu_proc_flags_out;
 
 
 // The CPU flags that the ALU becomes made aware of 
 bit [`proc_flags_msb_pos:0] true_proc_flags;
-bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded;
-//wire alu_modded_proc_flags;
+bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded,
+	alu_modded_proc_flags;
 
-bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_reg_index;
-//bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
-bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_rpair_index;
+//bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_reg_index;
+////bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
+//bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_rpair_index;
+////bit alu_dest_reg_is_temp, alu_dest_rpair_is_temp;
+bit [`all_regs_index_msb_pos:0] alu_dest_reg_index;
+bit [`all_regs_index_msb_pos:0] alu_dest_rpair_index;
 
 `endif		// alu_vars_svinc

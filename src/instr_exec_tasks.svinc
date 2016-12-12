@@ -31,19 +31,26 @@
 //endtask
 
 task finish_alu_op_with_dest_reg;
-	if ( alu_dest_reg_was_modded )
+	if (alu_dest_reg_was_modded)
 	begin
 		cpu_regs[alu_dest_reg_index] <= `get_alu_out_8;
 	end
-	true_proc_flags <= alu_proc_flags_out;
+	
+	if (alu_modded_proc_flags)
+	begin
+		true_proc_flags <= alu_proc_flags_out;
+	end
 endtask
 
 task finish_alu_op_with_dest_rpair;
-	if ( alu_dest_rpair_was_modded )
+	if (alu_dest_rpair_was_modded)
 	begin
 		`make_reg_pair_w_pi(alu_dest_rpair_index) <= `get_alu_out_16;
 	end
-	true_proc_flags <= alu_proc_flags_out;
+	if (alu_modded_proc_flags)
+	begin
+		true_proc_flags <= alu_proc_flags_out;
+	end
 endtask
 
 task start_exec_shared_non_ldst_suffix;
@@ -64,20 +71,24 @@ task exec_any_call;
 	set_pc_and_dio_addr(next_pc_and_dio_addr);
 endtask
 
-task exec_ig4_branch;
-	// If it's negative
-	if (final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
-	begin
-		//`get_cpu_rp_pc <= `get_cpu_rp_pc
-		//	+ { 8'hff, final_ig4_imm_value_8 };
-		set_pc_and_dio_addr( `get_cpu_rp_pc
-			+ { 8'hff, final_ig4_imm_value_8 } );
-	end
-	else //if (!final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
-	begin
-		//`get_cpu_rp_pc <= `get_cpu_rp_pc + final_ig4_imm_value_8;
-		set_pc_and_dio_addr( `get_cpu_rp_pc + final_ig4_imm_value_8 );
-	end
+task finish_ig4_branch;
+	//// If it's negative
+	//if (final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
+	//begin
+	//	$display("memes");
+	//	set_pc_and_dio_addr( `get_cpu_rp_pc
+	//		+ { 8'hff, final_ig4_imm_value_8 } );
+	//	
+	//	//$display( "%h", `get_cpu_rp_pc 
+	//	//	+ { 8'hff, final_ig4_imm_value_8 } );
+	//end
+	//else //if (!final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
+	//begin
+	//	//`get_cpu_rp_pc <= `get_cpu_rp_pc + final_ig4_imm_value_8;
+	//	
+	//	$display("nice");
+	//	set_pc_and_dio_addr( `get_cpu_rp_pc + final_ig4_imm_value_8 );
+	//end
 endtask
 
 
@@ -206,15 +217,17 @@ task finish_exec_ldst_instr;
 	endcase
 	
 	
-	if (!non_bc_instr_possibly_changes_pc)
-	begin
-		prep_load_instr_hi_generic();
-	end
+	//if (!non_bc_instr_possibly_changes_pc)
+	//begin
+	//	prep_load_instr_hi_generic();
+	//end
+	//
+	//else // if (non_bc_instr_possibly_changes_pc)
+	//begin
+	//	prep_update_pc_etc_after_ipc();
+	//end
 	
-	else // if (non_bc_instr_possibly_changes_pc)
-	begin
-		prep_update_pc_etc_after_ipc();
-	end
+	start_exec_shared_non_ldst_suffix();
 endtask
 
 

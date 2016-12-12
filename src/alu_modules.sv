@@ -15,9 +15,94 @@
 // You should have received a copy of the GNU General Public License along
 // with Small Practice CPU.  If not, see <http://www.gnu.org/licenses/>.
 
+
 `include "src/alu_defines.svinc"
 `include "src/cpu_extras_defines.svinc"
 
+
+module adder_subtractor
+	import pkg_alu::*;
+	import pkg_pflags::*;
+	
+	( input addsub_oper oper,
+	input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in_hi, b_in_lo,
+	input bit [`proc_flags_msb_pos:0] proc_flags_in,
+	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
+	output bit [`proc_flags_msb_pos:0] proc_flags_out );
+	
+	always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
+	begin
+		case (oper)
+			pkg_alu::addsub_op_add:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ b_in_lo;
+			end
+			
+			pkg_alu::addsub_op_adc:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ b_in_lo + proc_flags_in[pkg_pflags::pf_slot_c];
+			end
+			
+			pkg_alu::addsub_op_addpb:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { a_in_hi, a_in_lo } + { 8'h0, b_in_lo };
+			end
+			
+			pkg_alu::addsub_op_addp:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { a_in_hi, a_in_lo } + { b_in_hi, b_in_lo };
+			end
+			
+			pkg_alu::addsub_op_addpsnx:
+			begin
+				if (b_in_lo[`cpu_imm_value_8_msb_pos])
+				begin
+					{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, 
+						out_lo } = { a_in_hi, a_in_lo } 
+						+ { 8'hff, b_in_lo };
+				end
+				
+				else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
+				begin
+					{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi,
+						out_lo } = { a_in_hi, a_in_lo }
+						+ { 8'h0, b_in_lo };
+				end
+			end
+			
+			// Subtraction operations
+			pkg_alu::addsub_op_sub:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ (~b_in_lo) + 1'b1;
+			end
+			
+			pkg_alu::addsub_op_sbc:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+					+ (~b_in_lo) + proc_flags_in[pkg_pflags::pf_slot_c];
+			end
+			
+			pkg_alu::addsub_op_subpb:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { a_in_hi, a_in_lo } + ~{ 8'h0, b_in_lo } + 1'b1;
+			end
+			
+			pkg_alu::addsub_op_subp:
+			begin
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { a_in_hi, a_in_lo } + ~{ b_in_hi, b_in_lo } + 1'b1;
+			end
+		endcase
+	end
+	
+	
+endmodule
 
 //module alu( input bit [alu_op_msb_pos:0] oper,
 module alu
@@ -25,11 +110,77 @@ module alu
 	import pkg_pflags::*;
 	
 	( input alu_oper oper,
-	input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in,
+	input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in_hi, b_in_lo,
 	input bit [`proc_flags_msb_pos:0] proc_flags_in,
 	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
 	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
+	
+	addsub_oper test_addsub_oper;
+	
+	bit [`alu_inout_msb_pos:0] addsub_a_in_hi, addsub_a_in_lo,
+		addsub_b_in_hi, addsub_b_in_lo; 
+	bit [`proc_flags_msb_pos:0] addsub_proc_flags_in;
+	bit [`alu_inout_msb_pos:0] addsub_out_hi, addsub_out_lo;
+	bit [`proc_flags_msb_pos:0] addsub_proc_flags_out;
+	
+	adder_subtractor test_addsub( .oper(test_addsub_oper), 
+		.a_in_hi(addsub_a_in_hi), .a_in_lo(addsub_a_in_lo),
+		.b_in_hi(addsub_b_in_hi), .b_in_lo(addsub_b_in_lo),
+		.proc_flags_in(addsub_proc_flags_in),
+		.out_hi(addsub_out_hi), .out_lo(addsub_out_lo),
+		.proc_flags_out(addsub_proc_flags_out) );
+	
+	task copy_addsub_outputs_8;
+		{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
+			= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+			addsub_out_lo };
+	endtask
+	
+	task copy_addsub_outputs_16;
+		{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+			= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+			addsub_out_hi, addsub_out_lo };
+	endtask
+	
+	task do_addsub_oper_8;
+		input [`addsub_op_msb_pos:0] some_op;
+		input [`proc_flags_msb_pos:0] some_proc_flags_in;
+		input [`alu_inout_msb_pos:0] some_a_in_lo, some_b_in_lo;
+		
+		{ test_addsub_oper, addsub_proc_flags_in, addsub_a_in_lo, 
+			addsub_b_in_lo }
+			= { some_op, some_proc_flags_in, some_a_in_lo, some_b_in_lo };
+		
+		copy_addsub_outputs_8();
+	endtask
+	
+	task do_addsub_oper_16;
+		input [`addsub_op_msb_pos:0] some_op;
+		input [`proc_flags_msb_pos:0] some_proc_flags_in;
+		input [`alu_inout_msb_pos:0] some_a_in_hi, some_a_in_lo,
+			some_b_in_hi, some_b_in_lo;
+		
+		{ test_addsub_oper, addsub_proc_flags_in, addsub_a_in_hi, 
+			addsub_a_in_lo, addsub_b_in_hi, addsub_b_in_lo }
+			= { some_op, some_proc_flags_in, some_a_in_hi, some_a_in_lo, 
+			some_b_in_hi, some_b_in_lo };
+		
+		copy_addsub_outputs_16();
+	endtask
+	
+	task do_basic_addsub_oper_8;
+		input [`addsub_op_msb_pos:0] some_op;
+		
+		do_addsub_oper_8( some_op, proc_flags_in, a_in_lo, b_in_lo );
+	endtask
+	
+	task do_basic_addsub_oper_16;
+		input [`addsub_op_msb_pos:0] some_op;
+		
+		do_addsub_oper_16( some_op, proc_flags_in, a_in_hi, a_in_lo,
+			b_in_hi, b_in_lo );
+	endtask
 	
 	// import alu_oper_cat;
 	alu_oper_cat oper_cat;
@@ -64,7 +215,8 @@ module alu
 	
 	
 	
-	always @ ( oper, a_in_lo, b_in, proc_flags_in )
+	//always @ ( oper, a_in_lo, b_in_lo, proc_flags_in )
+	always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
 	begin
 		//$display( "%h %h\t\t%h %h", rot_mod_thing, rot_c_mod_thing,
 		//	rot_p_mod_thing, rot_p_c_mod_thing );
@@ -81,24 +233,54 @@ module alu
 			begin
 				oper_cat = `alu_op_add_cat;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-					+ b_in;
+				do_basic_addsub_oper_8(pkg_alu::addsub_op_add);
 			end
 			
 			pkg_alu::alu_op_adc:
 			begin
 				oper_cat = `alu_op_adc_cat;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-					+ b_in + proc_flags_in[pkg_pflags::pf_slot_c];
+				do_basic_addsub_oper_8(pkg_alu::addsub_op_adc);
 			end
 			
 			pkg_alu::alu_op_addpb:
 			begin
 				oper_cat = `alu_op_addpb_cat;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { a_in_hi, a_in_lo } + { 8'h0, b_in };
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+				//	= { a_in_hi, a_in_lo } + { 8'h0, b_in_lo };
+				
+				do_basic_addsub_oper_16(pkg_alu::addsub_op_addpb);
+			end
+			
+			pkg_alu::alu_op_addp:
+			begin
+				oper_cat = `alu_op_addp_cat;
+				
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+				//	= { a_in_hi, a_in_lo } + { b_in_hi, b_in_lo };
+				
+				do_basic_addsub_oper_16(pkg_alu::addsub_op_addp);
+			end
+			
+			pkg_alu::alu_op_addpsnx:
+			begin
+				oper_cat = `alu_op_addpsnx_cat;
+				
+				//if (b_in_lo[`cpu_imm_value_8_msb_pos])
+				//begin
+				//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, 
+				//		out_lo } = { a_in_hi, a_in_lo } 
+				//		+ { 8'hff, b_in_lo };
+				//end
+				//
+				//else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
+				//begin
+				//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi,
+				//		out_lo } = { a_in_hi, a_in_lo }
+				//		+ { 8'h0, b_in_lo };
+				//end
+				do_basic_addsub_oper_16(pkg_alu::addsub_op_addpsnx);
 			end
 			
 			// Subtraction operations
@@ -106,33 +288,46 @@ module alu
 			begin
 				oper_cat = `alu_op_sub_cat;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-					+ (~b_in) + 1'b1;
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+				//	+ (~b_in_lo) + 1'b1;
+				do_basic_addsub_oper_8(pkg_alu::addsub_op_sub);
 			end
 			
 			pkg_alu::alu_op_sbc:
 			begin
 				oper_cat = `alu_op_sbc_cat;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-					+ (~b_in) + proc_flags_in[pkg_pflags::pf_slot_c];
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+				//	+ (~b_in_lo) + proc_flags_in[pkg_pflags::pf_slot_c];
+				
+				do_basic_addsub_oper_8(pkg_alu::addsub_op_sbc);
 			end
 			
 			pkg_alu::alu_op_subpb:
 			begin
 				oper_cat = `alu_op_subpb_cat;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { a_in_hi, a_in_lo } + ~{ 8'h0, b_in } + 1'b1;
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+				//	= { a_in_hi, a_in_lo } + ~{ 8'h0, b_in_lo } + 1'b1;
+				do_basic_addsub_oper_16(pkg_alu::addsub_op_subpb);
 			end
 			
-			pkg_alu::alu_op_cmp:
+			pkg_alu::alu_op_subp:
 			begin
-				oper_cat = `alu_op_cmp_cat;
+				oper_cat = `alu_op_subp_cat;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-					+ (~b_in) + 1'b1;
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+				//	= { a_in_hi, a_in_lo } + ~{ b_in_hi, b_in_lo } + 1'b1;
+				do_basic_addsub_oper_16(pkg_alu::addsub_op_subp);
 			end
+			
+			//pkg_alu::alu_op_cmp:
+			//begin
+			//	oper_cat = `alu_op_cmp_cat;
+			//	
+			//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
+			//		+ (~b_in_lo) + 1'b1;
+			//end
 			
 		// Bitwise operations
 			// Operations analogous to logic gates (none of these affect
@@ -142,7 +337,7 @@ module alu
 				oper_cat = `alu_op_and_cat;
 				
 				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-					= { a_in_lo & b_in, 
+					= { a_in_lo & b_in_lo, 
 					proc_flags_in[pkg_pflags::pf_slot_c] };
 			end
 			
@@ -151,7 +346,7 @@ module alu
 				oper_cat = `alu_op_orr_cat;
 				
 				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-					= { a_in_lo | b_in, 
+					= { a_in_lo | b_in_lo, 
 					proc_flags_in[pkg_pflags::pf_slot_c] };
 			end
 			
@@ -160,7 +355,7 @@ module alu
 				oper_cat = `alu_op_xor_cat;
 				
 				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-					= { a_in_lo ^ b_in, 
+					= { a_in_lo ^ b_in_lo, 
 					proc_flags_in[pkg_pflags::pf_slot_c] };
 			end
 			
@@ -202,12 +397,12 @@ module alu
 			end
 			
 			// 8-bit Bitshifting operations (number of bits specified by
-			// b_in)
+			// b_in_lo)
 			pkg_alu::alu_op_lsl:
 			begin
 				oper_cat = `alu_op_lsl_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -219,7 +414,7 @@ module alu
 				else
 				begin
 					{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
-						= { 1'b0, a_in_lo } << b_in;
+						= { 1'b0, a_in_lo } << b_in_lo;
 				end
 			end
 			
@@ -227,7 +422,7 @@ module alu
 			begin
 				oper_cat = `alu_op_lsr_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -239,7 +434,7 @@ module alu
 				else
 				begin
 					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-						= { a_in_lo, 1'b0 } >> b_in;
+						= { a_in_lo, 1'b0 } >> b_in_lo;
 				end
 			end
 			
@@ -247,7 +442,7 @@ module alu
 			begin
 				oper_cat = `alu_op_asr_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -259,18 +454,18 @@ module alu
 				else
 				begin
 					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-						= $signed({ a_in_lo, 1'b0 }) >>> b_in;
+						= $signed({ a_in_lo, 1'b0 }) >>> b_in_lo;
 				end
 				
 			end
 			
 			// 8-bit Bit rotation operations (number of bits specified by
-			// [b_in % inout_width])
+			// [b_in_lo % inout_width])
 			pkg_alu::alu_op_rol:
 			begin
 				oper_cat = `alu_op_rol_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -284,12 +479,12 @@ module alu
 					// Don't change carry
 					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
 						= { rot_temp[ ( `alu_inout_width 
-						- ( b_in & rot_mod_thing ) ) 
+						- ( b_in_lo & rot_mod_thing ) ) 
 						+: `alu_inout_width ],
 						proc_flags_in[pkg_pflags::pf_slot_c] };
 					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
 					//	= { rot_temp[ ( `alu_inout_width 
-					//	- ( b_in % `alu_inout_width ) ) 
+					//	- ( b_in_lo % `alu_inout_width ) ) 
 					//	+: ``alu_inout_width ],
 					//	proc_flags_in[pkg_pflags::pf_slot_c] };
 				end
@@ -300,7 +495,7 @@ module alu
 			begin
 				oper_cat = `alu_op_ror_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -313,11 +508,11 @@ module alu
 				begin
 					// Don't change carry
 					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-						= { rot_temp[ ( b_in & rot_mod_thing ) 
+						= { rot_temp[ ( b_in_lo & rot_mod_thing ) 
 						+: `alu_inout_width ],
 						proc_flags_in[pkg_pflags::pf_slot_c] };
 					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-					//	= { rot_temp[ ( b_in % `alu_inout_width ) 
+					//	= { rot_temp[ ( b_in_lo % `alu_inout_width ) 
 					//	+: `alu_inout_width ],
 					//	proc_flags_in[pkg_pflags::pf_slot_c] };
 				end
@@ -344,12 +539,12 @@ module alu
 			end
 			
 			// 16-bit Bitshifting operations that shift 
-			// { a_in_hi, a_in_lo } by b_in bits
+			// { a_in_hi, a_in_lo } by b_in_lo bits
 			pkg_alu::alu_op_lslp:
 			begin
 				oper_cat = `alu_op_lslp_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -362,7 +557,7 @@ module alu
 				begin
 					{ proc_flags_out[pkg_pflags::pf_slot_c], { out_hi, 
 						out_lo } } = { 1'b0, { a_in_hi, a_in_lo } } 
-						<< b_in;
+						<< b_in_lo;
 				end
 				
 			end
@@ -371,7 +566,7 @@ module alu
 			begin
 				oper_cat = `alu_op_lsrp_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -384,7 +579,7 @@ module alu
 				begin
 					{ { out_hi, out_lo }, 
 						proc_flags_out[pkg_pflags::pf_slot_c] } 
-						= { { a_in_hi, a_in_lo }, 1'b0 } >> b_in;
+						= { { a_in_hi, a_in_lo }, 1'b0 } >> b_in_lo;
 				end
 				
 			end
@@ -393,7 +588,7 @@ module alu
 			begin
 				oper_cat = `alu_op_asrp_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -406,19 +601,20 @@ module alu
 				begin
 					{ { out_hi, out_lo }, 
 						proc_flags_out[pkg_pflags::pf_slot_c] } 
-						= $signed({ { a_in_hi, a_in_lo }, 1'b0 }) >>> b_in;
+						= $signed({ { a_in_hi, a_in_lo }, 1'b0 }) 
+						>>> b_in_lo;
 				end
 				
 			end
 			
 			
 			// 16-bit Bit rotation operations that rotate 
-			// { a_in_hi, a_in_lo } by [b_in % inout_width] bits
+			// { a_in_hi, a_in_lo } by [b_in_lo % inout_width] bits
 			pkg_alu::alu_op_rolp:
 			begin
 				oper_cat = `alu_op_rolp_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -433,7 +629,7 @@ module alu
 					{ { out_hi, out_lo }, 
 						proc_flags_out[pkg_pflags::pf_slot_c] } 
 						= { rot_p_temp[ ( `alu_inout_pair_width 
-						- ( b_in & rot_p_mod_thing ) ) 
+						- ( b_in_lo & rot_p_mod_thing ) ) 
 						+: `alu_inout_pair_width ],
 						proc_flags_in[pkg_pflags::pf_slot_c] };
 				end
@@ -444,7 +640,7 @@ module alu
 			begin
 				oper_cat = `alu_op_rorp_cat;
 				
-				if ( b_in == `alu_inout_width'h0 )
+				if ( b_in_lo == `alu_inout_width'h0 )
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
@@ -458,7 +654,7 @@ module alu
 					// Don't change carry
 					{ { out_hi, out_lo }, 
 						proc_flags_out[pkg_pflags::pf_slot_c] }
-						= { rot_p_temp[ ( b_in & rot_p_mod_thing ) 
+						= { rot_p_temp[ ( b_in_lo & rot_p_mod_thing ) 
 						+: `alu_inout_pair_width ],
 						proc_flags_in[pkg_pflags::pf_slot_c] };
 				end

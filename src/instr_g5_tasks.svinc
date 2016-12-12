@@ -146,7 +146,7 @@ task update_extra_ig5_pc_stuff;
 endtask
 
 
-task prep_alu_instr_grp_5_generic;
+task prep_addsub_and_alu_instr_grp_5_generic;
 	input [`instr_g5_op_msb_pos:0] opcode;
 	input [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
 	input [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;

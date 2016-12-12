@@ -126,7 +126,7 @@ endmodule
 // the next value of data_inout_addr after loading the high 16 bits of a
 // 32-bit instruction
 //`define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + `instr_16_num_bytes )
-`define get_pc_after_reg_instr ( `get_cpu_rp_pc + `instr_16_num_bytes )
+//`define get_pc_after_reg_instr ( `get_cpu_rp_pc + `instr_16_num_bytes )
 
 // The next value of the PC after a non-PC-changing 32-bit instruction
 //`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + `instr_32_num_bytes )
@@ -174,9 +174,28 @@ module spcpu
 	// CPU state stuff
 	// For some reason, vvp does weird things when I make cpu_regs part of
 	// the misc_cpu_vars struct, so just get rid of that struct for now.
-	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	
-	bit [ `cpu_reg_width + `cpu_reg_msb_pos : 0 ] prev_pc;
+	// 16 programmer-visible CPU regs and 2 registers ONLY for internal use
+	// (mainly for internal ALU usage)
+	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
+	bit [`cpu_reg_msb_pos:0] temp_regs[0:1];
+	
+	// all_regs is used for ALU operations
+	wire [`cpu_reg_msb_pos:0] all_regs[ 0 : `cpu_reg_arr_msb_pos + 2 ];
+	
+	assign { all_regs[0], all_regs[1], all_regs[2], all_regs[3],
+		all_regs[4], all_regs[5], all_regs[6], all_regs[7],
+		all_regs[8], all_regs[9], all_regs[10], all_regs[11],
+		all_regs[12], all_regs[13], all_regs[14], all_regs[15],
+		all_regs[16], all_regs[17] }
+		= { cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3],
+		cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
+		cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
+		cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15],
+		temp_regs[0], temp_regs[1] };
+	
+	//bit [ `cpu_reg_width + `cpu_reg_msb_pos : 0 ] prev_pc;
+	bit [`cpu_imm_value_16_msb_pos:0] prev_pc;
 	wire [`cpu_reg_msb_pos:0] prev_r14, prev_r15;
 	assign { prev_r14, prev_r15 } = prev_pc;
 	
@@ -248,8 +267,9 @@ module spcpu
 		.rbp_index(ig5_rbp_index),
 		.ra_index_is_for_pair(ig5_ra_index_is_for_pair) );
 	
-	alu the_alu( .oper(the_alu_op), .a_in_hi(alu_a_in_hi),
-		.a_in_lo(alu_a_in_lo), .b_in(alu_b_in), 
+	alu the_alu( .oper(the_alu_op), 
+		.a_in_hi(alu_a_in_hi), .a_in_lo(alu_a_in_lo), 
+		.b_in_hi(alu_b_in_hi), .b_in_lo(alu_b_in_lo),
 		.proc_flags_in(alu_proc_flags_in), .out_hi(alu_out_hi),
 		.out_lo(alu_out_lo), .proc_flags_out(alu_proc_flags_out) );
 	
@@ -353,7 +373,8 @@ module spcpu
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
-			curr_state <= curr_state + 1;
+			//curr_state <= curr_state + 1;
+			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 			prep_load_16_no_addr();
 		end
 		
@@ -391,7 +412,7 @@ module spcpu
 			begin
 				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 				
-				prep_alu_if_needed_init();
+				prep_addsub_and_alu_if_needed_init();
 				
 			end
 			
@@ -420,7 +441,8 @@ module spcpu
 		begin
 			curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 			instr_in_lo <= temp_data_in;
-			prep_alu_if_needed_final();
+			//prep_alu_if_needed_final();
+			prep_addsub_and_alu_if_needed_final();
 		end
 		
 		
