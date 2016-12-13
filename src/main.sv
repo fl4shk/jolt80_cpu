@@ -258,19 +258,20 @@ module spcpu
 		.ra_index_is_for_pair(ig5_ra_index_is_for_pair) );
 	
 	
-	// This is used for adjusting the program counter
+	//// This is used for adjusting the program counter
 	//pc_incrementer the_pc_incrementer( .pc_in(`get_cpu_rp_pc),
 	//	.offset_in(the_pc_inc_offset_in), .pc_out(the_pc_inc_pc_out) );
 	
+	
+	// These are used for adjusting the program counter
 	pc_incrementer the_pc_incrementer( .pc_in(the_pc_inc_pc_in),
 		.offset_in(the_pc_inc_offset_in), .pc_out(the_pc_inc_pc_out) );
 	
-	adder_subtractor pc_adjuster( .oper(pc_adjuster_op), 
-		.a_in_hi(pc_adjuster_a_in_hi), .a_in_lo(pc_adjuster_a_in_lo), 
+	sign_extend_adder branch_pc_adjuster
+		( .a_in_hi(pc_adjuster_a_in_hi), .a_in_lo(pc_adjuster_a_in_lo), 
 		.b_in_hi(pc_adjuster_b_in_hi), .b_in_lo(pc_adjuster_b_in_lo),
-		.proc_flags_in(dummy_pc_adjuster_proc_flags_in), 
 		.out_hi(pc_adjuster_out_hi), .out_lo(pc_adjuster_out_lo), 
-		.proc_flags_out(dummy_pc_adjuster_proc_flags_out) );
+		.proc_flags_out(pc_adjuster_proc_flags_out) );
 	
 	alu the_alu( .oper(the_alu_op), 
 		.a_in_hi(alu_a_in_hi), .a_in_lo(alu_a_in_lo), 
@@ -538,8 +539,8 @@ module spcpu
 		begin
 			//pc_adjuster_op = pkg_alu::addsub_op_addp;
 			
-			// This is for branches
-			pc_adjuster_op = pkg_alu::addsub_op_addpsnx;
+			//// This is for branches
+			//pc_adjuster_op = pkg_alu::addsub_op_addpsnx;
 			$display("comb logic begin_0");
 		end
 		
@@ -579,6 +580,7 @@ module spcpu
 			
 			else if ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
 			begin
+				
 				update_ipc_pc_for_grp_4_instr();
 			end
 			
@@ -597,7 +599,6 @@ module spcpu
 		else if ( curr_state 
 			== pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
 		begin
-			//comb_logic_prep_pc_adjuster_after_non_bc_ipc();
 			comb_logic_prep_pc_inc_after_non_bc_ipc();
 		end
 		

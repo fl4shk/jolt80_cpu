@@ -35,6 +35,29 @@ module pc_incrementer
 	
 endmodule
 
+module sign_extend_adder
+	import pkg_pflags::*;
+	
+	( input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in_hi, b_in_lo,
+		output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
+		output bit [`proc_flags_msb_pos:0] proc_flags_out );
+	
+	always @ (*)
+	begin
+		if (b_in_lo[`cpu_imm_value_8_msb_pos])
+		begin
+			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
+				= { a_in_hi, a_in_lo } + { 8'hff, b_in_lo };
+		end
+		
+		else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
+		begin
+			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
+				= { a_in_hi, a_in_lo } + { 8'h0, b_in_lo };
+		end
+	end
+	
+endmodule
 
 module adder_subtractor
 	import pkg_alu::*;
@@ -46,19 +69,28 @@ module adder_subtractor
 	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
 	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
-	always
-	begin
-		#4
-		//$display( "%h", oper );
-		if ( oper == pkg_alu::addsub_op_addp )
-		//if ( ( oper == pkg_alu::addsub_op_add )
-		//	|| ( oper == pkg_alu::addsub_op_addp ) )
-		begin
-			$display( "adder_subtractor:  %h %h %h", { a_in_hi, a_in_lo }, 
-				{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
-		end
-		
-	end
+	
+	//always
+	//begin
+	//	#4
+	//	//$display( "%h", oper );
+	//	if ( oper == pkg_alu::addsub_op_addp )
+	//	//if ( ( oper == pkg_alu::addsub_op_add )
+	//	//	|| ( oper == pkg_alu::addsub_op_addp ) )
+	//	begin
+	//		$display( "adder_subtractor:  %h %h %h", { a_in_hi, a_in_lo }, 
+	//			{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
+	//	end
+	//	
+	//end
+	
+	wire [`alu_inout_msb_pos:0] snx_adder_out_hi, snx_adder_out_lo;
+	wire [`proc_flags_msb_pos:0] snx_adder_proc_flags_out;
+	
+	sign_extend_adder the_sign_extend_adder( .a_in_hi(a_in_hi),
+		.a_in_lo(a_in_lo), .b_in_hi(b_in_hi), .b_in_lo(b_in_lo),
+		.out_hi(snx_adder_out_hi), .out_lo(snx_adder_out_lo),
+		.proc_flags_out(snx_adder_proc_flags_out) );
 	
 	always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
 	//always @ (*)
@@ -95,19 +127,23 @@ module adder_subtractor
 			
 			pkg_alu::addsub_op_addpsnx:
 			begin
-				if (b_in_lo[`cpu_imm_value_8_msb_pos])
-				begin
-					{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, 
-						out_lo } = { a_in_hi, a_in_lo } 
-						+ { 8'hff, b_in_lo };
-				end
+				//if (b_in_lo[`cpu_imm_value_8_msb_pos])
+				//begin
+				//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, 
+				//		out_lo } = { a_in_hi, a_in_lo } 
+				//		+ { 8'hff, b_in_lo };
+				//end
+				//
+				//else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
+				//begin
+				//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi,
+				//		out_lo } = { a_in_hi, a_in_lo }
+				//		+ { 8'h0, b_in_lo };
+				//end
+				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { snx_adder_proc_flags_out[pkg_pflags::pf_slot_c],
+					snx_adder_out_hi, snx_adder_out_lo };
 				
-				else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
-				begin
-					{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi,
-						out_lo } = { a_in_hi, a_in_lo }
-						+ { 8'h0, b_in_lo };
-				end
 			end
 			
 			// Subtraction operations
@@ -233,7 +269,7 @@ module alu
 	
 	// 8-bit bit rotation stuff
 	bit [`alu_inout_msb_pos:0] rot_mod_thing;
-	bit [ `alu_inout_width + `alu_inout_width - 1:0 ] rot_temp;
+	bit [ `alu_inout_width + `alu_inout_width - 1 : 0 ] rot_temp;
 	
 	
 	// Note that using `width_to_msb_pos in this way ONLY works if
@@ -246,7 +282,8 @@ module alu
 	// 16-bit bit rotation stuff
 	bit [`alu_inout_pair_msb_pos:0] rot_p_mod_thing;
 	bit [ `alu_inout_pair_width + `alu_inout_pair_width 
-		+ `alu_inout_pair_width + `alu_inout_pair_width - 1:0 ] rot_p_temp;
+		+ `alu_inout_pair_width + `alu_inout_pair_width - 1 : 0 ] 
+		rot_p_temp;
 	
 	
 	// Note that using `width_to_msb_pos in this way ONLY works if
