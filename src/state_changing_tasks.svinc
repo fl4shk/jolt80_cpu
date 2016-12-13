@@ -42,18 +42,10 @@ endtask
 
 
 
-task disable_dio_we;
-	data_inout_we <= 1'b0;
-endtask
-
-task enable_dio_we;
-	data_inout_we <= 1'b1;
-endtask
-
 // Prepare to, on the next cycle, load an 8-bit value
 task prep_load_8_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-	disable_dio_we();
+	data_inout_we <= 0;
 endtask
 task prep_load_8_with_addr;
 	input [`cpu_addr_msb_pos:0] read_addr;
@@ -68,16 +60,15 @@ task prep_store_8;
 	input [`cpu_addr_msb_pos:0] write_addr;
 	
 	data_inout_addr <= write_addr;
-	//data_inout <= write_data;
 	temp_data_out <= write_data;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
-	enable_dio_we();
+	data_inout_we <= 1;
 endtask
 
 // Prepare to, on the next cycle, load a 16-bit value
 task prep_load_16_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
-	disable_dio_we();
+	data_inout_we <= 0;
 endtask
 task prep_load_16_with_addr;
 	input [`cpu_addr_msb_pos:0] read_addr;
@@ -95,64 +86,56 @@ task prep_load_instr_hi_after_reg;
 	//advance_pc_etc_after_load_instr_part();
 	
 	//advance_pc_etc_after_reg
-	prep_load_16_no_addr();
+	//prep_load_16_no_addr();
+	prep_load_16_with_addr(`get_cpu_rp_pc);
 endtask
 
-task prep_load_instr_hi_after_bc;
-	$display("prep_load_instr_hi_after_bc");
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-	prep_load_16_no_addr();
-endtask
-
-task prep_update_pc_etc_after_non_bc_ipc;
-	curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
-	
-endtask
-
-//task update_temp_pc_during_start_exec_instr;
-//	
-//	if (non_bc_instr_possibly_changes_pc)
-//	begin
-//	end
-//	
-//endtask
 
 task prep_load_instr_hi_generic;
 	
 	if (!instr_is_branch_or_call)
 	begin
-		$display("!instr_is_branch_or_call");
+		//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
+		//begin
+		//	$display("!instr_is_branch_or_call");
+		//end
+		
 		if (!non_bc_instr_possibly_changes_pc)
 		begin
-			$display("!non_bc_instr_possibly_changes_pc");
+			//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
+			//begin
+			//	$display("!non_bc_instr_possibly_changes_pc");
+			//end
 			prep_load_instr_hi_after_reg();
 		end
 		
 		else // if (non_bc_instr_possibly_changes_pc)
 		begin
-			$display("non_bc_instr_possibly_changes_pc");
-			prep_update_pc_etc_after_non_bc_ipc();
+			//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
+			//begin
+			//	$display("non_bc_instr_possibly_changes_pc");
+			//end
+			curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
 		end
 	end
 	
 	else // if (instr_is_branch_or_call)
 	begin
-		$display("instr_is_branch_or_call");
-		prep_load_instr_hi_after_bc();
+		//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
+		//begin
+		//	$display("instr_is_branch_or_call");
+		//end
+		//prep_load_instr_hi_after_bc();
+		$display("prep_load_instr_hi_after_bc");
+		curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+		prep_load_16_no_addr();
 	end
 	
 endtask
 
 task prep_load_instr_lo_reg;
 	curr_state <= pkg_cpu::cpu_st_load_instr_lo;
-	//advance_dio_addr_for_instr_lo();
-	//advance_pc_etc_after_reg_instr();
-	//$display( "prep_load_instr_lo_reg:  %h %h", `get_cpu_rp_pc,
-	//	`get_temp_pc );
-	//advance_pc_etc_after_load_instr_part();
-	//prep_pc_adjuster_during_load_instr_lo();
 	prep_load_16_no_addr();
-	//prep_pc_adjuster_before_load_instr_lo();
 endtask
 
 
@@ -160,29 +143,6 @@ endtask
 
 
 
-//task comb_logic_prep_pc_adjuster_inputs_generic;
-//	input [`cpu_imm_value_8_msb_pos:0] specific_num_bytes;
-//	
-//	//{ pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, pc_adjuster_b_in_hi,
-//	//	pc_adjuster_b_in_lo } 
-//	//	<= { `get_cpu_rp_pc, 8'h0, specific_num_bytes };
-//	{ pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, pc_adjuster_b_in_hi,
-//		pc_adjuster_b_in_lo } 
-//		= { `get_cpu_rp_pc, 8'h0, specific_num_bytes };
-//endtask
-//
-//task comb_logic_prep_pc_adjuster_during_load_instr_hi;
-//	//$display("comb_logic_prep_pc_adjuster_during_load_instr_hi");
-//	comb_logic_prep_pc_adjuster_inputs_generic(`instr_16_num_bytes);
-//endtask
-//task comb_logic_prep_pc_adjuster_during_load_instr_lo;
-//	//$display("comb_logic_prep_pc_adjuster_during_load_instr_lo");
-//	comb_logic_prep_pc_adjuster_inputs_generic(`instr_32_num_bytes);
-//endtask
-//
-//task comb_logic_prep_pc_adjuster_after_non_bc_ipc;
-//	comb_logic_prep_pc_adjuster_during_load_instr_hi();
-//endtask
 
 task comb_logic_prep_pc_adjuster_for_branch;
 	input [`instr_g4_imm_value_msb_pos:0] branch_offset;
@@ -205,31 +165,12 @@ task comb_logic_prep_pc_inc_generic;
 		= { `get_cpu_rp_pc, specific_num_bytes };
 endtask
 
-//task comb_logic_prep_pc_inc_during_load_instr_hi;
-//	comb_logic_prep_pc_inc_generic(`instr_16_num_bytes);
-//endtask
-////task comb_logic_prep_pc_inc_during_load_instr_lo;
-////	//comb_logic_prep_pc_inc_generic(`instr_32_num_bytes);
-////endtask
 task comb_logic_prep_pc_inc_during_load_instr_portion;
 	comb_logic_prep_pc_inc_generic(`instr_16_num_bytes);
 endtask
 
 task comb_logic_prep_pc_inc_after_non_bc_ipc;
-	//comb_logic_prep_pc_inc_during_load_instr_hi();
-	if (!final_instr_is_32_bit)
-	begin
-		
-	end
-	
-	else // if (final_instr_is_32_bit)
-	begin
-		//comb_logic_prep_pc_inc_generic(-`instr_16_num_bytes);
-		//comb_logic_prep_pc_inc_generic(-`instr_32_num_bytes);
-		//comb_logic_prep_pc_inc_generic(5);
-		//comb_logic_prep_pc_inc_generic(-`instr_16_num_bytes);
-	end
-	//$display("comb_logic_prep_pc_inc_after_non_bc_ipc");
+	$display("prep PC incrementer after non branch/call IPC");
 	
 	comb_logic_prep_pc_inc_generic(0);
 endtask

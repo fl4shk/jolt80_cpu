@@ -383,6 +383,7 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
+		//$display( "curr_state:  %h", curr_state );
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
 			//curr_state <= curr_state + 1;
@@ -397,6 +398,10 @@ module spcpu
 			$display();
 			
 			
+			////$display( "temp_data_in:  %h", temp_data_in );
+			//$display( "temp_data_in, data_inout, data_inout_we, ",
+			//	"data_inout_addr:  %h %h %h %h", temp_data_in, data_inout, 
+			//	data_inout_we, data_inout_addr );
 			// Back up temp_data_in, init_instr_grp, and pc
 			instr_in_hi <= temp_data_in;
 			final_instr_grp <= init_instr_grp;
@@ -461,7 +466,11 @@ module spcpu
 			//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
 			//seq_logic_grab_pc_adjuster_outputs();
 			second_prev_pc <= `get_cpu_rp_pc;
+			
+			//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
+			//	the_pc_inc_pc_out );
 			seq_logic_grab_pc_inc_outputs();
+			
 			prep_alu_if_needed_final();
 		end
 		
@@ -569,12 +578,19 @@ module spcpu
 			end
 		end
 		
+		else if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
+		begin
+			//comb_logic_prep_pc_
+			$display("comb_logic in finish_exec_ldst_instr");
+		end
+		
 		else if ( curr_state 
 			== pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
 		begin
 			//comb_logic_prep_pc_adjuster_after_non_bc_ipc();
 			comb_logic_prep_pc_inc_after_non_bc_ipc();
 		end
+		
 		
 		//else
 		//begin
