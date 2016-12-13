@@ -132,12 +132,17 @@ task start_exec_instr_from_grp_4;
 		pkg_instr_dec::instr_g4_op_bnv:
 		begin
 			// Wait a cycle
+			if (final_branch_was_taken)
+			begin
+				finish_ig4_branch();
+			end
 		end
 		
 		// (branch when Z == 0)
 		pkg_instr_dec::instr_g4_op_bne:
 		begin
-			if (!true_proc_flags[pkg_pflags::pf_slot_z])
+			//if (!true_proc_flags[pkg_pflags::pf_slot_z])
+			if (final_branch_was_taken)
 			begin
 				finish_ig4_branch();
 			end
@@ -146,7 +151,8 @@ task start_exec_instr_from_grp_4;
 		// (branch when Z == 1)
 		pkg_instr_dec::instr_g4_op_beq:
 		begin
-			if (true_proc_flags[pkg_pflags::pf_slot_z])
+			//if (true_proc_flags[pkg_pflags::pf_slot_z])
+			if (final_branch_was_taken)
 			begin
 				finish_ig4_branch();
 			end
@@ -155,7 +161,8 @@ task start_exec_instr_from_grp_4;
 		// (branch when C == 0 [unsigned greater than or equal])
 		pkg_instr_dec::instr_g4_op_bcc:
 		begin
-			if (!true_proc_flags[pkg_pflags::pf_slot_c])
+			//if (!true_proc_flags[pkg_pflags::pf_slot_c])
+			if (final_branch_was_taken)
 			begin
 				finish_ig4_branch();
 			end
@@ -164,7 +171,8 @@ task start_exec_instr_from_grp_4;
 		// (branch when C == 1 [unsigned less than])
 		pkg_instr_dec::instr_g4_op_bcs:
 		begin
-			if (true_proc_flags[pkg_pflags::pf_slot_c])
+			//if (true_proc_flags[pkg_pflags::pf_slot_c])
+			if (final_branch_was_taken)
 			begin
 				finish_ig4_branch();
 			end
@@ -174,9 +182,10 @@ task start_exec_instr_from_grp_4;
 		// [unsigned less than or equal])
 		pkg_instr_dec::instr_g4_op_bls:
 		begin
-			if ( ( true_proc_flags[pkg_pflags::pf_slot_c]
-				&& !true_proc_flags[pkg_pflags::pf_slot_z] )
-				||  true_proc_flags[pkg_pflags::pf_slot_z] )
+			//if ( ( true_proc_flags[pkg_pflags::pf_slot_c]
+			//	&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+			//	|| true_proc_flags[pkg_pflags::pf_slot_z] )
+			if (final_branch_was_taken)
 			begin
 				finish_ig4_branch();
 			end
@@ -185,8 +194,9 @@ task start_exec_instr_from_grp_4;
 		// (branch when C == 0 and Z == 0 [unsigned greater than])
 		pkg_instr_dec::instr_g4_op_bhi:
 		begin
-			if ( !true_proc_flags[pkg_pflags::pf_slot_c]
-				&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+			//if ( !true_proc_flags[pkg_pflags::pf_slot_c]
+			//	&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+			if (final_branch_was_taken)
 			begin
 				finish_ig4_branch();
 			end

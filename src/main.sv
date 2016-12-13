@@ -211,6 +211,7 @@ module spcpu
 	
 	`include "src/extra_instr_dec_vars.svinc"
 	`include "src/alu_vars.svinc"
+	wire final_branch_was_taken;
 	
 	
 	
@@ -383,12 +384,6 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
-		//$display( "curr_state, program_counter, data_inout_addr, ",
-		//	"second_prev_pc, third_prev_pc:  %h %h %h %h %h", 
-		//	curr_state, `get_cpu_rp_pc, data_inout_addr, second_prev_pc, 
-		//	third_prev_pc );
-		//$display( "curr_state:  %h", curr_state );
-		//debug_disp_regs_and_proc_flags();
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
 			//curr_state <= curr_state + 1;
@@ -404,11 +399,6 @@ module spcpu
 			$display();
 			
 			
-			////$display( "temp_data_in:  %h", temp_data_in );
-			//$display( "temp_data_in, data_inout, data_inout_we, ",
-			//	"program_counter, data_inout_addr:  %h %h %h %h %h", 
-			//	temp_data_in, data_inout, data_inout_we, `get_cpu_rp_pc, 
-			//	data_inout_addr );
 			// Back up temp_data_in, init_instr_grp, and pc
 			instr_in_hi <= temp_data_in;
 			final_instr_grp <= init_instr_grp;

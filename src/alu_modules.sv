@@ -49,7 +49,6 @@ module adder_subtractor
 	always
 	begin
 		#4
-		//$display("dank");
 		//$display( "%h", oper );
 		if ( oper == pkg_alu::addsub_op_addp )
 		//if ( ( oper == pkg_alu::addsub_op_add )

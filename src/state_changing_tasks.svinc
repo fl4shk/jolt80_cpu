@@ -104,17 +104,11 @@ task prep_load_instr_hi_generic;
 	
 	if (!instr_is_branch_or_call)
 	begin
-		//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
-		//begin
-		//	$display("!instr_is_branch_or_call");
-		//end
+		//$display("!instr_is_branch_or_call");
 		
 		if (!non_bc_instr_possibly_changes_pc)
 		begin
-			//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
-			//begin
-			//	$display("!non_bc_instr_possibly_changes_pc");
-			//end
+			//$display("!non_bc_instr_possibly_changes_pc");
 			prep_load_instr_hi_after_reg();
 		end
 		
@@ -126,9 +120,20 @@ task prep_load_instr_hi_generic;
 	
 	else // if (instr_is_branch_or_call)
 	begin
-		//$display("prep_load_instr_hi_after_bc");
+		$display("prep load instr hi generic:  instr is bc");
+		$display( "pc:  %h %h", `get_cpu_rp_pc, `get_pc_adjuster_outputs );
 		curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-		prep_load_16_no_addr();
+		//prep_load_16_with_addr(`get_cpu_rp_pc);
+		
+		if (final_branch_was_taken)
+		begin
+			prep_load_16_with_addr(`get_pc_adjuster_outputs);
+		end
+		
+		else // if (!final_branch_was_taken)
+		begin
+			prep_load_16_with_addr(`get_cpu_rp_pc);
+		end
 	end
 	
 endtask
@@ -147,14 +152,21 @@ endtask
 task comb_logic_prep_pc_adjuster_for_branch;
 	input [`instr_g4_imm_value_msb_pos:0] branch_offset;
 	
+	//$display("combinational logic prep pc adjuster for branch");
 	{ pc_adjuster_op, pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, 
 		pc_adjuster_b_in_hi, pc_adjuster_b_in_lo }
 		= { pkg_alu::addsub_op_addpsnx, `get_cpu_rp_pc, 8'h0, 
 		branch_offset };
+	//{ pc_adjuster_op, pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, 
+	//	pc_adjuster_b_in_hi, pc_adjuster_b_in_lo }
+	//	= { pkg_alu::addsub_op_addpsnx, prev_pc, 8'h0, 
+	//	branch_offset };
+	
 endtask
 
 task seq_logic_grab_pc_adjuster_outputs;
 	//$display("seq_logic_grab_pc_adjuster_outputs");
+	//$display( "PC adjuster outputs:  %h", `get_pc_adjuster_outputs );
 	set_pc_and_dio_addr(`get_pc_adjuster_outputs);
 endtask
 

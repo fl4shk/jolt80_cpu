@@ -486,6 +486,37 @@ package pkg_instr_dec;
 			|| ( test_ig5_opcode == instr_g5_op_strxi ) );
 	endfunction
 	
+	// Functions for checking whether a branch will be taken
+	function ig4_get_branch_was_taken;
+		input [`instr_g4_op_msb_pos:0] test_ig4_opcode;
+		input [`proc_flags_msb_pos:0] test_proc_flags;
+		
+		ig4_get_branch_was_taken
+			= ( ( test_ig4_opcode == instr_g4_op_bra )
+			
+			|| ( test_ig4_opcode == instr_g4_op_bne
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] )
+			
+			|| ( test_ig4_opcode == instr_g4_op_beq
+			&& test_proc_flags[pkg_pflags::pf_slot_z] )
+			
+			|| ( test_ig4_opcode == instr_g4_op_bcc
+			&& !test_proc_flags[pkg_pflags::pf_slot_c] )
+			
+			|| ( test_ig4_opcode == instr_g4_op_bcs
+			&& test_proc_flags[pkg_pflags::pf_slot_c] )
+			
+			|| ( test_ig4_opcode == instr_g4_op_bls 
+			&& ( ( test_proc_flags[pkg_pflags::pf_slot_c]
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] )
+			|| test_proc_flags[pkg_pflags::pf_slot_z] ) )
+			
+			|| ( test_ig4_opcode == instr_g4_op_bhi 
+			&& ( !test_proc_flags[pkg_pflags::pf_slot_c]
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] ) ) );
+	endfunction
+	
+	
 endpackage
 
 
