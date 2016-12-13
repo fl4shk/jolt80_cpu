@@ -184,8 +184,9 @@ module spcpu
 	
 	//bit [ `cpu_reg_width + `cpu_reg_msb_pos : 0 ] prev_pc;
 	bit [`cpu_imm_value_16_msb_pos:0] prev_pc;
-	wire [`cpu_reg_msb_pos:0] prev_r14, prev_r15;
-	assign { prev_r14, prev_r15 } = prev_pc;
+	bit [`cpu_imm_value_16_msb_pos:0] second_prev_pc;
+	//wire [`cpu_reg_msb_pos:0] prev_r14, prev_r15;
+	//assign { prev_r14, prev_r15 } = prev_pc;
 	
 	
 	// The entirety of a 16-bit insturction, or the high 16 bits of a
@@ -459,6 +460,7 @@ module spcpu
 			instr_in_lo <= temp_data_in;
 			//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
 			//seq_logic_grab_pc_adjuster_outputs();
+			second_prev_pc <= `get_cpu_rp_pc;
 			seq_logic_grab_pc_inc_outputs();
 			prep_alu_if_needed_final();
 		end
@@ -486,6 +488,7 @@ module spcpu
 			if ( prev_pc == `get_cpu_rp_pc )
 			begin
 				$display("The pc was not actually changed");
+				//seq_logic_grab_pc_inc_outputs();
 			end
 			
 			else
@@ -496,6 +499,8 @@ module spcpu
 			//prep_load_instr_hi_generic();
 			//seq_logic_grab_pc_adjuster_outputs();
 			
+			//seq_logic_grab_pc_
+			//set_pc_and_dio_addr(
 			seq_logic_grab_pc_inc_outputs();
 			prep_load_instr_hi_after_reg();
 			
@@ -521,15 +526,16 @@ module spcpu
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			comb_logic_prep_pc_inc_during_load_instr_hi();
+			//comb_logic_prep_pc_inc_during_load_instr_hi();
+			comb_logic_prep_pc_inc_during_load_instr_portion();
 		end
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo )
 		begin
-			comb_logic_prep_pc_inc_during_load_instr_lo();
+			//comb_logic_prep_pc_inc_during_load_instr_lo();
+			comb_logic_prep_pc_inc_during_load_instr_portion();
 		end
 		
-		else 
-		if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
+		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
 			// Just do this every time
 			comb_logic_prep_pc_adjuster_for_branch(final_ig4_imm_value_8);

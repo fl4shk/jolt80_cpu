@@ -85,6 +85,7 @@ task finish_ig4_branch;
 	//	$display("nice");
 	//	set_pc_and_dio_addr( `get_cpu_rp_pc + final_ig4_imm_value_8 );
 	//end
+	//$display("finish_ig4_branch");
 	seq_logic_grab_pc_adjuster_outputs();
 endtask
 
