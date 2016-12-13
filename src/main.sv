@@ -183,8 +183,8 @@ module spcpu
 	
 	
 	//bit [ `cpu_reg_width + `cpu_reg_msb_pos : 0 ] prev_pc;
-	bit [`cpu_imm_value_16_msb_pos:0] prev_pc;
-	bit [`cpu_imm_value_16_msb_pos:0] second_prev_pc;
+	bit [`cpu_imm_value_16_msb_pos:0] prev_pc, second_prev_pc,
+		third_prev_pc;
 	//wire [`cpu_reg_msb_pos:0] prev_r14, prev_r15;
 	//assign { prev_r14, prev_r15 } = prev_pc;
 	
@@ -383,6 +383,10 @@ module spcpu
 	
 	always @ ( posedge clk )
 	begin
+		//$display( "curr_state, program_counter, data_inout_addr, ",
+		//	"second_prev_pc, third_prev_pc:  %h %h %h %h %h", 
+		//	curr_state, `get_cpu_rp_pc, data_inout_addr, second_prev_pc, 
+		//	third_prev_pc );
 		//$display( "curr_state:  %h", curr_state );
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
@@ -396,16 +400,19 @@ module spcpu
 		begin
 			debug_disp_regs_and_proc_flags();
 			$display();
+			$display();
 			
 			
 			////$display( "temp_data_in:  %h", temp_data_in );
 			//$display( "temp_data_in, data_inout, data_inout_we, ",
-			//	"data_inout_addr:  %h %h %h %h", temp_data_in, data_inout, 
-			//	data_inout_we, data_inout_addr );
+			//	"program_counter, data_inout_addr:  %h %h %h %h %h", 
+			//	temp_data_in, data_inout, data_inout_we, `get_cpu_rp_pc, 
+			//	data_inout_addr );
 			// Back up temp_data_in, init_instr_grp, and pc
 			instr_in_hi <= temp_data_in;
 			final_instr_grp <= init_instr_grp;
 			prev_pc <= `get_cpu_rp_pc;
+			second_prev_pc <= the_pc_inc_pc_out;
 			
 			
 			// Back up the decoded instruction contents to be used on
@@ -465,7 +472,7 @@ module spcpu
 			instr_in_lo <= temp_data_in;
 			//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
 			//seq_logic_grab_pc_adjuster_outputs();
-			second_prev_pc <= `get_cpu_rp_pc;
+			third_prev_pc <= the_pc_inc_pc_out;
 			
 			//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
 			//	the_pc_inc_pc_out );
@@ -494,7 +501,11 @@ module spcpu
 			
 			
 			// Check if the pc was ACTUALLY changed
-			if ( prev_pc == `get_cpu_rp_pc )
+			//if ( prev_pc == `get_cpu_rp_pc )
+			if ( ( !final_instr_is_32_bit 
+				&& ( prev_pc == `get_cpu_rp_pc ) )
+				|| ( final_instr_is_32_bit
+				&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
 			begin
 				$display("The pc was not actually changed");
 				//seq_logic_grab_pc_inc_outputs();
@@ -502,6 +513,7 @@ module spcpu
 			
 			else
 			begin
+				//seq_logic_grab_pc_inc_outputs();
 				$display("The pc WAS changed");
 			end
 			
@@ -510,8 +522,10 @@ module spcpu
 			
 			//seq_logic_grab_pc_
 			//set_pc_and_dio_addr(
+			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 			seq_logic_grab_pc_inc_outputs();
-			prep_load_instr_hi_after_reg();
+			
+			//prep_load_instr_hi_after_reg();
 			
 		end
 		
@@ -578,11 +592,11 @@ module spcpu
 			end
 		end
 		
-		else if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
-		begin
-			//comb_logic_prep_pc_
-			$display("comb_logic in finish_exec_ldst_instr");
-		end
+		//else if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
+		//begin
+		//	//comb_logic_prep_pc_
+		//	$display("comb_logic in finish_exec_ldst_instr");
+		//end
 		
 		else if ( curr_state 
 			== pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )

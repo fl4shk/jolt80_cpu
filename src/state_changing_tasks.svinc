@@ -86,8 +86,17 @@ task prep_load_instr_hi_after_reg;
 	//advance_pc_etc_after_load_instr_part();
 	
 	//advance_pc_etc_after_reg
-	//prep_load_16_no_addr();
-	prep_load_16_with_addr(`get_cpu_rp_pc);
+	
+	//$display("There MIGHT be a problem with prep_load_instr_hi_after_reg");
+	if ( data_inout_addr == `get_cpu_rp_pc )
+	begin
+		prep_load_16_no_addr();
+	end
+	
+	else // if ( data_inout_addr != `get_cpu_rp_pc )
+	begin
+		prep_load_16_with_addr(`get_cpu_rp_pc);
+	end
 endtask
 
 
@@ -111,22 +120,13 @@ task prep_load_instr_hi_generic;
 		
 		else // if (non_bc_instr_possibly_changes_pc)
 		begin
-			//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
-			//begin
-			//	$display("non_bc_instr_possibly_changes_pc");
-			//end
 			curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
 		end
 	end
 	
 	else // if (instr_is_branch_or_call)
 	begin
-		//if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
-		//begin
-		//	$display("instr_is_branch_or_call");
-		//end
-		//prep_load_instr_hi_after_bc();
-		$display("prep_load_instr_hi_after_bc");
+		//$display("prep_load_instr_hi_after_bc");
 		curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 		prep_load_16_no_addr();
 	end
@@ -147,10 +147,10 @@ endtask
 task comb_logic_prep_pc_adjuster_for_branch;
 	input [`instr_g4_imm_value_msb_pos:0] branch_offset;
 	
-	{ pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, pc_adjuster_b_in_hi,
-		pc_adjuster_b_in_lo }
-		= { `get_cpu_rp_pc, 8'h0, branch_offset };
-	
+	{ pc_adjuster_op, pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, 
+		pc_adjuster_b_in_hi, pc_adjuster_b_in_lo }
+		= { pkg_alu::addsub_op_addpsnx, `get_cpu_rp_pc, 8'h0, 
+		branch_offset };
 endtask
 
 task seq_logic_grab_pc_adjuster_outputs;
@@ -170,9 +170,23 @@ task comb_logic_prep_pc_inc_during_load_instr_portion;
 endtask
 
 task comb_logic_prep_pc_inc_after_non_bc_ipc;
-	$display("prep PC incrementer after non branch/call IPC");
+	//$display("prep PC incrementer after non branch/call IPC");
 	
-	comb_logic_prep_pc_inc_generic(0);
+	
+	if ( ( !final_instr_is_32_bit 
+		&& ( prev_pc == `get_cpu_rp_pc ) )
+		|| ( final_instr_is_32_bit
+		&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
+	begin
+		//$display("nice");
+		comb_logic_prep_pc_inc_generic(`instr_16_num_bytes);
+	end
+	else
+	begin
+		//$display("oh no");
+		comb_logic_prep_pc_inc_generic(0);
+	end
+	//comb_logic_prep_pc_inc_generic(`instr_16_num_bytes);
 endtask
 
 task seq_logic_grab_pc_inc_outputs;

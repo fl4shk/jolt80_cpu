@@ -63,26 +63,25 @@ endtask
 
 task exec_any_call;
 	input [`cpu_imm_value_16_msb_pos:0] next_pc_and_dio_addr;
+	//$display( "exec_any_call:  second_prev_pc, third_prev_pc:  %h %h",
+	//	second_prev_pc, third_prev_pc );
 	`get_cpu_rp_lr <= `get_cpu_rp_pc;
+	
+	//`get_cpu_rp_lr <= third_prev_pc + 2;
+	//`get_cpu_rp_lr <= prev_pc + 4;
+	//if (!final_instr_is_32_bit)
+	//begin
+	//	`get_cpu_rp_lr <= second_prev_pc;
+	//end
+	//else // if (final_instr_is_32_bit)
+	//begin
+	//	`get_cpu_rp_lr <= third_prev_pc;
+	//end
+	//`get_cpu_rp_lr <= second_prev_pc;
 	set_pc_and_dio_addr(next_pc_and_dio_addr);
 endtask
 
 task finish_ig4_branch;
-	//// If it's negative
-	//if (final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
-	//begin
-	//	set_pc_and_dio_addr( `get_cpu_rp_pc
-	//		+ { 8'hff, final_ig4_imm_value_8 } );
-	//	
-	//	//$display( "%h", `get_cpu_rp_pc 
-	//	//	+ { 8'hff, final_ig4_imm_value_8 } );
-	//end
-	//else //if (!final_ig4_imm_value_8[`instr_g4_imm_value_msb_pos])
-	//begin
-	//	//`get_cpu_rp_pc <= `get_cpu_rp_pc + final_ig4_imm_value_8;
-	//	
-	//	set_pc_and_dio_addr( `get_cpu_rp_pc + final_ig4_imm_value_8 );
-	//end
 	//$display("finish_ig4_branch");
 	seq_logic_grab_pc_adjuster_outputs();
 endtask
@@ -225,7 +224,7 @@ task finish_exec_ldst_instr;
 	
 	//start_exec_shared_non_ldst_suffix();
 	
-	$display("waiting\t\ta\t\tcycle");
+	//$display("waiting\t\ta\t\tcycle");
 	prep_load_instr_hi_generic();
 endtask
 

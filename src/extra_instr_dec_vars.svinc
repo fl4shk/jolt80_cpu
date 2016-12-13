@@ -110,6 +110,9 @@ wire init_instr_is_32_bit, final_instr_is_32_bit;
 wire final_ig1_instr_is_ldst, final_ig2_instr_is_ldst,
 	final_ig3_instr_is_ldst, final_ig4_instr_is_ldst,
 	final_ig5_instr_is_ldst;
+wire final_instr_is_ldst;
+
+//bit final_instr_is_ldst;
 
 
 

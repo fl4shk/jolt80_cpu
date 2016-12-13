@@ -37,5 +37,16 @@ assign final_ig4_instr_is_ldst
 	= pkg_instr_dec::ig4_get_instr_is_ldst(final_ig4_opcode);
 assign final_ig5_instr_is_ldst
 	= pkg_instr_dec::ig5_get_instr_is_ldst(final_ig5_opcode);
+assign final_instr_is_ldst 
+	= ( ( final_instr_grp == pkg_instr_dec::instr_grp_1
+	&& final_ig1_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_2
+	&& final_ig2_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_3
+	&& final_ig3_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_4
+	&& final_ig4_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_5
+	&& final_ig5_instr_is_ldst ) );
 
 `endif		// extra_wire_assignments_svinc
