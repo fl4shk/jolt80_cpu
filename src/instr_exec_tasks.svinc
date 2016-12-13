@@ -74,7 +74,11 @@ task exec_any_call;
 	input [`cpu_imm_value_16_msb_pos:0] next_pc_and_dio_addr;
 	//$display( "exec_any_call:  second_prev_pc, third_prev_pc:  %h %h",
 	//	second_prev_pc, third_prev_pc );
-	`get_cpu_rp_lr <= `get_cpu_rp_pc;
+	//`get_cpu_rp_lr <= `get_cpu_rp_pc;
+	
+	//`get_cpu_rp_lr <= prev_pc + ( !final_instr_is_32_bit ? 2 : 4 );
+	`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc :
+	third_prev_pc );
 	
 	//`get_cpu_rp_lr <= third_prev_pc + 2;
 	//`get_cpu_rp_lr <= prev_pc + 4;

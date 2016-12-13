@@ -143,6 +143,8 @@ module tb_memory
 				// Read 16-bit data
 				else // if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
 				begin
+					//$display( "16-bit read:  %h, %h", addr_in, 
+					//	`make_mem_pair(addr_in) );
 					read_data_out <= `make_mem_pair(addr_in);
 				end
 			end

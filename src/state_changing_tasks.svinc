@@ -127,12 +127,35 @@ task prep_load_instr_hi_generic;
 		
 		if (final_branch_was_taken)
 		begin
+			$display("Branch WAS taken");
 			prep_load_16_with_addr(`get_pc_adjuster_outputs);
 		end
 		
 		else // if (!final_branch_was_taken)
 		begin
-			prep_load_16_with_addr(`get_cpu_rp_pc);
+			$display("Branch was NOT taken");
+			//prep_load_16_with_addr(`get_cpu_rp_pc);
+			
+			//if (!final_instr_is_32_bit)
+			//begin
+			//	prep_load_16_with_addr(`get_cpu_rp_pc)
+			//end
+			//else
+			//begin
+			//	
+			//end
+			
+			// If the instruction is a branch instruction
+			if ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
+			begin
+				prep_load_16_with_addr(`get_cpu_rp_pc);
+			end
+			
+			// If the instruction is a call instruction
+			else
+			begin
+				prep_load_16_no_addr();
+			end
 		end
 	end
 	

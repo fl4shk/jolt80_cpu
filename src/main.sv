@@ -400,6 +400,8 @@ module spcpu
 			
 			
 			// Back up temp_data_in, init_instr_grp, and pc
+			//$display( "load instr hi:  %h %h %h", temp_data_in,
+			//	`get_cpu_rp_pc, data_inout_addr );
 			instr_in_hi <= temp_data_in;
 			final_instr_grp <= init_instr_grp;
 			prev_pc <= `get_cpu_rp_pc;
@@ -464,6 +466,9 @@ module spcpu
 			//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
 			//seq_logic_grab_pc_adjuster_outputs();
 			third_prev_pc <= the_pc_inc_pc_out;
+			
+			//$display( "load instr lo:  %h %h %h %h", instr_in_hi, 
+			//	temp_data_in, `get_cpu_rp_pc, data_inout_addr );
 			
 			//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
 			//	the_pc_inc_pc_out );

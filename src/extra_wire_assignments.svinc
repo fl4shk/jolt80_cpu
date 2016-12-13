@@ -51,8 +51,9 @@ assign final_instr_is_ldst
 
 
 assign final_branch_was_taken
-	= pkg_instr_dec::ig4_get_branch_was_taken( final_ig4_opcode,
-		true_proc_flags );
+	= ( ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
+	&& pkg_instr_dec::ig4_get_branch_was_taken( final_ig4_opcode,
+	true_proc_flags ) );
 
 
 `endif		// extra_wire_assignments_svinc
