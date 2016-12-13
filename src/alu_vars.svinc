@@ -18,11 +18,18 @@
 `ifndef alu_vars_svinc
 `define alu_vars_svinc
 
-// Adder-subtractor inputs and outputs
+// PC incrementer inputs and outputs
+bit [`cpu_imm_value_16_msb_pos:0] the_pc_inc_pc_in, the_pc_inc_offset_in;
+wire [`cpu_imm_value_16_msb_pos:0] the_pc_inc_pc_out;
+//bit [`cpu_imm_value_16_msb_pos:0] the_pc_inc_pc_out;
+
+
+// PC adjuster inputs and outputs
 addsub_oper pc_adjuster_op;
 bit [`alu_inout_msb_pos:0] pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, 
 	pc_adjuster_b_in_hi, pc_adjuster_b_in_lo; 
 bit [`proc_flags_msb_pos:0] dummy_pc_adjuster_proc_flags_in;
+wire [`cpu_reg_msb_pos:0] pc_adjuster_out_hi, pc_adjuster_out_lo;
 //bit [`alu_inout_msb_pos:0] pc_adjuster_out_hi, pc_adjuster_out_lo;
 bit [`proc_flags_msb_pos:0] dummy_pc_adjuster_proc_flags_out;
 

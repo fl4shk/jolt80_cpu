@@ -180,7 +180,6 @@ module spcpu
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	//bit [`cpu_reg_msb_pos:0] temp_pc[0:1];
 	
-	wire [`cpu_reg_msb_pos:0] pc_adjuster_out_hi, pc_adjuster_out_lo;
 	
 	
 	//bit [ `cpu_reg_width + `cpu_reg_msb_pos : 0 ] prev_pc;
@@ -258,6 +257,12 @@ module spcpu
 	
 	
 	// This is used for adjusting the program counter
+	//pc_incrementer the_pc_incrementer( .pc_in(`get_cpu_rp_pc),
+	//	.offset_in(the_pc_inc_offset_in), .pc_out(the_pc_inc_pc_out) );
+	
+	pc_incrementer the_pc_incrementer( .pc_in(the_pc_inc_pc_in),
+		.offset_in(the_pc_inc_offset_in), .pc_out(the_pc_inc_pc_out) );
+	
 	adder_subtractor pc_adjuster( .oper(pc_adjuster_op), 
 		.a_in_hi(pc_adjuster_a_in_hi), .a_in_lo(pc_adjuster_a_in_lo), 
 		.b_in_hi(pc_adjuster_b_in_hi), .b_in_lo(pc_adjuster_b_in_lo),
@@ -359,13 +364,14 @@ module spcpu
 				data_in_is_0_counter <= 0;
 			end
 			
-			if ( `get_cpu_rp_pc >= 16'h0004 
-				&& `get_cpu_rp_pc < 16'h7ff0 )
-			begin
-				$display("\ndone");
-				$finish;
-			end
-			else if ( data_in_is_0_counter >= 4 )
+			//if ( `get_cpu_rp_pc >= 16'h0004 
+			//	&& `get_cpu_rp_pc < 16'h7ff0 )
+			//begin
+			//	$display("\ndone");
+			//	$finish;
+			//end
+			//else 
+			if ( data_in_is_0_counter >= 4 )
 			begin
 				$display("\ndone");
 				$finish;
@@ -380,7 +386,6 @@ module spcpu
 		begin
 			//curr_state <= curr_state + 1;
 			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-			//prep_pc_adjuster_before_load_instr_hi();
 			prep_load_16_no_addr();
 		end
 		
@@ -421,13 +426,15 @@ module spcpu
 				prep_alu_if_needed_init();
 				//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
 				//prep_pc_adjuster_during_load_instr_hi();
-				seq_logic_grab_pc_adjuster_outputs();
+				//seq_logic_grab_pc_adjuster_outputs();
+				seq_logic_grab_pc_inc_outputs();
 			end
 			
 			// Handle 32-bit instructions
 			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
 			begin
-				seq_logic_grab_pc_adjuster_outputs();
+				//seq_logic_grab_pc_adjuster_outputs();
+				seq_logic_grab_pc_inc_outputs();
 				prep_load_instr_lo_reg();
 			end
 			
@@ -451,7 +458,8 @@ module spcpu
 			curr_state <= pkg_cpu::cpu_st_start_exec_instr;
 			instr_in_lo <= temp_data_in;
 			//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
-			seq_logic_grab_pc_adjuster_outputs();
+			//seq_logic_grab_pc_adjuster_outputs();
+			seq_logic_grab_pc_inc_outputs();
 			prep_alu_if_needed_final();
 		end
 		
@@ -468,7 +476,7 @@ module spcpu
 		end
 		
 		else // if ( curr_state 
-			// == pkg_cpu::cpu_st_update_pc_after_instr_possibly_changed )
+			// == pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
 		begin
 			$display( "Check whether the pc was actually changed by a ",
 				 "non-branch, non-call instruction" );
@@ -486,6 +494,9 @@ module spcpu
 			end
 			
 			//prep_load_instr_hi_generic();
+			//seq_logic_grab_pc_adjuster_outputs();
+			
+			seq_logic_grab_pc_inc_outputs();
 			prep_load_instr_hi_after_reg();
 			
 		end
@@ -498,33 +509,31 @@ module spcpu
 	//always @ (*)
 	always @ ( curr_state )
 	begin
-		//$display( "comb logic:  %h %h", `get_cpu_rp_pc, `get_temp_pc );
 		
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
-			pc_adjuster_op = pkg_alu::addsub_op_addp;
+			//pc_adjuster_op = pkg_alu::addsub_op_addp;
+			
+			// This is for branches
+			pc_adjuster_op = pkg_alu::addsub_op_addpsnx;
 			$display("comb logic begin_0");
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			//if (init_instr_is_32_bit)
-			//begin
-			//	$display( "comb logic load_instr_hi:  %h %h %h",
-			//		`get_cpu_rp_pc, `get_temp_pc, temp_data_in );
-			//end
-			comb_logic_prep_pc_adjuster_during_load_instr_hi();
+			comb_logic_prep_pc_inc_during_load_instr_hi();
 		end
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo )
 		begin
-			//$display( "comb logic load_instr_lo:  %h %h %h %h",
-			//	`get_cpu_rp_pc, `get_temp_pc, instr_in_hi, temp_data_in );
-			comb_logic_prep_pc_adjuster_during_load_instr_lo();
+			comb_logic_prep_pc_inc_during_load_instr_lo();
 		end
 		
 		else 
 		if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
+			// Just do this every time
+			comb_logic_prep_pc_adjuster_for_branch(final_ig4_imm_value_8);
+			
 			{ instr_is_branch_or_call, non_bc_instr_possibly_changes_pc }
 				= 0;
 			
@@ -552,6 +561,13 @@ module spcpu
 			begin
 				update_ipc_pc_for_grp_5_instr();
 			end
+		end
+		
+		else if ( curr_state 
+			== pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
+		begin
+			//comb_logic_prep_pc_adjuster_after_non_bc_ipc();
+			comb_logic_prep_pc_inc_after_non_bc_ipc();
 		end
 		
 		//else

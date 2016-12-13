@@ -20,6 +20,22 @@
 `include "src/cpu_extras_defines.svinc"
 
 
+module pc_incrementer
+	import pkg_alu::*;
+	
+	( input bit [`cpu_imm_value_16_msb_pos:0] pc_in, offset_in,
+	output bit [`cpu_imm_value_16_msb_pos:0] pc_out );
+	
+	//assign pc_out = pc_in + offset_in;
+	
+	always @ ( pc_in, offset_in )
+	begin
+		pc_out = pc_in + offset_in;
+	end
+	
+endmodule
+
+
 module adder_subtractor
 	import pkg_alu::*;
 	import pkg_pflags::*;
