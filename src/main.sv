@@ -267,9 +267,15 @@ module spcpu
 	pc_incrementer the_pc_incrementer( .pc_in(the_pc_inc_pc_in),
 		.offset_in(the_pc_inc_offset_in), .pc_out(the_pc_inc_pc_out) );
 	
-	sign_extend_adder branch_pc_adjuster
-		( .a_in_hi(pc_adjuster_a_in_hi), .a_in_lo(pc_adjuster_a_in_lo), 
+	//sign_extend_adder branch_pc_adjuster
+	//	( .a_in_hi(pc_adjuster_a_in_hi), .a_in_lo(pc_adjuster_a_in_lo), 
+	//	.b_in_hi(pc_adjuster_b_in_hi), .b_in_lo(pc_adjuster_b_in_lo),
+	//	.out_hi(pc_adjuster_out_hi), .out_lo(pc_adjuster_out_lo), 
+	//	.proc_flags_out(pc_adjuster_proc_flags_out) );
+	adder_subtractor branch_pc_adjuster( .oper(pc_adjuster_op),
+		.a_in_hi(pc_adjuster_a_in_hi), .a_in_lo(pc_adjuster_a_in_lo), 
 		.b_in_hi(pc_adjuster_b_in_hi), .b_in_lo(pc_adjuster_b_in_lo),
+		.proc_flags_in(dummy_pc_adjuster_proc_flags_in),
 		.out_hi(pc_adjuster_out_hi), .out_lo(pc_adjuster_out_lo), 
 		.proc_flags_out(pc_adjuster_proc_flags_out) );
 	
@@ -531,8 +537,8 @@ module spcpu
 	
 	
 	// Combinational logic for various PC-changing stuff
-	//always @ (*)
-	always @ ( curr_state )
+	always @ (*)
+	//always @ ( curr_state )
 	begin
 		
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
@@ -548,6 +554,7 @@ module spcpu
 		begin
 			//comb_logic_prep_pc_inc_during_load_instr_hi();
 			comb_logic_prep_pc_inc_during_load_instr_portion();
+			pc_adjuster_op = pkg_alu::addsub_op_follow;
 		end
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo )
 		begin

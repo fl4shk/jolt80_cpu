@@ -25,8 +25,9 @@ PKGFILES		:=	$(foreach DIR,$(SRCDIRS),$(shell find $(DIR) \
 SRCFILES		:=	$(foreach DIR,$(SRCDIRS),$(shell find $(DIR) \
 	-maxdepth 1  -type f -iname "*.sv"))
 
-all:
+all: clean
 	$(BUILD) $(PKGFILES) $(SRCFILES)
 
+.PHONY : clean
 clean:  
 	rm -fv $(PROJ).vvp

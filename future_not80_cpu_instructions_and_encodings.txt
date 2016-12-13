@@ -70,10 +70,11 @@ Group 2 (The instruction group with the most opcodes):
       8. subp ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
       
       9. cmp
+      10. cmp16 (16-bit comparison of rAp and rBp)
       
-      10. umul (Unsigned MULtiply rA by rB, storing results in rAp [16-bit,
+      11. umul (Unsigned MULtiply rA by rB, storing results in rAp [16-bit,
       big endian])
-      11. smul (Signed MULtiply rA by rB, storing results in rAp [16-bit,
+      12. smul (Signed MULtiply rA by rB, storing results in rAp [16-bit,
       big endian])
       
     
@@ -82,11 +83,15 @@ Group 2 (The instruction group with the most opcodes):
       2. orr
       3. xor
     
-    Complement instructions with one register operand (rB ignored):
+    Complement and absolute value instructions with one register (or reg
+    pair) operand (rB ignored):
       1. inv (one's complement of rA)
       2. invp (one's complement of rAp)
       3. neg (two's complement of rA)
       4. negp (two's complement of rAp) 
+      5. abs (store the absolute value of rA to rA)
+      6. absp (store the absolute of rAp to rAp)
+    
     
     Bitshifting (and rotating) instructions that use the value of rB as the
     number of bits to shift by:
@@ -101,6 +106,14 @@ Group 2 (The instruction group with the most opcodes):
       1. rolc
       2. rorc
     
+    Bitshifting (and rotating) instructions that shift or rotate rA by one
+    bit at a time:
+      1. lsls (LSL by Single bit)
+      2. lsrs (LSR by Single bit)
+      3. asrs (ASR by Single bit)
+      4. rols (ROL by Single bit)
+      5. rors (ROR by Single bit)
+    
     Bitshifting (and rotating) instructions that do a 16-bit shift or
     rotate on the reg pair rAp, using rB as the number of bits to shift by:
       1. lslp
@@ -113,6 +126,14 @@ Group 2 (The instruction group with the most opcodes):
     of { carry, rAp } by one bit:
       1. rolcp
       2. rorcp
+    
+    Bitshifting (and rotating) instructions that shift or rotate rA by one
+    bit at a time:
+      1. lslps (LSL by Single bit)
+      2. lsrps (LSR by Single bit)
+      3. asrps (ASR by Single bit)
+      4. rolps (ROL by Single bit)
+      5. rorps (ROR by Single bit)
     
     Copy instructions:
       1. cpy (CoPY from reg rB to reg rA)
@@ -137,30 +158,9 @@ Group 2 (The instruction group with the most opcodes):
       1. ldraa (LoaD contents into Register rA from memory at address
       contained in reg pair rBp, then Add 1 to the reg pair rBp)
       
-      2. straa (STore Register rA contents to memory at address contained
-      in reg pair rBp, then Add 1 to the reg pair rBp)
       
-      
-      3. ldrab (add 1 to the reg pair rBp, then LoaD contents into Register
-      rA from memory at address contained in reg pair rBp)
-      
-      4. strab (add 1 to the reg pair rBp, then STore Register rA contents
-      to memory at address contained in reg pair rBp)
-      
-      
-      5. ldrsa (LoaD contents into Register rA from memory at address
-      contained in reg pair rBp, then Subtract 1 from the reg pair rBp)
-      
-      6. strsa ([STore Register, Subtract After] STore Register rA contents
-      to memory at address contained in reg pair rBp, then Subtract 1 from
-      the reg pair rBp)
-      
-      
-      7. ldrsb (Subtract 1 from the reg pair rBp, then LoaD contents into
+      2. ldrsb (Subtract 1 from the reg pair rBp, then LoaD contents into
       Register rA from memory at address contained in reg pair rBp)
-      
-      8. strsb (Subtract 1 from the reg pair rBp, then STore Register rA
-      contents to memory at address contained in reg pair rBp)
     
     16-bit Load/store instructions:
       1. ldp (LoaD 16-bit contents [big endian] into reg Pair rAp from
@@ -175,34 +175,7 @@ Group 2 (The instruction group with the most opcodes):
       memory at address contained in reg pair rBp, then Add 2 to the reg
       pair rBp)
       
-      2. stpaa (STore 16-bit contents [big endian] of reg Pair rAp to
-      memory at address contained in reg pair rBp, then Add 2 to the reg
-      pair rBp)
-      
-      
-      3. ldpab (Add 2 to the reg pair rBp, then LoaD 16-bit contents [big
-      endian] into reg Pair rAp from memory at address contained in reg
-      pair rBp)
-      
-      4. stpab (Add 2 to the reg pair rBp, then STore 16-bit contents [big
-      endian] of reg Pair rAp to memory at address contained in reg pair
-      rBp)
-      
-      
-      5. ldpsa (LoaD 16-bit contents [big endian] into reg Pair rAp from
-      memory at address contained in reg pair rBp, then Subtract 2 from the
-      reg pair rBp)
-      
-      6. stpsa (STore 16-bit contents [big endian] of reg Pair rAp to
-      memory at address contained in reg pair rBp, then Subtract 2 from the
-      reg pair rBp)
-      
-      
-      7. ldpsb (Subtract 2 from the reg pair rBp, then LoaD 16-bit contents
-      [big endian] into reg Pair rAp from memory at address contained in
-      reg pair rBp)
-      
-      8. stpsb (Subtract 2 from the reg pair rBp, then STore 16-bit
+      2. stpsb (Subtract 2 from the reg pair rBp, then STore 16-bit
       contents [big endian] of reg Pair rAp to memory at address contained
       in reg pair rBp)
 

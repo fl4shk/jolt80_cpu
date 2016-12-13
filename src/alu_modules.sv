@@ -39,22 +39,30 @@ module sign_extend_adder
 	import pkg_pflags::*;
 	
 	( input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in_hi, b_in_lo,
-		output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
-		output bit [`proc_flags_msb_pos:0] proc_flags_out );
+	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
+	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
 	always @ (*)
+	//always @ (activator)
+	//always @ ( a_in_hi, a_in_lo, b_in_hi, b_in_lo )
 	begin
+		//$display( "sign_extend_adder:  %h %h %h", { a_in_hi, a_in_lo }, 
+		//	{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
 		if (b_in_lo[`cpu_imm_value_8_msb_pos])
 		begin
+			//$display( "sign_extend_adder:  negative");
 			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
 				= { a_in_hi, a_in_lo } + { 8'hff, b_in_lo };
 		end
 		
 		else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
 		begin
+			//$display( "sign_extend_adder:  positive");
 			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
 				= { a_in_hi, a_in_lo } + { 8'h0, b_in_lo };
 		end
+		//$display( "sign_extend_adder:  %h %h %h", { a_in_hi, a_in_lo }, 
+		//	{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
 	end
 	
 endmodule
@@ -84,16 +92,28 @@ module adder_subtractor
 	//	
 	//end
 	
-	wire [`alu_inout_msb_pos:0] snx_adder_out_hi, snx_adder_out_lo;
-	wire [`proc_flags_msb_pos:0] snx_adder_proc_flags_out;
+	bit [`alu_inout_msb_pos:0] snx_adder_a_in_hi, snx_adder_a_in_lo,
+		snx_adder_b_in_hi, snx_adder_b_in_lo;
+	bit [`alu_inout_msb_pos:0] snx_adder_out_hi, snx_adder_out_lo;
+	bit [`proc_flags_msb_pos:0] snx_adder_proc_flags_out;
 	
-	sign_extend_adder the_sign_extend_adder( .a_in_hi(a_in_hi),
-		.a_in_lo(a_in_lo), .b_in_hi(b_in_hi), .b_in_lo(b_in_lo),
+	sign_extend_adder the_sign_extend_adder
+		( .a_in_hi(snx_adder_a_in_hi), .a_in_lo(snx_adder_a_in_lo), 
+		.b_in_hi(snx_adder_b_in_hi), .b_in_lo(snx_adder_b_in_lo),
 		.out_hi(snx_adder_out_hi), .out_lo(snx_adder_out_lo),
 		.proc_flags_out(snx_adder_proc_flags_out) );
 	
-	always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
-	//always @ (*)
+	//task init_snx_adder;
+	//	input [`alu_inout_msb_pos:0] some_a_in_hi, some_a_in_lo,
+	//		some_b_in_hi, some_b_in_lo;
+	//	
+	//	{ snx_adder_a_in_hi, snx_adder_a_in_lo, 
+	//		snx_adder_b_in_hi, snx_adder_b_in_lo }
+	//		= { some_a_in_hi, some_a_in_lo, some_b_in_hi, some_b_in_lo };
+	//endtask
+	
+	//always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
+	always @ (*)
 	begin
 		case (oper)
 			pkg_alu::addsub_op_follow:
@@ -140,10 +160,31 @@ module adder_subtractor
 				//		out_lo } = { a_in_hi, a_in_lo }
 				//		+ { 8'h0, b_in_lo };
 				//end
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { snx_adder_proc_flags_out[pkg_pflags::pf_slot_c],
-					snx_adder_out_hi, snx_adder_out_lo };
 				
+				
+				{ snx_adder_a_in_hi, snx_adder_a_in_lo, 
+					snx_adder_b_in_hi, snx_adder_b_in_lo }
+					= { a_in_hi, a_in_lo, b_in_hi, b_in_lo };
+				//init_snx_adder( a_in_hi, a_in_lo, b_in_hi, b_in_lo );
+				
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+				//	= { snx_adder_proc_flags_out[pkg_pflags::pf_slot_c],
+				//	snx_adder_out_hi, snx_adder_out_lo };
+				//proc_flags_out[pkg
+				//{ out_hi, out_lo } = { snx_adder_out_hi, 
+				//	snx_adder_out_lo };
+				//{ out_hi, out_lo } = { snx_adder_out_hi, 
+				//	snx_adder_out_lo };
+				
+				//$display( "addsub_op_addpsnx:  %h %h %h\t\t%h %h %h", 
+				//	{ a_in_hi, a_in_lo }, { b_in_hi, b_in_lo }, 
+				//	{ out_hi, out_lo },
+				//	{ snx_adder_a_in_hi, snx_adder_a_in_lo },
+				//	{ snx_adder_b_in_hi, snx_adder_b_in_lo },
+				//	{ snx_adder_out_hi, snx_adder_out_lo } );
+					
+				{ out_hi, out_lo } = { snx_adder_out_hi, 
+					snx_adder_out_lo };
 			end
 			
 			// Subtraction operations
@@ -333,7 +374,6 @@ module alu
 			begin
 				oper_cat = `alu_op_adc_cat;
 				
-				//do_basic_addsub_oper_8(pkg_alu::addsub_op_adc);
 				init_addsub_oper_8( pkg_alu::addsub_op_adc, proc_flags_in,
 					a_in_lo, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
@@ -345,10 +385,6 @@ module alu
 			begin
 				oper_cat = `alu_op_addpb_cat;
 				
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-				//	= { a_in_hi, a_in_lo } + { 8'h0, b_in_lo };
-				
-				//do_basic_addsub_oper_16(pkg_alu::addsub_op_addpb);
 				init_addsub_oper_16( pkg_alu::addsub_op_addpb, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
@@ -360,10 +396,6 @@ module alu
 			begin
 				oper_cat = `alu_op_addp_cat;
 				
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-				//	= { a_in_hi, a_in_lo } + { b_in_hi, b_in_lo };
-				
-				//do_basic_addsub_oper_16(pkg_alu::addsub_op_addp);
 				init_addsub_oper_16( pkg_alu::addsub_op_addp, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
@@ -375,20 +407,6 @@ module alu
 			begin
 				oper_cat = `alu_op_addpsnx_cat;
 				
-				//if (b_in_lo[`cpu_imm_value_8_msb_pos])
-				//begin
-				//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, 
-				//		out_lo } = { a_in_hi, a_in_lo } 
-				//		+ { 8'hff, b_in_lo };
-				//end
-				//
-				//else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
-				//begin
-				//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi,
-				//		out_lo } = { a_in_hi, a_in_lo }
-				//		+ { 8'h0, b_in_lo };
-				//end
-				//do_basic_addsub_oper_16(pkg_alu::addsub_op_addpsnx);
 				init_addsub_oper_16( pkg_alu::addsub_op_addpsnx, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
@@ -401,9 +419,6 @@ module alu
 			begin
 				oper_cat = `alu_op_sub_cat;
 				
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-				//	+ (~b_in_lo) + 1'b1;
-				//do_basic_addsub_oper_8(pkg_alu::addsub_op_sub);
 				init_addsub_oper_8( pkg_alu::addsub_op_sub, proc_flags_in,
 					a_in_lo, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
@@ -415,10 +430,6 @@ module alu
 			begin
 				oper_cat = `alu_op_sbc_cat;
 				
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-				//	+ (~b_in_lo) + proc_flags_in[pkg_pflags::pf_slot_c];
-				
-				//do_basic_addsub_oper_8(pkg_alu::addsub_op_sbc);
 				init_addsub_oper_8( pkg_alu::addsub_op_sbc, proc_flags_in,
 					a_in_lo, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
@@ -430,9 +441,6 @@ module alu
 			begin
 				oper_cat = `alu_op_subpb_cat;
 				
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-				//	= { a_in_hi, a_in_lo } + ~{ 8'h0, b_in_lo } + 1'b1;
-				//do_basic_addsub_oper_16(pkg_alu::addsub_op_subpb);
 				init_addsub_oper_16( pkg_alu::addsub_op_subpb, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
@@ -444,9 +452,6 @@ module alu
 			begin
 				oper_cat = `alu_op_subp_cat;
 				
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-				//	= { a_in_hi, a_in_lo } + ~{ b_in_hi, b_in_lo } + 1'b1;
-				//do_basic_addsub_oper_16(pkg_alu::addsub_op_subp);
 				init_addsub_oper_16( pkg_alu::addsub_op_subp, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
