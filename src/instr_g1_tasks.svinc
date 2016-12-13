@@ -199,6 +199,7 @@ task start_exec_instr_from_grp_1;
 			//`get_final_ig1_reg_a <= `get_alu_out_8;
 			//
 			//true_proc_flags
+			//$display( "addi:  %h" );
 			finish_alu_op_with_dest_reg();
 		end
 		

@@ -388,6 +388,7 @@ module spcpu
 		//	curr_state, `get_cpu_rp_pc, data_inout_addr, second_prev_pc, 
 		//	third_prev_pc );
 		//$display( "curr_state:  %h", curr_state );
+		//debug_disp_regs_and_proc_flags();
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
 			//curr_state <= curr_state + 1;

@@ -29,8 +29,17 @@
 task finish_alu_op_with_dest_reg;
 	if (alu_dest_reg_was_modded)
 	begin
+		//$display( "ALU dest reg WAS modded:  %d %h %h", alu_dest_reg_index,
+		//	cpu_regs[alu_dest_reg_index], `get_alu_out_8 );
+		//$display( "Finish ALU op with dest reg:  %d %h %h", 
+		//	alu_dest_reg_index, cpu_regs[alu_dest_reg_index], 
+		//	`get_alu_out_8 );
 		cpu_regs[alu_dest_reg_index] <= `get_alu_out_8;
 	end
+	//else
+	//begin
+	//	$display("ALU dest reg was NOT modded");
+	//end
 	
 	if (alu_modded_proc_flags)
 	begin
