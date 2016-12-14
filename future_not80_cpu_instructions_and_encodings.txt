@@ -155,12 +155,12 @@ Group 2 (The instruction group with the most opcodes):
       
       
     8-bit Push/pop style instructions:
-      1. ldraa (LoaD contents into Register rA from memory at address
-      contained in reg pair rBp, then Add 1 to the reg pair rBp)
-      
-      
-      2. ldrsb (Subtract 1 from the reg pair rBp, then LoaD contents into
+      1. ldrab (Add 1 the reg pair rBp, then LoaD contents into
       Register rA from memory at address contained in reg pair rBp)
+      
+      2. strsa (Store reg rA to memory at address contained in reg pair
+      rBp, then Add 1 the reg pair rBp)
+      
     
     16-bit Load/store instructions:
       1. ldp (LoaD 16-bit contents [big endian] into reg Pair rAp from
@@ -171,13 +171,13 @@ Group 2 (The instruction group with the most opcodes):
       
       
     16-bit Push/pop style instructions:
-      1. ldpaa (LoaD 16-bit contents [big endian] into reg Pair rAp from
-      memory at address contained in reg pair rBp, then Add 2 to the reg
+      1. ldpab (Add 2 to the reg pair rBb, then LoaD 16-bit contents [big
+      endian] into reg Pair rAp from memory at address contained in reg
       pair rBp)
       
-      2. stpsb (Subtract 2 from the reg pair rBp, then STore 16-bit
-      contents [big endian] of reg Pair rAp to memory at address contained
-      in reg pair rBp)
+      2. stpsa (STore 16-bit contents [big endian] of reg Pair rAp to
+      memory at address contained in reg pair rBp, then Subtract 2 from the
+      reg pair rBp, )
 
 
 Group 3 (Instructions with one register and two register pairs):  
@@ -224,6 +224,8 @@ can be 16-bit immediate values):
     high byte of 16-bit immediate value (i);
     low byte of 16-bit immediate value (j);
   Instructions
+    Arithmetic instructions:
+      
     Extended copy instructions:
       1. cpypi (COPY Pair Immediate, which sets the a register pair rAp
       to a 16-bit value in one instruction, but in twice the number of
