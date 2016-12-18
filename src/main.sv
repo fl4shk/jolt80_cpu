@@ -331,28 +331,6 @@ module spcpu
 	always @ ( posedge clk )
 	begin
 	
-	if (reset)
-	begin
-		//{ data_inout_addr, data_inout_we } <= 0;
-		data_inout_addr <= 0;
-		data_inout_we <= 0;
-		
-		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
-		
-		
-		// Clear every CPU register
-		{ cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3], 
-			cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
-			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
-			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
-		
-		//curr_state <= pkg_cpu::cpu_st_begin_0;
-		curr_state <= 0;
-		
-		data_in_is_0_counter <= 0;
-		
-		prep_load_16_no_addr();
-	end
 	
 	end
 	
@@ -390,6 +368,32 @@ module spcpu
 	
 	
 	always @ ( posedge clk )
+	begin
+	
+	if (reset)
+	begin
+		//{ data_inout_addr, data_inout_we } <= 0;
+		data_inout_addr <= 0;
+		data_inout_we <= 0;
+		
+		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
+		
+		
+		// Clear every CPU register
+		{ cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3], 
+			cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
+			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
+			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
+		
+		//curr_state <= pkg_cpu::cpu_st_begin_0;
+		curr_state <= 0;
+		
+		data_in_is_0_counter <= 0;
+		
+		prep_load_16_no_addr();
+	end
+	
+	else
 	begin
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
@@ -532,6 +536,8 @@ module spcpu
 			
 		end
 		
+	end
+	
 	end
 	
 	
