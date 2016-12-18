@@ -328,11 +328,11 @@ module spcpu
 	// This is used to determine when to stop simulation
 	logic [5:0] data_in_is_0_counter;
 	
-	always @ ( posedge clk )
-	begin
-	
-	
-	end
+	//always @ ( posedge clk )
+	//begin
+	//
+	//
+	//end
 	
 	
 	
