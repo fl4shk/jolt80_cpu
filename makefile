@@ -25,8 +25,13 @@ PKGFILES		:=	$(foreach DIR,$(SRCDIRS),$(shell find $(DIR) \
 SRCFILES		:=	$(foreach DIR,$(SRCDIRS),$(shell find $(DIR) \
 	-maxdepth 1  -type f -iname "*.sv"))
 
-all: clean
+all: reminder clean
 	$(BUILD) $(PKGFILES) $(SRCFILES)
+
+
+.PHONY : reminder
+reminder:
+	@echo "Reminder:  With Icarus Verilog, DON'T CAST BITS TO ENUMS!"
 
 .PHONY : clean
 clean:  
