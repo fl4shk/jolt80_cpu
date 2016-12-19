@@ -95,7 +95,7 @@ task exec_any_call;
 endtask
 
 task finish_ig4_branch;
-	$display("finish_ig4_branch");
+	//$display("finish_ig4_branch");
 	seq_logic_grab_pc_adjuster_outputs();
 endtask
 
