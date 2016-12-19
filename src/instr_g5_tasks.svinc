@@ -222,9 +222,26 @@ task start_exec_instr_from_grp_5;
 			//	( `get_final_ig5_rpair_b + instr_in_lo ),
 			//	final_ig5_rbp_index );
 			
-			prep_load_8_with_addr( `get_final_ig5_rpair_b
-				+ instr_in_lo );
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			if (!data_ready)
+			begin
+				if (!did_prep_ldst_instr)
+				begin
+					did_prep_ldst_instr <= 1;
+					prep_load_8_with_addr( `get_final_ig5_rpair_b
+						+ instr_in_lo );
+				end
+				
+				else
+				begin
+					req_rdwr <= 0;
+				end
+			end
+			
+			else // if (data_ready)
+			begin
+				did_prep_ldst_instr <= 0;
+				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			end
 		end
 		
 		// (Store rA to memory at address [rBp + 16-bit Immediate value])
@@ -239,9 +256,28 @@ task start_exec_instr_from_grp_5;
 			//	: `instr_g5_ihi_ra_index_range_lo ],
 			//	instr_in_hi[ `instr_g5_ihi_rbp_index_range_hi
 			//	: `instr_g5_ihi_rbp_index_range_lo ] );
-			prep_store_8( `get_final_ig5_reg_a, ( `get_final_ig5_rpair_b 
-				+ instr_in_lo ) );
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			
+			if (!data_ready)
+			begin
+				if (!did_prep_ldst_instr)
+				begin
+					did_prep_ldst_instr <= 1;
+					prep_store_8( `get_final_ig5_reg_a, 
+						( `get_final_ig5_rpair_b + instr_in_lo ) );
+				end
+				
+				else
+				begin
+					req_rdwr <= 0;
+				end
+			end
+			
+			//else // if (data_ready)
+			if (data_ready)
+			begin
+				did_prep_ldst_instr <= 0;
+				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			end
 		end
 		
 		default:

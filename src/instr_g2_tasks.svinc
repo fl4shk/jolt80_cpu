@@ -718,15 +718,51 @@ task start_exec_instr_from_grp_2;
 		// (LoaD contents into Register rA from memory at address in rBp)
 		pkg_instr_dec::instr_g2_op_ldr:
 		begin
-			prep_load_8_with_addr(`get_final_ig2_rpair_b);
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			// Wait an extra cycle
+			if (!data_ready)
+			begin
+				if (!did_prep_ldst_instr)
+				begin
+					did_prep_ldst_instr <= 1;
+					prep_load_8_with_addr(`get_final_ig2_rpair_b);
+				end
+				
+				else
+				begin
+					req_rdwr <= 0;
+				end
+			end
+			
+			else // if (data_ready)
+			begin
+				did_prep_ldst_instr <= 0;
+				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			end
 		end
 		
 		// (STore Register rA contents to memory at address in rBp)
 		pkg_instr_dec::instr_g2_op_str :
 		begin
-			prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			if (!data_ready)
+			begin
+				if (!did_prep_ldst_instr)
+				begin
+					did_prep_ldst_instr <= 1;
+					prep_store_8( `get_final_ig2_reg_a, 
+						`get_final_ig2_rpair_b );
+				end
+				
+				else
+				begin
+					req_rdwr <= 0;
+				end
+			end
+			
+			else // if (data_ready)
+			begin
+				did_prep_ldst_instr <= 0;
+				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			end
 		end
 		
 		default:

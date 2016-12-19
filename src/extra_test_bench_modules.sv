@@ -165,7 +165,7 @@ module tb_memory
 	//( input bit clk, input bit reset,
 	//input tb_mem_inputs the_inputs,
 	//output bit [`cpu_data_inout_16_msb_pos:0] read_data_out );
-	( input bit clk, input bit reset,
+	( input bit clk, input bit reset, input bit req_rdwr,
 	input bit [`cpu_addr_msb_pos:0] addr_in,
 	input bit [`cpu_data_inout_8_msb_pos:0] write_data_in_8,
 	input bit [`cpu_data_inout_16_msb_pos:0] write_data_in_16,
@@ -178,7 +178,7 @@ module tb_memory
 	input bit write_data_we,
 	output bit [`cpu_data_inout_8_msb_pos:0] read_data_out_8,
 	output bit [`cpu_data_inout_16_msb_pos:0] read_data_out_16,
-	output bit stall_cpu );
+	output bit data_ready );
 	
 	import pkg_cpu::*;
 	import pkg_instr_dec::*;
@@ -198,10 +198,33 @@ module tb_memory
 	//	== pkg_cpu::cpu_data_acc_sz_8 ) ? mem[the_inputs.read_addr_in]
 	//	: `make_mem_pair(the_inputs.read_addr_in);
 	
+	bit [1:0] temp_counter;
+	
 	
 	initial $readmemh( "readmemh_input.txt.ignore", mem, 0, 
 		( num_bytes - 1 ) ); 
-	initial stall_cpu = 0;
+	initial data_ready = 0;
+	
+	
+	//always @ (req_rdwr)
+	//begin
+	//	if (!req_rdwr)
+	//	begin
+	//		$display("Set stall_cpu to 0");
+	//		stall_cpu = 0;
+	//	end
+	//end
+	
+	//always @ (*)
+	//begin
+	//	if (!req_rdwr)
+	//	begin
+	//		//$display("tb_memory:  not req_rdwr");
+	//		$display("tb_memory:  0");
+	//		temp_counter = 0;
+	//		data_ready = 0;
+	//	end
+	//end
 	
 	
 	always @ ( posedge clk )
@@ -214,8 +237,43 @@ module tb_memory
 			//$display( "mem[0x7ffc], mem[0x7ffb], mem[0x7ffa]:  %h %h %h",
 			//	mem[16'h7ffc], mem[16'h7ffb], mem[16'h7ffa] );
 			
-			stall_cpu <= !stall_cpu;
+		if (!req_rdwr)
+		begin
+			////$display("tb_memory:  not req_rdwr");
+			//
+			//temp_counter <= 0;
+			////data_ready <= 1;
+			//data_ready <= 0;
+		end
+		
+		else // if (req_rdwr)
+		begin
+			//stall_cpu <= !stall_cpu;
 			
+			//if (!temp_counter[1])
+			if (!temp_counter)
+			begin
+				////$display("tb_memory:  yes req_rdwr, not temp_counter[1]");
+				//$display("tb_memory:  1 0");
+				data_ready <= 0;
+				temp_counter <= temp_counter + 1;
+			end
+			
+			//else // if (temp_counter[1])
+			////else // if (temp_counter)
+			else
+			begin
+				///$display("tb_memory:  yes req_rdwr, yes temp_counter[1]");
+				//$display("tb_memory:  1 1");
+				data_ready <= 1;
+				temp_counter <= 0;
+			end
+		end
+			//stall_cpu <= !stall_cpu;
+			
+			
+		if (temp_counter)
+		begin
 			if ( write_data_we == 1'b0 )
 			begin
 				//$display("helo");
@@ -224,8 +282,6 @@ module tb_memory
 				begin
 					$display( "8-bit read:  %h, %h", addr_in, 
 						mem[addr_in] );
-					//read_data_out <= { `cpu_data_inout_8_width'h0,
-					//	mem[addr_in] };
 					read_data_out_8 <= { `cpu_data_inout_8_width'h0,
 						mem[addr_in] };
 				end
@@ -235,7 +291,6 @@ module tb_memory
 				begin
 					//$display( "16-bit read:  %h, %h", addr_in, 
 					//	`make_mem_pair(addr_in) );
-					//read_data_out <= `make_mem_pair(addr_in);
 					read_data_out_16 <= `make_mem_pair(addr_in);
 				end
 			end
@@ -246,10 +301,6 @@ module tb_memory
 				// Write 8-bit data
 				if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
 				begin
-					//mem[addr_in] 
-					//	<= write_data_in[`cpu_data_inout_8_msb_pos:0];
-					//$display( "8-bit write:  %h, %h", addr_in,
-					//	write_data_in[`cpu_data_inout_8_msb_pos:0] );
 					mem[addr_in] 
 						<= write_data_in_8[`cpu_data_inout_8_msb_pos:0];
 					$display( "8-bit write:  %h, %h", addr_in,
@@ -259,13 +310,11 @@ module tb_memory
 				// Write 16-bit data
 				else // if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
 				begin
-					//`make_mem_pair(addr_in) <= write_data_in;
-					//$display( "16-bit write:  %h", write_data_in );
 					`make_mem_pair(addr_in) <= write_data_in_16;
 					$display( "16-bit write:  %h", write_data_in_16 );
 				end
 			end
-		//end
+		end
 		
 	end
 	

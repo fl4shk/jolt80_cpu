@@ -24,6 +24,7 @@
 
 module spcpu_test_bench;
 	
+	//bit clk_gen_reset, tb_half_clk, tb_mem_clk;
 	bit clk_gen_reset, tb_clk;
 	
 	bit test_mem_reset;
@@ -40,11 +41,12 @@ module spcpu_test_bench;
 	
 	tb_clk_gen clk_gen( .reset(clk_gen_reset), .clk(tb_clk) );
 	
-	wire test_cpu_do_stall;
+	wire test_cpu_data_ready;
 	wire [`cpu_data_inout_16_msb_pos:0] test_cpu_data_inout_direct;
 	bit [`cpu_addr_msb_pos:0] test_cpu_data_inout_addr;
 	bit test_cpu_data_acc_sz, test_cpu_data_inout_we;
 	logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_out;
+	wire test_cpu_req_rdwr;
 	
 	
 	wire [`cpu_data_inout_8_msb_pos:0] tb_mem_read_data_out_8;
@@ -54,11 +56,12 @@ module spcpu_test_bench;
 	
 	
 	spcpu test_cpu( .clk(tb_clk), .reset(test_cpu_reset),
-		.do_stall(test_cpu_do_stall),
+		.data_ready(test_cpu_data_ready),
 		.data_inout(test_cpu_data_inout_direct),
 		.data_inout_addr(test_cpu_data_inout_addr),
 		.data_acc_sz(test_cpu_data_acc_sz),
-		.data_inout_we(test_cpu_data_inout_we) );
+		.data_inout_we(test_cpu_data_inout_we),
+		.req_rdwr(test_cpu_req_rdwr) );
 	
 	//tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset),
 	//	.the_inputs(mem_inputs), .read_data_out(tb_mem_read_data_out) );
@@ -70,6 +73,7 @@ module spcpu_test_bench;
 	//	.read_data_out(tb_mem_read_data_out) );
 	
 	tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset),
+		.req_rdwr(test_cpu_req_rdwr),
 		.addr_in(test_cpu_data_inout_addr),
 		.write_data_in_8(tb_mem_write_data_in_8),
 		.write_data_in_16(tb_mem_write_data_in_16),
@@ -77,7 +81,7 @@ module spcpu_test_bench;
 		.write_data_we(test_cpu_data_inout_we), 
 		.read_data_out_8(tb_mem_read_data_out_8),
 		.read_data_out_16(tb_mem_read_data_out_16),
-		.stall_cpu(test_cpu_do_stall) );
+		.data_ready(test_cpu_data_ready) );
 	
 	
 	
@@ -172,12 +176,7 @@ endmodule
 // The CPU itself
 module spcpu
 	
-	import pkg_cpu::*;
-	import pkg_pflags::*;
-	import pkg_instr_dec::*;
-	import pkg_alu::*;
-	
-	( input bit clk, input bit reset, input bit do_stall,
+	( input bit clk, input bit reset, input bit data_ready,
 	
 	// Data being read in or written out
 	inout [`cpu_data_inout_16_msb_pos:0] data_inout,
@@ -190,7 +189,15 @@ module spcpu
 	
 	// Write enable, which when low specifies that the CPU wants to read,
 	// and when high specifies that the CPU wants to write,
-	output bit data_inout_we );
+	output bit data_inout_we,
+	
+	// Request Read or Write
+	output bit req_rdwr );
+	
+	import pkg_cpu::*;
+	import pkg_pflags::*;
+	import pkg_instr_dec::*;
+	import pkg_alu::*;
 	
 	
 	
@@ -206,6 +213,7 @@ module spcpu
 	// (mainly for internal ALU usage)
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	//bit [`cpu_reg_msb_pos:0] temp_pc[0:1];
+	bit did_prep_ldst_instr;
 	
 	
 	
@@ -367,7 +375,8 @@ module spcpu
 	always @ ( posedge clk )
 	begin
 		
-		if (!do_stall)
+		//if (!do_stall)
+		if (data_ready)
 		begin
 		
 		if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
@@ -403,6 +412,8 @@ module spcpu
 	always @ ( posedge clk )
 	begin
 	
+	//$display( "do_stall:  %h", do_stall );
+	
 	if (reset)
 	begin
 		//{ data_inout_addr, data_inout_we } <= 0;
@@ -418,6 +429,9 @@ module spcpu
 			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
 			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
 		
+		did_prep_ldst_instr <= 0;
+		
+		
 		//curr_state <= pkg_cpu::cpu_st_begin_0;
 		curr_state <= 0;
 		
@@ -426,13 +440,20 @@ module spcpu
 		prep_load_16_no_addr();
 	end
 	
-	else if ( do_stall && !reset )
-	begin
-		$display("do_stall && !reset");
-	end
+	//else if ( do_stall && !reset )
+	//begin
+	//	req_rdwr <= 0;
+	//	
+	//	$display( "do_stall && !reset:  %h %h %h %h", curr_state, 
+	//		temp_data_in, `get_cpu_rp_pc, data_inout_addr );
+	//end
 	
-	else if ( !do_stall && !reset )
+	//else if ( !do_stall && !reset )
+	else //if (!reset)
 	begin
+		//$display( "req_rdwr, data_ready:  %h %h", req_rdwr, 
+		//	data_ready );
+		
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
 		begin
 			//curr_state <= curr_state + 1;
@@ -443,87 +464,114 @@ module spcpu
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			debug_disp_regs_and_proc_flags();
-			$display();
-			$display();
+			//debug_disp_regs_and_proc_flags();
+			//$display();
+			//$display();
 			
-			
-			// Back up temp_data_in, init_instr_grp, and pc
-			//$display( "load instr hi:  %h %h %h", temp_data_in,
-			//	`get_cpu_rp_pc, data_inout_addr );
-			instr_in_hi <= temp_data_in;
-			final_instr_grp <= init_instr_grp;
-			prev_pc <= `get_cpu_rp_pc;
-			second_prev_pc <= the_pc_inc_pc_out;
-			
-			
-			// Back up the decoded instruction contents to be used on
-			// cycles after the current one.
-			back_up_ig1_instr_contents();
-			back_up_ig2_instr_contents();
-			back_up_ig3_instr_contents();
-			back_up_ig4_instr_contents();
-			back_up_ig5_instr_contents();
-			
-			update_extra_ig1_pc_stuff();
-			update_extra_ig2_pc_stuff();
-			update_extra_ig3_pc_stuff();
-			//update_extra_ig4_pc_stuff();
-			update_extra_ig5_pc_stuff();
-			
-			
-			
-			//if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
-			if (!init_instr_is_32_bit)
+			if (data_ready)
 			begin
-				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+				debug_disp_regs_and_proc_flags();
+				$display();
+				$display();
 				
-				prep_alu_if_needed_init();
-				//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
-				//prep_pc_adjuster_during_load_instr_hi();
-				//seq_logic_grab_pc_adjuster_outputs();
-				seq_logic_grab_pc_inc_outputs();
+				
+				// Back up temp_data_in, init_instr_grp, and pc
+				//$display( "Load Instruction High:  %h %h %h", temp_data_in,
+				//	`get_cpu_rp_pc, data_inout_addr );
+				//$display();
+				instr_in_hi <= temp_data_in;
+				final_instr_grp <= init_instr_grp;
+				prev_pc <= `get_cpu_rp_pc;
+				second_prev_pc <= the_pc_inc_pc_out;
+				
+				
+				// Back up the decoded instruction contents to be used on
+				// cycles after the current one.
+				back_up_ig1_instr_contents();
+				back_up_ig2_instr_contents();
+				back_up_ig3_instr_contents();
+				back_up_ig4_instr_contents();
+				back_up_ig5_instr_contents();
+				
+				update_extra_ig1_pc_stuff();
+				update_extra_ig2_pc_stuff();
+				update_extra_ig3_pc_stuff();
+				//update_extra_ig4_pc_stuff();
+				update_extra_ig5_pc_stuff();
+				
+				
+				
+				//if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
+				if (!init_instr_is_32_bit)
+				begin
+					curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+					//$display( "Instruction is 16-bit, so don't request ",
+					//	"another 16 bits of data." );
+					req_rdwr <= 0;
+					
+					prep_alu_if_needed_init();
+					seq_logic_grab_pc_inc_outputs();
+				end
+				
+				// Handle 32-bit instructions
+				else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
+				begin
+					seq_logic_grab_pc_inc_outputs();
+					prep_load_instr_lo_reg();
+				end
+				
+				//else if ( init_instr_grp == pkg_instr_dec::instr_grp_... )
+				//begin
+				//	
+				//end
+				
+				
+				else // if ( init_instr_grp 
+					// == pkg_instr_dec::instr_grp_unknown )
+				begin
+					$display("Unknown instruction encoding");
+					
+				end
+				
 			end
 			
-			// Handle 32-bit instructions
-			else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
+			else // if (!data_ready)
 			begin
-				//seq_logic_grab_pc_adjuster_outputs();
-				seq_logic_grab_pc_inc_outputs();
-				prep_load_instr_lo_reg();
-			end
-			
-			//else if ( init_instr_grp == pkg_instr_dec::instr_grp_... )
-			//begin
-			//	
-			//end
-			
-			
-			else // if ( init_instr_grp 
-				// == pkg_instr_dec::instr_grp_unknown )
-			begin
-				$display("Unknown instruction encoding");
-				
+				$display("Load Instruction High:  Data NOT ready");
+				//$display();
 			end
 			
 		end
 		
+		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo )
 		begin
-			curr_state <= pkg_cpu::cpu_st_start_exec_instr;
-			instr_in_lo <= temp_data_in;
-			//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
-			//seq_logic_grab_pc_adjuster_outputs();
-			third_prev_pc <= the_pc_inc_pc_out;
+			if (data_ready)
+			begin
+				req_rdwr <= 0;
+				curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+				instr_in_lo <= temp_data_in;
+				//set_pc_and_dio_addr(`get_pc_adjuster_outputs);
+				//seq_logic_grab_pc_adjuster_outputs();
+				third_prev_pc <= the_pc_inc_pc_out;
+				
+				//$display( "Load Instruction Low:  %h %h %h %h", 
+				//	instr_in_hi, temp_data_in, `get_cpu_rp_pc, 
+				//	data_inout_addr );
+				//$display();
+				
+				//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
+				//	the_pc_inc_pc_out );
+				seq_logic_grab_pc_inc_outputs();
+				
+				prep_alu_if_needed_final();
+			end
 			
-			//$display( "load instr lo:  %h %h %h %h", instr_in_hi, 
-			//	temp_data_in, `get_cpu_rp_pc, data_inout_addr );
-			
-			//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
-			//	the_pc_inc_pc_out );
-			seq_logic_grab_pc_inc_outputs();
-			
-			prep_alu_if_needed_final();
+			else // if (!data_ready)
+			begin
+				$display("Load Instruction Low:  Data NOT ready");
+				//$display();
+			end
 		end
 		
 		
@@ -537,6 +585,8 @@ module spcpu
 		begin
 			finish_exec_ldst_instr();
 		end
+		
+		
 		
 		else // if ( curr_state 
 			// == pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
@@ -569,6 +619,8 @@ module spcpu
 			//set_pc_and_dio_addr(
 			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 			seq_logic_grab_pc_inc_outputs();
+			//prep_load_16_no_addr();
+			req_rdwr <= 1;
 			
 			//prep_load_instr_hi_after_reg();
 			
@@ -580,7 +632,8 @@ module spcpu
 	
 	
 	
-	// Combinational logic for various PC-changing stuff
+	//// Combinational logic for various PC-changing stuffs
+	// Latch logic for various PC-changing stuffs
 	always @ (*)
 	//always @ ( curr_state )
 	begin
@@ -591,25 +644,25 @@ module spcpu
 			
 			//// This is for branches
 			//pc_adjuster_op = pkg_alu::addsub_op_addpsnx;
-			$display("comb logic begin_0");
+			//$display("latch logic begin_0");
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
-			//comb_logic_prep_pc_inc_during_load_instr_hi();
-			comb_logic_prep_pc_inc_during_load_instr_portion();
+			//latch_logic_prep_pc_inc_during_load_instr_hi();
+			latch_logic_prep_pc_inc_during_load_instr_portion();
 			//pc_adjuster_op = pkg_alu::addsub_op_follow;
 		end
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_lo )
 		begin
-			//comb_logic_prep_pc_inc_during_load_instr_lo();
-			comb_logic_prep_pc_inc_during_load_instr_portion();
+			//latch_logic_prep_pc_inc_during_load_instr_lo();
+			latch_logic_prep_pc_inc_during_load_instr_portion();
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
 			// Just do this every time
-			comb_logic_prep_pc_adjuster_for_branch(final_ig4_imm_value_8);
+			latch_logic_prep_pc_adjuster_for_branch(final_ig4_imm_value_8);
 			
 			{ instr_is_branch_or_call, non_bc_instr_possibly_changes_pc }
 				= 0;
@@ -643,14 +696,14 @@ module spcpu
 		
 		//else if ( curr_state == pkg_cpu::cpu_st_finish_exec_ldst_instr )
 		//begin
-		//	//comb_logic_prep_pc_
-		//	$display("comb_logic in finish_exec_ldst_instr");
+		//	//latch_logic_prep_pc_
+		//	$display("latch_logic in finish_exec_ldst_instr");
 		//end
 		
 		else if ( curr_state 
 			== pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
 		begin
-			comb_logic_prep_pc_inc_after_non_bc_ipc();
+			latch_logic_prep_pc_inc_after_non_bc_ipc();
 		end
 		
 		

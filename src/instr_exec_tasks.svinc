@@ -146,11 +146,13 @@ task finish_exec_ldst_instr;
 	//debug_disp_instr();
 	//$display();
 	
+	//req_rdwr <= 0;
+	
 	case (final_instr_grp)
 		pkg_instr_dec::instr_grp_1:
 		begin
-			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid Group 1 ",
-				"Load Instruction!" );
+			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
+				"Group 1 Load or Store Instruction!" );
 		end
 		
 		pkg_instr_dec::instr_grp_2:
@@ -167,8 +169,8 @@ task finish_exec_ldst_instr;
 				
 				default:
 				begin
-					$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
-						"Group 2 Load Instruction!" );
+					$display( "finish_exec_ldst_instr:  Uh oh!  ",
+						"Invalid Group 2 Load or Store Instruction!" );
 				end
 			endcase
 		end
@@ -190,16 +192,16 @@ task finish_exec_ldst_instr;
 				
 				default:
 				begin
-					$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
-						"Group 5 Load Instruction!" );
+					$display( "finish_exec_ldst_instr:  Uh oh!  ",
+						"Invalid Group 3 Load or Store Instruction!" );
 				end
 			endcase
 		end
 		
 		pkg_instr_dec::instr_grp_4:
 		begin
-			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid Group 4 ",
-				"Load Instruction!" );
+			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
+				"Group 4 Load or Store Instruction!" );
 		end
 		
 		pkg_instr_dec::instr_grp_5:
@@ -217,13 +219,12 @@ task finish_exec_ldst_instr;
 				
 				default:
 				begin
-					$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
-						"Group 5 Load Instruction!" );
+					$display( "finish_exec_ldst_instr:  Uh oh!  ",
+						"Invalid Group 5 Load or Store Instruction!" );
 				end
 			endcase
 		end
 	endcase
-	
 	
 	//if (!non_bc_instr_possibly_changes_pc)
 	//begin
@@ -238,7 +239,10 @@ task finish_exec_ldst_instr;
 	//start_exec_shared_non_ldst_suffix();
 	
 	//$display("waiting\t\ta\t\tcycle");
+	
+	
 	prep_load_instr_hi_generic();
+	
 endtask
 
 

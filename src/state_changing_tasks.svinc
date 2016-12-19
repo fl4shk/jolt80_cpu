@@ -46,6 +46,7 @@ endtask
 task prep_load_8_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	data_inout_we <= 0;
+	req_rdwr <= 1;
 endtask
 task prep_load_8_with_addr;
 	input [`cpu_addr_msb_pos:0] read_addr;
@@ -63,12 +64,15 @@ task prep_store_8;
 	temp_data_out <= write_data;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_8;
 	data_inout_we <= 1;
+	req_rdwr <= 1;
 endtask
 
 // Prepare to, on the next cycle, load a 16-bit value
 task prep_load_16_no_addr;
 	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
 	data_inout_we <= 0;
+	//$display("prep_load_16_no_addr");
+	req_rdwr <= 1;
 endtask
 task prep_load_16_with_addr;
 	input [`cpu_addr_msb_pos:0] read_addr;
@@ -101,6 +105,7 @@ endtask
 
 
 task prep_load_instr_hi_generic;
+	//req_rdwr <= 1;
 	
 	if (!instr_is_branch_or_call)
 	begin
@@ -172,7 +177,7 @@ endtask
 
 
 
-task comb_logic_prep_pc_adjuster_for_branch;
+task latch_logic_prep_pc_adjuster_for_branch;
 	input [`instr_g4_imm_value_msb_pos:0] branch_offset;
 	
 	//{ pc_adjuster_op, pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, 
@@ -193,18 +198,18 @@ endtask
 
 
 
-task comb_logic_prep_pc_inc_generic;
+task latch_logic_prep_pc_inc_generic;
 	input [`cpu_imm_value_16_msb_pos:0] specific_num_bytes;
 	
 	{ the_pc_inc_pc_in, the_pc_inc_offset_in } 
 		= { `get_cpu_rp_pc, specific_num_bytes };
 endtask
 
-task comb_logic_prep_pc_inc_during_load_instr_portion;
-	comb_logic_prep_pc_inc_generic(`instr_16_num_bytes);
+task latch_logic_prep_pc_inc_during_load_instr_portion;
+	latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
 endtask
 
-task comb_logic_prep_pc_inc_after_non_bc_ipc;
+task latch_logic_prep_pc_inc_after_non_bc_ipc;
 	//$display("prep PC incrementer after non branch/call IPC");
 	
 	
@@ -214,14 +219,14 @@ task comb_logic_prep_pc_inc_after_non_bc_ipc;
 		&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
 	begin
 		//$display("nice");
-		comb_logic_prep_pc_inc_generic(`instr_16_num_bytes);
+		latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
 	end
 	else
 	begin
 		//$display("oh no");
-		comb_logic_prep_pc_inc_generic(0);
+		latch_logic_prep_pc_inc_generic(0);
 	end
-	//comb_logic_prep_pc_inc_generic(`instr_16_num_bytes);
+	//latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
 endtask
 
 task seq_logic_grab_pc_inc_outputs;
