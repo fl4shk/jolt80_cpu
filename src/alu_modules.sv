@@ -21,10 +21,11 @@
 
 
 module pc_incrementer
-	import pkg_alu::*;
 	
 	( input bit [`cpu_imm_value_16_msb_pos:0] pc_in, offset_in,
 	output bit [`cpu_imm_value_16_msb_pos:0] pc_out );
+	
+	import pkg_alu::*;
 	
 	//assign pc_out = pc_in + offset_in;
 	
@@ -36,11 +37,12 @@ module pc_incrementer
 endmodule
 
 module sign_extend_adder
-	import pkg_pflags::*;
 	
 	( input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in_hi, b_in_lo,
 	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
 	output bit [`proc_flags_msb_pos:0] proc_flags_out );
+	
+	import pkg_pflags::*;
 	
 	always @ (*)
 	//always @ (activator)
@@ -68,15 +70,15 @@ module sign_extend_adder
 endmodule
 
 module adder_subtractor
-	import pkg_alu::*;
-	import pkg_pflags::*;
 	
-	( input addsub_oper oper,
+	( input pkg_alu::addsub_oper oper,
 	input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in_hi, b_in_lo,
 	input bit [`proc_flags_msb_pos:0] proc_flags_in,
 	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
 	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
+	import pkg_alu::*;
+	import pkg_pflags::*;
 	
 	//always
 	//begin
@@ -219,15 +221,15 @@ endmodule
 
 //module alu( input bit [alu_op_msb_pos:0] oper,
 module alu
-	import pkg_alu::*;
-	import pkg_pflags::*;
 	
-	( input alu_oper oper,
+	( input pkg_alu::alu_oper oper,
 	input bit [`alu_inout_msb_pos:0] a_in_hi, a_in_lo, b_in_hi, b_in_lo,
 	input bit [`proc_flags_msb_pos:0] proc_flags_in,
 	output bit [`alu_inout_msb_pos:0] out_hi, out_lo,
 	output bit [`proc_flags_msb_pos:0] proc_flags_out );
 	
+	import pkg_alu::*;
+	import pkg_pflags::*;
 	
 	addsub_oper test_addsub_oper;
 	

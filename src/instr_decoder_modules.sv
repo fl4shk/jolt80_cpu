@@ -22,10 +22,11 @@
 
 // This module decodes the instruction group of an instruction's 
 module instr_group_decoder
-	import pkg_instr_dec::*;
 	
 	( input bit [`instr_main_msb_pos:0] instr_hi,
-	output instr_group group_out ); 
+	output pkg_instr_dec::instr_group group_out ); 
+	
+	import pkg_instr_dec::*;
 	
 	instr_group temp_group;
 	
@@ -75,7 +76,6 @@ endmodule
 // Instruction Group 1 decoder
 // Encoding:  0ooo aaaa iiii iiii
 module instr_grp_1_decoder
-	import pkg_instr_dec::*;
 	
 	//( input bit [`instr_main_msb_pos:0] instr_hi,
 	//output ig1_dec_outputs ig1d_outputs );
@@ -84,6 +84,8 @@ module instr_grp_1_decoder
 		output bit [`cpu_reg_index_ie_msb_pos:0] ra_index,
 		output bit [`instr_g1_imm_value_msb_pos:0] imm_value_8,
 		output bit ra_index_is_for_pair );
+	
+	import pkg_instr_dec::*;
 	
 	//assign { ig1d_outputs.opcode, ig1d_outputs.ra_index, 
 	//	ig1d_outputs.imm_value_8 } = instr_hi[ `instr_g1_op_range_hi
@@ -105,7 +107,6 @@ endmodule
 // Instruction Group 2 decoder
 // Encoding:  10oo oooo aaaa bbbb
 module instr_grp_2_decoder
-	import pkg_instr_dec::*;
 	
 	//( input bit [`instr_main_msb_pos:0] instr_hi,
 	//output ig2_dec_outputs ig2d_outputs );
@@ -114,6 +115,8 @@ module instr_grp_2_decoder
 		output bit [`cpu_reg_index_ie_msb_pos:0] ra_index,
 		output bit [`cpu_reg_index_ie_msb_pos:0] rb_index,
 		output bit ra_index_is_for_pair, rb_index_is_for_pair );
+	
+	import pkg_instr_dec::*;
 	
 	
 	assign opcode = instr_hi[`instr_g2_op_range_hi:`instr_g2_op_range_lo];
@@ -137,7 +140,6 @@ endmodule
 // Instruction Group 3 decoder
 // Encoding:  1100 ooaa aabb bccc
 module instr_grp_3_decoder
-	import pkg_instr_dec::*;
 	
 	//( input bit [`instr_main_msb_pos:0] instr_hi,
 	//output ig3_dec_outputs ig3d_outputs );
@@ -146,6 +148,8 @@ module instr_grp_3_decoder
 		output bit [`cpu_reg_index_ie_msb_pos:0] ra_index,
 		output bit [`cpu_reg_index_ie_msb_pos:0] rbp_index,
 		output bit [`cpu_reg_index_ie_msb_pos:0] rcp_index );
+	
+	import pkg_instr_dec::*;
 	
 	//assign { opcode, ra_index, rbp_index, rcp_index } 
 	//	= instr_hi[`instr_g3_op_range_hi:`instr_g3_rcp_index_range_lo];
@@ -163,13 +167,14 @@ endmodule
 // Instruction Group 4 decoder
 // Encoding:  1101 oooo iiii iiii
 module instr_grp_4_decoder
-	import pkg_instr_dec::*;
 	
 	//( input bit [`instr_main_msb_pos:0] instr_hi,
 	//output ig4_dec_outputs ig4d_outputs );
 	( input bit [`instr_main_msb_pos:0] instr_hi,
 		output bit [`instr_g4_op_msb_pos:0] opcode,
 		output bit [`instr_g4_imm_value_msb_pos:0] imm_value_8 );
+	
+	import pkg_instr_dec::*;
 	
 	//assign { opcode, imm_value_8 } 
 	//	= instr_hi[`instr_g4_op_range_hi:`instr_g4_imm_value_range_lo];
@@ -183,7 +188,6 @@ endmodule
 // Instruction Group 5 decoder
 // Encoding:  1110 00oo oaaa abbb   iiii iiii jjjj jjjj
 module instr_grp_5_decoder
-	import pkg_instr_dec::*;
 	
 	//( input bit [`instr_main_msb_pos:0] instr_hi,
 	//output ig5_dec_outputs ig5d_outputs );
@@ -193,6 +197,7 @@ module instr_grp_5_decoder
 		output bit [`cpu_reg_index_ie_msb_pos:0] rbp_index,
 		output bit ra_index_is_for_pair );
 	
+	import pkg_instr_dec::*;
 	
 	assign opcode = instr_hi[ `instr_g5_ihi_op_range_hi
 		: `instr_g5_ihi_op_range_lo ];

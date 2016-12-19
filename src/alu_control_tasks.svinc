@@ -93,6 +93,7 @@ task set_more_alu_config;
 	input op_affects_flags;
 	
 	the_alu_op <= some_alu_op;
+	//the_alu_op <= pkg_alu::alu_oper'(some_alu_op);
 	alu_was_used <= 1;
 	alu_proc_flags_in <= true_proc_flags;
 	alu_modded_proc_flags <= op_affects_flags;
