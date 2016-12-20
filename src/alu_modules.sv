@@ -30,6 +30,7 @@ module pc_incrementer
 	//assign pc_out = pc_in + offset_in;
 	
 	always @ ( pc_in, offset_in )
+	//always_comb
 	begin
 		pc_out = pc_in + offset_in;
 	end
@@ -47,24 +48,20 @@ module sign_extend_adder
 	always @ (*)
 	//always @ (activator)
 	//always @ ( a_in_hi, a_in_lo, b_in_hi, b_in_lo )
+	//always_comb
 	begin
-		//$display( "sign_extend_adder:  %h %h %h", { a_in_hi, a_in_lo }, 
-		//	{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
+		proc_flags_out[pkg_pflags::pf_slot_z] = 0;
 		if (b_in_lo[`cpu_imm_value_8_msb_pos])
 		begin
-			//$display( "sign_extend_adder:  negative");
 			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
 				= { a_in_hi, a_in_lo } + { 8'hff, b_in_lo };
 		end
 		
 		else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
 		begin
-			//$display( "sign_extend_adder:  positive");
 			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
 				= { a_in_hi, a_in_lo } + { 8'h0, b_in_lo };
 		end
-		//$display( "sign_extend_adder:  %h %h %h", { a_in_hi, a_in_lo }, 
-		//	{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
 	end
 	
 endmodule
@@ -80,24 +77,11 @@ module adder_subtractor
 	import pkg_alu::*;
 	import pkg_pflags::*;
 	
-	//always
-	//begin
-	//	#4
-	//	//$display( "%h", oper );
-	//	if ( oper == pkg_alu::addsub_op_addp )
-	//	//if ( ( oper == pkg_alu::addsub_op_add )
-	//	//	|| ( oper == pkg_alu::addsub_op_addp ) )
-	//	begin
-	//		$display( "adder_subtractor:  %h %h %h", { a_in_hi, a_in_lo }, 
-	//			{ b_in_hi, b_in_lo }, { out_hi, out_lo } );
-	//	end
-	//	
-	//end
 	
 	bit [`alu_inout_msb_pos:0] snx_adder_a_in_hi, snx_adder_a_in_lo,
 		snx_adder_b_in_hi, snx_adder_b_in_lo;
-	bit [`alu_inout_msb_pos:0] snx_adder_out_hi, snx_adder_out_lo;
-	bit [`proc_flags_msb_pos:0] snx_adder_proc_flags_out;
+	wire [`alu_inout_msb_pos:0] snx_adder_out_hi, snx_adder_out_lo;
+	wire [`proc_flags_msb_pos:0] snx_adder_proc_flags_out;
 	
 	sign_extend_adder the_sign_extend_adder
 		( .a_in_hi(snx_adder_a_in_hi), .a_in_lo(snx_adder_a_in_lo), 
@@ -105,24 +89,21 @@ module adder_subtractor
 		.out_hi(snx_adder_out_hi), .out_lo(snx_adder_out_lo),
 		.proc_flags_out(snx_adder_proc_flags_out) );
 	
-	//task init_snx_adder;
-	//	input [`alu_inout_msb_pos:0] some_a_in_hi, some_a_in_lo,
-	//		some_b_in_hi, some_b_in_lo;
-	//	
-	//	{ snx_adder_a_in_hi, snx_adder_a_in_lo, 
-	//		snx_adder_b_in_hi, snx_adder_b_in_lo }
-	//		= { some_a_in_hi, some_a_in_lo, some_b_in_hi, some_b_in_lo };
-	//endtask
 	
 	//always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
 	always @ (*)
+	//always_comb
 	begin
+		{ proc_flags_out, out_hi, out_lo } = { proc_flags_in, a_in_hi, 
+			a_in_lo };
+		{ snx_adder_a_in_hi, snx_adder_a_in_lo, snx_adder_b_in_hi,
+			snx_adder_b_in_lo } = { a_in_hi, a_in_lo, b_in_hi, b_in_lo };
 		case (oper)
-			pkg_alu::addsub_op_follow:
-			begin
-				{ proc_flags_out, out_hi, out_lo } = { proc_flags_in,
-					a_in_hi, a_in_lo };
-			end
+			//pkg_alu::addsub_op_follow:
+			//begin
+			//	{ proc_flags_out, out_hi, out_lo } = { proc_flags_in,
+			//		a_in_hi, a_in_lo };
+			//end
 			pkg_alu::addsub_op_add:
 			begin
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
@@ -311,8 +292,8 @@ module alu
 	
 	
 	// 8-bit bit rotation stuff
-	bit [`alu_inout_msb_pos:0] rot_mod_thing;
-	bit [ `alu_inout_width + `alu_inout_width - 1 : 0 ] rot_temp;
+	wire [`alu_inout_msb_pos:0] rot_mod_thing;
+	wire [ `alu_inout_width + `alu_inout_width - 1 : 0 ] rot_temp;
 	
 	
 	// Note that using `width_to_msb_pos in this way ONLY works if
@@ -323,8 +304,8 @@ module alu
 	
 	
 	// 16-bit bit rotation stuff
-	bit [`alu_inout_pair_msb_pos:0] rot_p_mod_thing;
-	bit [ `alu_inout_pair_width + `alu_inout_pair_width 
+	wire [`alu_inout_pair_msb_pos:0] rot_p_mod_thing;
+	wire [ `alu_inout_pair_width + `alu_inout_pair_width 
 		+ `alu_inout_pair_width + `alu_inout_pair_width - 1 : 0 ] 
 		rot_p_temp;
 	
@@ -339,6 +320,8 @@ module alu
 	//always @ ( oper, a_in_lo, b_in_lo, proc_flags_in )
 	//always @ ( oper, a_in_hi, a_in_lo, b_in_hi, b_in_lo, proc_flags_in )
 	always @ (*)
+	//always_comb
+	//always_latch
 	begin
 		//$display( "%h %h\t\t%h %h", rot_mod_thing, rot_c_mod_thing,
 		//	rot_p_mod_thing, rot_p_c_mod_thing );
@@ -347,6 +330,12 @@ module alu
 		//get_alu_oper_cat( oper, oper_cat );
 		
 		do_not_change_z_flag = 1'b0;
+		{ oper_cat, proc_flags_out, out_hi, out_lo } 
+			= { `alu_op_add_cat, proc_flags_in, a_in_hi, a_in_lo };
+		{ test_addsub_oper, addsub_proc_flags_in, addsub_a_in_hi, 
+			addsub_a_in_lo, addsub_b_in_hi, addsub_b_in_lo }
+			= { pkg_alu::addsub_op_add, proc_flags_in, a_in_hi, a_in_lo, 
+			b_in_hi, b_in_lo };
 		
 		case (oper)
 		// Arithmetic operations
@@ -354,16 +343,6 @@ module alu
 			pkg_alu::alu_op_add:
 			begin
 				oper_cat = `alu_op_add_cat;
-				
-				//$display( "In ALU:  alu_op_add" );
-				//do_basic_addsub_oper_8(pkg_alu::addsub_op_add);
-				
-				//$display( "before add:  %h %h %h %h", out_lo, a_in_lo, 
-				//	b_in_lo, ( a_in_lo + b_in_lo ) );
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } = a_in_lo 
-				//	+ b_in_lo;
-				//$display( "after add:  %h %h %h %h", out_lo, a_in_lo, 
-				//	b_in_lo, ( a_in_lo + b_in_lo ) );
 				
 				init_addsub_oper_8( pkg_alu::addsub_op_add, proc_flags_in,
 					a_in_lo, b_in_lo );
@@ -826,9 +805,9 @@ module alu
 			begin
 				// Don't change ANYTHING
 				{ proc_flags_out[pkg_pflags::pf_slot_c], 
-					do_not_change_z_flag, out_lo } 
+					do_not_change_z_flag, out_hi, out_lo } 
 					= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-					a_in_lo };
+					a_in_hi, a_in_lo };
 			end
 			
 		endcase

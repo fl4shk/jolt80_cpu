@@ -41,71 +41,118 @@ module spcpu_test_bench;
 	
 	tb_clk_gen clk_gen( .reset(clk_gen_reset), .clk(tb_clk) );
 	
+	
+	
+	
 	wire test_cpu_data_ready;
-	wire [`cpu_data_inout_16_msb_pos:0] test_cpu_data_inout_direct;
-	bit [`cpu_addr_msb_pos:0] test_cpu_data_inout_addr;
-	bit test_cpu_data_acc_sz, test_cpu_data_inout_we;
-	logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_out;
+	//bit test_cpu_reset;
+	//wire [`cpu_data_inout_16_msb_pos:0] test_cpu_data_inout_direct;
+	wire [`cpu_addr_msb_pos:0] test_cpu_data_inout_addr;
+	wire test_cpu_data_acc_sz, test_cpu_data_inout_we;
+	//logic [`cpu_data_inout_16_msb_pos:0] test_cpu_data_out;
+	bit [`cpu_data_inout_16_msb_pos:0] test_cpu_temp_data_in;
+	wire [`cpu_data_inout_16_msb_pos:0] test_cpu_temp_data_out;
 	wire test_cpu_req_rdwr;
 	
-	
-	wire [`cpu_data_inout_8_msb_pos:0] tb_mem_read_data_out_8;
-	wire [`cpu_data_inout_16_msb_pos:0] tb_mem_read_data_out_16;
-	wire [`cpu_data_inout_8_msb_pos:0] tb_mem_write_data_in_8;
-	wire [`cpu_data_inout_16_msb_pos:0] tb_mem_write_data_in_16;
+	wire [`cpu_reg_msb_pos:0] test_cpu_debug_reg_0;
 	
 	
+	
+	wire [ `cpu_addr_msb_pos - 1 : 0 ] test_mem_addr_2;
+	wire [`cpu_data_inout_8_msb_pos:0] test_mem_read_data_out_8;
+	wire [`cpu_data_inout_16_msb_pos:0] test_mem_read_data_out_16;
+	
+	wire [`cpu_data_inout_8_msb_pos:0] test_mem_write_data_in_8;
+	wire [`cpu_data_inout_16_msb_pos:0] test_mem_write_data_in_16;
+	wire test_mem_write_data_we_8, test_mem_write_data_we_16;
+	
+	
+	
+	//initial test_cpu_reset = 1;
+	
+	assign test_cpu_data_ready = 1;
+	assign test_mem_addr_2 = ( test_cpu_data_inout_addr >> 1 );
+	
+	assign test_mem_write_data_we_8
+		= ( ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+		? test_cpu_data_inout_we : 0 );
+	assign test_mem_write_data_we_16
+		= ( ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
+		? test_cpu_data_inout_we : 0 );
+	
+	//assign test_cpu_data_inout_direct = ( (!test_cpu_data_inout_we) 
+	//	? ( ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+	//	? test_mem_read_data_out_8 : test_mem_read_data_out_16 )
+	//	: `cpu_data_inout_16_width'hz );
+	
+	assign test_cpu_temp_data_in
+		= ( ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+		? test_mem_read_data_out_8 : test_mem_read_data_out_16 );
+	
+	//assign test_cpu_data_out = (test_cpu_data_inout_we)
+	//	? test_cpu_data_inout_direct : `cpu_data_inout_16_width'hz;
+	//
+	//assign test_mem_write_data_in_8
+	//	= test_cpu_data_out[`cpu_data_inout_8_msb_pos:0];
+	//assign test_mem_write_data_in_16 = test_cpu_data_out;
+	assign test_mem_write_data_in_8
+		= test_cpu_temp_data_out[`cpu_data_inout_8_msb_pos:0];
+	assign test_mem_write_data_in_16 = test_cpu_temp_data_out;
+	
+	
+	
+	
+	//test_memory test_mem( .clk(clk), .req_rdwr(test_cpu_req_rdwr),
+	//	.addr_in(test_cpu_data_inout_addr),
+	//	.write_data_in_8(test_mem_write_data_in_8),
+	//	.write_data_in_16(test_mem_write_data_in_16),
+	//	.write_data_we_8(test_mem_write_data_we_8),
+	//	.write_data_we_16(test_mem_write_data_we_16),
+	//	.read_data_out_8(test_mem_read_data_out_8),
+	//	.read_data_out_16(test_mem_read_data_out_16),
+	//	.data_ready(test_cpu_data_ready) );
+	
+	//mixed_width_true_dual_port_ram #(8,16,15) dedotated_wam
+	//	( .addr1(test_cpu_data_inout_addr),
+	//	.addr2(test_mem_addr_2),
+	//	.data_in1(test_mem_write_data_in_8),
+	//	.data_in2(test_mem_write_data_in_16),
+	//	.we1(test_mem_write_data_we_8),
+	//	.we2(test_mem_write_data_we_16),
+	//	.clk(clk),
+	//	.data_out1(test_mem_read_data_out_8),
+	//	.data_out2(test_mem_read_data_out_16) );
+	
+	tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
+		.req_rdwr(test_cpu_req_rdwr),
+		.addr_in(test_cpu_data_inout_addr),
+		.write_data_in_8(test_mem_write_data_in_8),
+		.write_data_in_16(test_mem_write_data_in_16),
+		.data_acc_sz(test_cpu_data_acc_sz),
+		.write_data_we_8(test_mem_write_data_we_8),
+		.write_data_we_16(test_mem_write_data_we_16),
+		.read_data_out_8(test_mem_read_data_out_8),
+		.read_data_out_16(test_mem_read_data_out_16),
+		.data_ready(test_cpu_data_ready) );
+		
+	
+	
+	//spcpu test_cpu( .clk(clk), .reset(reset),
+	//	.data_ready(test_cpu_data_ready),
+	//	.data_inout(test_cpu_data_inout_direct),
+	//	.data_inout_addr(test_cpu_data_inout_addr),
+	//	.data_acc_sz(test_cpu_data_acc_sz),
+	//	.data_inout_we(test_cpu_data_inout_we),
+	//	.req_rdwr(test_cpu_req_rdwr) );
 	spcpu test_cpu( .clk(tb_clk), .reset(test_cpu_reset),
 		.data_ready(test_cpu_data_ready),
-		.data_inout(test_cpu_data_inout_direct),
+		.temp_data_in(test_cpu_temp_data_in),
+		.temp_data_out(test_cpu_temp_data_out),
 		.data_inout_addr(test_cpu_data_inout_addr),
 		.data_acc_sz(test_cpu_data_acc_sz),
 		.data_inout_we(test_cpu_data_inout_we),
-		.req_rdwr(test_cpu_req_rdwr) );
-	
-	//tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset),
-	//	.the_inputs(mem_inputs), .read_data_out(tb_mem_read_data_out) );
-	//tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset),
-	//	.addr_in(test_cpu_data_inout_addr),
-	//	.write_data_in(test_cpu_data_out),
-	//	.data_acc_sz(test_cpu_data_acc_sz),
-	//	.write_data_we(test_cpu_data_inout_we), 
-	//	.read_data_out(tb_mem_read_data_out) );
-	
-	tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset),
 		.req_rdwr(test_cpu_req_rdwr),
-		.addr_in(test_cpu_data_inout_addr),
-		.write_data_in_8(tb_mem_write_data_in_8),
-		.write_data_in_16(tb_mem_write_data_in_16),
-		.data_acc_sz(test_cpu_data_acc_sz),
-		.write_data_we(test_cpu_data_inout_we), 
-		.read_data_out_8(tb_mem_read_data_out_8),
-		.read_data_out_16(tb_mem_read_data_out_16),
-		.data_ready(test_cpu_data_ready) );
-	
-	
-	
-	
-	
-	//assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
-	//	? test_cpu_data_in : `cpu_data_inout_16_width'hz;
-	//assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
-	//	? tb_mem_read_data_out : `cpu_data_inout_16_width'hz;
-	//assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
-	//	? temp_read_data_out : `cpu_data_inout_16_width'hz;
-	//assign test_cpu_data_inout_direct = (!test_cpu_data_inout_we) 
-	//	? tb_mem_read_data_out : `cpu_data_inout_16_width'hz;
-	assign test_cpu_data_inout_direct = ( (!test_cpu_data_inout_we) 
-		? ( ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
-		? tb_mem_read_data_out_8 : tb_mem_read_data_out_16 )
-		: `cpu_data_inout_16_width'hz );
-	
-	assign test_cpu_data_out = (test_cpu_data_inout_we)
-		? test_cpu_data_inout_direct : `cpu_data_inout_16_width'hz;
-	
-	assign tb_mem_write_data_in_8
-		= test_cpu_data_out[`cpu_data_inout_8_msb_pos:0];
-	assign tb_mem_write_data_in_16 = test_cpu_data_out;
+		.debug_reg_0(test_cpu_debug_reg_0) );
 	
 	
 	
@@ -127,11 +174,15 @@ module spcpu_test_bench;
 		
 	end
 	
-	//always @ ( posedge tb_half_clk )
+	////always @ ( posedge tb_half_clk )
+	//always @ ( posedge tb_clk )
 	//begin
-	//	$display( "%h %h %h %h", test_cpu_data_inout_direct,
-	//		test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
-	//		test_cpu_data_inout_we );
+	//	//$display( "%h %h %h %h", test_cpu_data_inout_direct,
+	//	//	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
+	//	//	test_cpu_data_inout_we );
+	//	$display( "%h %h\t\t%h %h %h", test_cpu_temp_data_in,
+	//		test_cpu_temp_data_out, test_cpu_data_inout_addr, 
+	//		test_cpu_data_acc_sz, test_cpu_data_inout_we );
 	//end
 	
 	
@@ -179,7 +230,11 @@ module spcpu
 	( input bit clk, input bit reset, input bit data_ready,
 	
 	// Data being read in or written out
-	inout [`cpu_data_inout_16_msb_pos:0] data_inout,
+	//inout [`cpu_data_inout_16_msb_pos:0] data_inout,
+	
+	input bit [`cpu_data_inout_16_msb_pos:0] temp_data_in,
+	output bit [`cpu_data_inout_16_msb_pos:0] temp_data_out,
+	
 	
 	// The address being loaded from or written to
 	output bit [`cpu_addr_msb_pos:0] data_inout_addr,
@@ -192,7 +247,9 @@ module spcpu
 	output bit data_inout_we,
 	
 	// Request Read or Write
-	output bit req_rdwr );
+	output bit req_rdwr,
+	
+	output wire [`cpu_reg_msb_pos:0] debug_reg_0 );
 	
 	import pkg_cpu::*;
 	import pkg_pflags::*;
@@ -236,11 +293,14 @@ module spcpu
 	
 	
 	
-	// These are used for communication with the outside world
-	wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
-	bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
+	//// These are used for communication with the outside world
+	//wire [`cpu_data_inout_16_msb_pos:0] temp_data_in;
+	//bit [`cpu_data_inout_16_msb_pos:0] temp_data_out;
 	
 	
+	
+	assign debug_reg_0 = cpu_regs[0];
+	//assign debug_reg_0 = 3;
 	
 	
 	
@@ -322,11 +382,11 @@ module spcpu
 		.proc_flags_out(alu_proc_flags_out) );
 	
 	
-	// Outside world access assign statements
-	assign data_inout = (data_inout_we) ? temp_data_out
-		: `cpu_data_inout_16_width'hz;
-	assign temp_data_in = (!data_inout_we) ? data_inout
-		: `cpu_data_inout_16_width'hz;
+	//// Outside world access assign statements
+	//assign data_inout = (data_inout_we) ? temp_data_out
+	//	: `cpu_data_inout_16_width'hz;
+	//assign temp_data_in = (!data_inout_we) ? data_inout
+	//	: `cpu_data_inout_16_width'hz;
 	
 	
 	
@@ -410,6 +470,7 @@ module spcpu
 	
 	
 	always @ ( posedge clk )
+	//always_ff @ ( posedge clk )
 	begin
 	
 	//$display( "do_stall:  %h", do_stall );
@@ -435,7 +496,7 @@ module spcpu
 		//curr_state <= pkg_cpu::cpu_st_begin_0;
 		curr_state <= 0;
 		
-		data_in_is_0_counter <= 0;
+		//data_in_is_0_counter <= 0;
 		
 		prep_load_16_no_addr();
 	end
@@ -636,6 +697,7 @@ module spcpu
 	// Latch logic for various PC-changing stuffs
 	always @ (*)
 	//always @ ( curr_state )
+	//always_latch
 	begin
 		
 		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
