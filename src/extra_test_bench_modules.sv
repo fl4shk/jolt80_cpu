@@ -228,6 +228,7 @@ module tb_memory
 				////$display("tb_memory:  yes req_rdwr, not temp_counter[1]");
 				//$display("tb_memory:  1 0");
 				data_ready <= 0;
+				//data_ready <= 1;
 				temp_counter <= temp_counter + 1;
 			end
 			
@@ -238,6 +239,7 @@ module tb_memory
 				////$display("tb_memory:  yes req_rdwr, yes temp_counter[1]");
 				//$display("tb_memory:  1 1");
 				data_ready <= 1;
+				//data_ready <= 0;
 				temp_counter <= 0;
 			end
 		end
@@ -246,6 +248,7 @@ module tb_memory
 	always @ ( posedge clk )
 	begin
 		if (temp_counter)
+		//if (1)
 		begin
 			if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
 			begin
@@ -273,6 +276,7 @@ module tb_memory
 	always @ ( posedge clk )
 	begin
 		if (temp_counter)
+		//if (1)
 		begin
 			if ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
 			begin

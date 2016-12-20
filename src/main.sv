@@ -58,6 +58,7 @@ module spcpu_test_bench;
 	
 	
 	
+	wire test_mem_data_ready;
 	wire [ `cpu_addr_msb_pos - 1 : 0 ] test_mem_addr_2;
 	wire [`cpu_data_inout_8_msb_pos:0] test_mem_read_data_out_8;
 	wire [`cpu_data_inout_16_msb_pos:0] test_mem_read_data_out_16;
@@ -70,7 +71,8 @@ module spcpu_test_bench;
 	
 	//initial test_cpu_reset = 1;
 	
-	assign test_cpu_data_ready = 1;
+	//assign test_cpu_data_ready = 1;
+	assign test_cpu_data_ready = test_mem_data_ready;
 	assign test_mem_addr_2 = ( test_cpu_data_inout_addr >> 1 );
 	
 	assign test_mem_write_data_we_8
@@ -123,6 +125,18 @@ module spcpu_test_bench;
 	//	.data_out1(test_mem_read_data_out_8),
 	//	.data_out2(test_mem_read_data_out_16) );
 	
+	//tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
+	//	.req_rdwr(test_cpu_req_rdwr),
+	//	.addr_in(test_cpu_data_inout_addr),
+	//	.write_data_in_8(test_mem_write_data_in_8),
+	//	.write_data_in_16(test_mem_write_data_in_16),
+	//	.data_acc_sz(test_cpu_data_acc_sz),
+	//	.write_data_we_8(test_mem_write_data_we_8),
+	//	.write_data_we_16(test_mem_write_data_we_16),
+	//	.read_data_out_8(test_mem_read_data_out_8),
+	//	.read_data_out_16(test_mem_read_data_out_16),
+	//	.data_ready(test_cpu_data_ready) );
+	
 	tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
 		.req_rdwr(test_cpu_req_rdwr),
 		.addr_in(test_cpu_data_inout_addr),
@@ -133,8 +147,7 @@ module spcpu_test_bench;
 		.write_data_we_16(test_mem_write_data_we_16),
 		.read_data_out_8(test_mem_read_data_out_8),
 		.read_data_out_16(test_mem_read_data_out_16),
-		.data_ready(test_cpu_data_ready) );
-		
+		.data_ready(test_mem_data_ready) );
 	
 	
 	//spcpu test_cpu( .clk(clk), .reset(reset),
