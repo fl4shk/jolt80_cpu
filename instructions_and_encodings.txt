@@ -38,16 +38,13 @@ Group 1 (Non-branching instructions with 8-bit immediate values):
       4. subi (ASSEMBLER ALIAS for addi with the two's complement of the
       immediate value)
       
-      5. sbci (ASSEMBLER ALIAS for adci with the one's complement of the
-      immediate value)
-      
-      6. subpbi (SuBtract 8-bit Immediate value from reg Pair rAp [NOT an
+      5. subpbi (SuBtract 8-bit Immediate value from reg Pair rAp [NOT an
       assembler alias for addpbi])
       
-      7. cmpi
+      6. cmpi
     
     Copy instructions:
-      8. cpyi (CoPY Immediate)
+      7. cpyi (CoPY Immediate)
 
 
 Group 2 (The instruction group with the most opcodes):  
