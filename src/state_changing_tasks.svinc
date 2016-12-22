@@ -230,7 +230,7 @@ task latch_logic_prep_pc_inc_after_non_bc_ipc;
 endtask
 
 task seq_logic_grab_pc_inc_outputs;
-	//$display( "seq_logic_grab_pc_inc_outputs:  %h", the_pc_inc_pc_out );
+	$display( "seq_logic_grab_pc_inc_outputs:  %h", the_pc_inc_pc_out );
 	set_pc_and_dio_addr(the_pc_inc_pc_out);
 endtask
 

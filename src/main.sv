@@ -187,16 +187,17 @@ module spcpu_test_bench;
 		
 	end
 	
-	////always @ ( posedge tb_half_clk )
-	//always @ ( posedge tb_clk )
-	//begin
-	//	//$display( "%h %h %h %h", test_cpu_data_inout_direct,
-	//	//	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
-	//	//	test_cpu_data_inout_we );
-	//	$display( "%h %h\t\t%h %h %h", test_cpu_temp_data_in,
-	//		test_cpu_temp_data_out, test_cpu_data_inout_addr, 
-	//		test_cpu_data_acc_sz, test_cpu_data_inout_we );
-	//end
+	//always @ ( posedge tb_half_clk )
+	always @ ( posedge tb_clk )
+	begin
+		////$display( "%h %h %h %h", test_cpu_data_inout_direct,
+		////	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
+		////	test_cpu_data_inout_we );
+		//$display( "In Test bench:  %h %h\t\t%h %h %h", 
+		//	test_cpu_temp_data_in, test_cpu_temp_data_out, 
+		//	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
+		//	test_cpu_data_inout_we );
+	end
 	
 	
 endmodule
@@ -532,9 +533,9 @@ module spcpu
 		begin
 			//curr_state <= curr_state + 1;
 			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-			prep_load_16_no_addr();
+			//prep_load_16_no_addr();
+			prep_load_16_with_addr(`get_cpu_rp_pc);
 		end
-		
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
@@ -550,9 +551,9 @@ module spcpu
 				
 				
 				// Back up temp_data_in, init_instr_grp, and pc
-				//$display( "Load Instruction High:  %h %h %h", temp_data_in,
-				//	`get_cpu_rp_pc, data_inout_addr );
-				//$display();
+				$display( "Load Instruction High:  %h %h %h", temp_data_in,
+					`get_cpu_rp_pc, data_inout_addr );
+				$display();
 				instr_in_hi <= temp_data_in;
 				final_instr_grp <= init_instr_grp;
 				prev_pc <= `get_cpu_rp_pc;
@@ -579,8 +580,8 @@ module spcpu
 				if (!init_instr_is_32_bit)
 				begin
 					curr_state <= pkg_cpu::cpu_st_start_exec_instr;
-					//$display( "Instruction is 16-bit, so don't request ",
-					//	"another 16 bits of data." );
+					$display( "Instruction is 16-bit, so don't request ",
+						"another 16 bits of data." );
 					req_rdwr <= 0;
 					
 					prep_alu_if_needed_init();
@@ -590,6 +591,8 @@ module spcpu
 				// Handle 32-bit instructions
 				else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
 				begin
+					$display("Instruction is 32-bit");
+					//req_rdwr <= 1;
 					seq_logic_grab_pc_inc_outputs();
 					prep_load_instr_lo_reg();
 				end
@@ -629,10 +632,10 @@ module spcpu
 				//seq_logic_grab_pc_adjuster_outputs();
 				third_prev_pc <= the_pc_inc_pc_out;
 				
-				//$display( "Load Instruction Low:  %h %h %h %h", 
-				//	instr_in_hi, temp_data_in, `get_cpu_rp_pc, 
-				//	data_inout_addr );
-				//$display();
+				$display( "Load Instruction Low:  %h %h %h %h", 
+					instr_in_hi, temp_data_in, `get_cpu_rp_pc, 
+					data_inout_addr );
+				$display();
 				
 				//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
 				//	the_pc_inc_pc_out );
