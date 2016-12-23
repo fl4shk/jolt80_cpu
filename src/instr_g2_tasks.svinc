@@ -18,6 +18,11 @@
 `ifndef instr_g2_tasks_svinc
 `define instr_g2_tasks_svinc
 
+`define get_ig2_reg_a cpu_regs[ig2_ra_index]
+`define get_ig2_reg_b cpu_regs[ig2_rb_index]
+`define get_ig2_rpair_a `make_reg_pair_w_pi(ig2_ra_index)
+`define get_ig2_rpair_b `make_reg_pair_w_pi(ig2_rb_index)
+
 `define get_final_ig2_reg_a cpu_regs[final_ig2_ra_index]
 `define get_final_ig2_reg_b cpu_regs[final_ig2_rb_index]
 `define get_final_ig2_rpair_a `make_reg_pair_w_pi(final_ig2_ra_index)
@@ -233,6 +238,16 @@ task disassemble_grp_2_instr;
 			`make_reg_ind_from_pi(final_ig2_rb_index) );
 	end
 	
+	// (Clear reg rA, then CoPY FRom Flags to reg rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyfrf )
+	begin
+		$display( "cpyfrf r%d", final_ig2_ra_index );
+	end
+	// (CoPY TO Flags from reg rA)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpytof )
+	begin
+		$display( "cpytof r%d", final_ig2_ra_index );
+	end
 	
 	// Swap instructions:
 	// (SWap register Pair, also can be used as a combined "call",
@@ -271,6 +286,54 @@ task disassemble_grp_2_instr;
 	begin
 		$display( "str r%d, r%dp", final_ig2_ra_index, 
 			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	// 8-bit Push/pop style instructions:
+	
+	// (Add 1 the reg pair rBp, then LoaD contents into Register rA
+	// from memory at address contained in reg pair rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldrab )
+	begin
+		$display( "ldrab r%d, r%dp", final_ig2_ra_index,
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	// (STore reg rA to memory at address contained in reg pair rBp,
+	// then Add 1 the reg pair rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_strsa )
+	begin
+		$display( "strsa r%d, r%dp", final_ig2_ra_index,
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	// (Add 1 to the reg pair rBp, then LoaD a byte containing
+	// processor Flags (other bits cleared) into the processor flags)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldfab )
+	begin
+		$display( "ldfab r%dp", 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	// (STore a byte containing the current processor flags (other bits
+	// cleared) to memory at address contained in reg pair rBp, then
+	// Add 1 the reg pair rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_stfsa )
+	begin
+		$display( "stfsa r%dp", 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
+	
+	
+	// Interrupt instructions (these ignore BOTH rA and rB):
+	// (ENable Interrupts)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_eni )
+	begin
+		$display("eni");
+	end
+	// (DIsable Interrupts)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_dii )
+	begin
+		$display("dii");
 	end
 	
 	else
@@ -576,6 +639,17 @@ task prep_alu_instr_grp_2_generic;
 		//pkg_instr_dec::instr_g2_op_str :
 		//begin
 		//end
+		
+		pkg_instr_dec::instr_g2_op_ldrab:
+		begin
+			do_alu_op_addp_no_flags( ig2_rb_index, 0, 1 );
+		end
+		pkg_instr_dec::instr_g2_op_strsa:
+		begin
+			do_alu_op_subp_no_flags( ig2_rb_index, 0, 1 );
+		end
+		
+		
 		default:
 		begin
 			alu_was_used <= 0;
@@ -768,6 +842,17 @@ task start_exec_instr_from_grp_2;
 			`get_final_ig2_rpair_a <= `get_final_ig2_rpair_b;
 		end
 		
+		// (Clear reg rA, then CoPY FRom Flags to reg rA)
+		pkg_instr_dec::instr_g2_op_cpyfrf:
+		begin
+			`get_final_ig2_reg_a <= true_proc_flags;
+		end
+		// (CoPY TO Flags from reg rA)
+		pkg_instr_dec::instr_g2_op_cpytof:
+		begin
+			true_proc_flags <= `get_final_ig2_reg_a;
+		end
+		
 		
 		// Swap instructions:
 		// (SWap register Pair, also can be used as a combined "call",
@@ -853,6 +938,82 @@ task start_exec_instr_from_grp_2;
 				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 			end
 		end
+		
+		// 8-bit Push/pop style instructions:
+		
+		// (Add 1 the reg pair rBp, then LoaD contents into Register rA
+		// from memory at address contained in reg pair rBp)
+		pkg_instr_dec::instr_g2_op_ldrab:
+		begin
+			// Wait an extra cycle
+			if (!data_ready)
+			begin
+				if (!did_prep_ldst_instr)
+				begin
+					did_prep_ldst_instr <= 1;
+					// 
+					//prep_load_8_with_addr(`get_final_ig2_rpair_b);
+					prep_load_8_with_addr(`get_alu_out_16);
+					finish_alu_op_with_dest_rpair();
+				end
+				
+				else
+				begin
+					req_rdwr <= 0;
+				end
+			end
+			
+			else // if (data_ready)
+			begin
+				did_prep_ldst_instr <= 0;
+				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			end
+		end
+		
+		// (STore reg rA to memory at address contained in reg pair rBp,
+		// then Add 1 the reg pair rBp)
+		pkg_instr_dec::instr_g2_op_strsa:
+		begin
+			if (!data_ready)
+			begin
+				if (!did_prep_ldst_instr)
+				begin
+					did_prep_ldst_instr <= 1;
+					prep_store_8( `get_final_ig2_reg_a, 
+						`get_final_ig2_rpair_b );
+					finish_alu_op_with_dest_rpair();
+				end
+				
+				else
+				begin
+					req_rdwr <= 0;
+				end
+			end
+			
+			else // if (data_ready)
+			begin
+				did_prep_ldst_instr <= 0;
+				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			end
+		end
+		
+		// (Add 1 to the reg pair rBp, then LoaD a byte containing
+		// processor Flags (other bits cleared) into the processor flags)
+		pkg_instr_dec::instr_g2_op_ldfab:
+		begin
+			
+		end
+		
+		// (STore a byte containing the current processor flags (other bits
+		// cleared) to memory at address contained in reg pair rBp, then
+		// Add 1 the reg pair rBp)
+		pkg_instr_dec::instr_g2_op_stfsa:
+		begin
+			
+		end
+		
+		
+		
 		
 		default:
 		begin

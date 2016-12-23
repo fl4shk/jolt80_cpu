@@ -58,6 +58,19 @@ task finish_alu_op_with_dest_rpair;
 	end
 endtask
 
+task finish_alu_op_with_dest_val_16;
+	output [`cpu_addr_msb_pos:0] val_16_out;
+	
+	if (alu_dest_rpair_was_modded)
+	begin
+		val_16_out <= `get_alu_out_16;
+	end
+	if (alu_modded_proc_flags)
+	begin
+		true_proc_flags <= alu_proc_flags_out;
+	end
+endtask
+
 //task start_exec_shared_non_ldst_suffix;
 //	if (!non_bc_instr_possibly_changes_pc)
 //	begin
@@ -163,6 +176,14 @@ task finish_exec_ldst_instr;
 					`get_final_ig2_reg_a <= temp_data_in;
 				end
 				pkg_instr_dec::instr_g2_op_str:
+				begin
+					// Wait a cycle
+				end
+				pkg_instr_dec::instr_g2_op_ldrab:
+				begin
+					`get_final_ig2_reg_a <= temp_data_in;
+				end
+				pkg_instr_dec::instr_g2_op_strsa:
 				begin
 					// Wait a cycle
 				end

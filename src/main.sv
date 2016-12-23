@@ -273,6 +273,7 @@ module spcpu
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	//bit [`cpu_reg_msb_pos:0] temp_pc[0:1];
 	bit did_prep_ldst_instr;
+	//bit [`cpu_addr_msb_pos:0] temp_store_addr;
 	
 	
 	
