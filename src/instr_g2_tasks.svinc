@@ -46,6 +46,16 @@ task disassemble_grp_2_instr;
 	begin
 		$display( "adc r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
 	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_addpb )
+	begin
+		$display( "addpb r%dp, r%d", final_ig2_ra_index, 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_addp )
+	begin
+		$display( "addp r%dp, r%d", final_ig2_ra_index, 
+			final_ig2_rb_index );
+	end
 	
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_sub )
 	begin
@@ -55,10 +65,27 @@ task disassemble_grp_2_instr;
 	begin
 		$display( "sbc r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
 	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_subpb )
+	begin
+		$display( "subpb r%dp, r%d", final_ig2_ra_index, 
+			final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_subp )
+	begin
+		$display( "subp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
+	end
 	
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cmp )
 	begin
 		$display( "cmp r%d, r%d", final_ig2_ra_index, final_ig2_rb_index );
+	end
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cmpp )
+	begin
+		$display( "cmpp r%dp, r%dp", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
 	end
 	
 	// Bitwise instructions with two register operands:
@@ -86,7 +113,7 @@ task disassemble_grp_2_instr;
 	// (one's complement of rAp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_invp )
 	begin
-		$display( "invp r%dp", final_ig2_ra_index );
+		$display( "invp r%dp", `make_reg_ind_from_pi(final_ig2_ra_index) );
 	end
 	
 	// (two's complement of rA)
@@ -98,7 +125,7 @@ task disassemble_grp_2_instr;
 	// (two's complement of rAp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_negp )
 	begin
-		$display( "negp r%dp", final_ig2_ra_index );
+		$display( "negp r%dp", `make_reg_ind_from_pi(final_ig2_ra_index) );
 	end
 	
 	
@@ -143,17 +170,20 @@ task disassemble_grp_2_instr;
 	// shift by:
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lslp )
 	begin
-		$display( "lslp r%dp, r%d", final_ig2_ra_index, 
+		$display( "lslp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_lsrp )
 	begin
-		$display( "lsrp r%dp, r%d", final_ig2_ra_index, 
+		$display( "lsrp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_asrp )
 	begin
-		$display( "asrp r%dp, r%d", final_ig2_ra_index, 
+		$display( "asrp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_rolp )
@@ -346,6 +376,17 @@ task prep_alu_instr_grp_2_generic;
 		begin
 			do_alu_op_adc( ra_index, cpu_regs[rb_index] );
 		end
+		// (ADD register rB to reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_addpb:
+		begin
+			do_alu_op_addpb( ra_index, cpu_regs[rb_index] );
+		end
+		// ([16-bit] ADD reg Pair rBp to reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_addp:
+		begin
+			do_alu_op_addp( ra_index, cpu_regs[rb_index], 
+				cpu_regs[ rb_index + 1 ] );
+		end
 		
 		pkg_instr_dec::instr_g2_op_sub:
 		begin
@@ -355,11 +396,29 @@ task prep_alu_instr_grp_2_generic;
 		begin
 			do_alu_op_sbc( ra_index, cpu_regs[rb_index] );
 		end
+		// (SuBtract 8-bit register rB from reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_subpb:
+		begin
+			do_alu_op_subpb( ra_index, cpu_regs[rb_index] );
+		end
+		// ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_subp:
+		begin
+			do_alu_op_subp( ra_index, cpu_regs[rb_index], 
+				cpu_regs[ rb_index + 1 ] );
+		end
 		
 		pkg_instr_dec::instr_g2_op_cmp:
 		begin
 			do_alu_op_cmp( ra_index, cpu_regs[rb_index] );
 		end
+		// (16-bit comparison of rAp and rBp)
+		pkg_instr_dec::instr_g2_op_cmpp:
+		begin
+			do_alu_op_cmpp( ra_index, cpu_regs[rb_index], 
+				cpu_regs[ rb_index + 1 ] );
+		end
+		
 		
 		// Bitwise instructions with two register operands:
 		pkg_instr_dec::instr_g2_op_and:
@@ -545,6 +604,16 @@ task start_exec_instr_from_grp_2;
 		begin
 			finish_alu_op_with_dest_reg();
 		end
+		// (ADD register rB to reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_addpb:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		// ([16-bit] ADD reg Pair rBp to reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_addp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
 		
 		pkg_instr_dec::instr_g2_op_sub:
 		begin
@@ -554,10 +623,24 @@ task start_exec_instr_from_grp_2;
 		begin
 			finish_alu_op_with_dest_reg();
 		end
+		// (SuBtract 8-bit register rB from reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_subpb:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
+		// ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
+		pkg_instr_dec::instr_g2_op_subp:
+		begin
+			finish_alu_op_with_dest_rpair();
+		end
 		
 		pkg_instr_dec::instr_g2_op_cmp:
 		begin
 			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g2_op_cmpp:
+		begin
+			finish_alu_op_with_dest_rpair();
 		end
 		
 		// Bitwise instructions with two register operands:

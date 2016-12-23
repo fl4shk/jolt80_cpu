@@ -204,6 +204,14 @@ task do_alu_op_cmp;
 	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 0 );
 	set_more_alu_config( pkg_alu::alu_op_sub, 1 );
 endtask
+task do_alu_op_cmpp;
+	input [`cpu_reg_arr_msb_pos:0] some_rap_index;
+	input [`cpu_imm_value_8_msb_pos:0] some_b_in_hi, some_b_in_lo;
+	
+	set_alu_inputs_a16_b16( some_rap_index, some_b_in_hi, some_b_in_lo, 
+		0 );
+	set_more_alu_config( pkg_alu::alu_op_subp, 1 );
+endtask
 
 // Bitwise operations
 

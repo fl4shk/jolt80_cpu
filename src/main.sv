@@ -437,11 +437,13 @@ module spcpu
 	// This is used to determine when to stop simulation
 	logic [5:0] data_in_is_0_counter;
 	
-	//always @ ( posedge clk )
-	//begin
-	//
-	//
-	//end
+	always @ ( posedge clk )
+	//always
+	begin
+		#1
+		$display( "curr_state:  %h", curr_state );
+		
+	end
 	
 	
 	
@@ -584,8 +586,16 @@ module spcpu
 						"another 16 bits of data." );
 					req_rdwr <= 0;
 					
+					
 					prep_alu_if_needed_init();
 					seq_logic_grab_pc_inc_outputs();
+					
+					
+					//if ( init_instr_grp == pkg_instr_dec::instr_grp_2 )
+					//begin
+					//	$display( "Barebones ig2 disassemble:  %h %h %h", 
+					//		ig2_opcode, ig2_ra_index, ig2_rb_index );
+					//end
 				end
 				
 				// Handle 32-bit instructions
@@ -614,6 +624,10 @@ module spcpu
 			
 			else // if (!data_ready)
 			begin
+				$display();
+				$display();
+				$display();
+				$display();
 				$display("Load Instruction High:  Data NOT ready");
 				//$display();
 			end
@@ -655,6 +669,7 @@ module spcpu
 		// Instruction execution states
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
+			$display("start_exec_instr()");
 			start_exec_instr();
 		end
 		

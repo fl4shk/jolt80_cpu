@@ -66,6 +66,18 @@ task disassemble_grp_1_instr;
 	end
 	
 	
+	// Bitwise instructions with two operands:
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_andi )
+	begin
+		$display( "andi r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_orri )
+	begin
+		$display( "orri r%d, $%h", final_ig1_ra_index,
+			final_ig1_imm_value_8 );
+	end
+	
 	//Copy instructions:
 	
 	// (CoPY Immediate)
@@ -152,6 +164,16 @@ task prep_alu_instr_grp_1_generic;
 			do_alu_op_cmp( ra_index, imm_value_8 );
 		end
 		
+		// Bitwise instructions with two operands:
+		pkg_instr_dec::instr_g1_op_andi:
+		begin
+			do_alu_op_and( ra_index, imm_value_8 );
+		end
+		pkg_instr_dec::instr_g1_op_orri:
+		begin
+			do_alu_op_orr( ra_index, imm_value_8 );
+		end
+		
 		//Copy instructions:
 		
 		// (CoPY Immediate)
@@ -222,6 +244,17 @@ task start_exec_instr_from_grp_1;
 		begin
 			finish_alu_op_with_dest_reg();
 		end
+		
+		// Bitwise instructions with two operands:
+		pkg_instr_dec::instr_g1_op_andi:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		pkg_instr_dec::instr_g1_op_orri:
+		begin
+			finish_alu_op_with_dest_reg();
+		end
+		
 		
 		//Copy instructions:
 		

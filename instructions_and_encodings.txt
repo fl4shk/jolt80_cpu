@@ -43,8 +43,12 @@ Group 1 (Non-branching instructions with 8-bit immediate values):
       
       6. cmpi
     
+    Bitwise instructions with two operands:
+      7. andi
+      8. orri
+      
     Copy instructions:
-      7. cpyi (CoPY Immediate)
+      9. cpyi (CoPY Immediate)
 
 
 Group 2 (The instruction group with the most opcodes):  
@@ -67,6 +71,7 @@ Group 2 (The instruction group with the most opcodes):
       8. subp ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
       
       9. cmp
+      10. cmpp (16-bit comparison of rAp and rBp)
       
     Bitwise instructions with two register operands:
       1. and
@@ -75,8 +80,8 @@ Group 2 (The instruction group with the most opcodes):
     
     Complement instructions with one register operand (rB ignored):
       1. inv (one's complement of rA)
-      2. invp (one's complement of rAp)
-      3. neg (two's complement of rA)
+      2. neg (two's complement of rA)
+      3. invp (one's complement of rAp)
       4. negp (two's complement of rAp) 
     
     Bitshifting (and rotating) instructions that use the value of rB as the

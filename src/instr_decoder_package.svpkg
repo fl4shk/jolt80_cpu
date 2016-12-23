@@ -65,6 +65,11 @@ package pkg_instr_dec;
 		
 		instr_g1_op_cmpi,
 		
+		
+		// Bitwise instructions with two operands:
+		instr_g1_op_andi,
+		instr_g1_op_orri,
+		
 		//Copy instructions:
 		
 		// (CoPY Immediate)
@@ -79,11 +84,21 @@ package pkg_instr_dec;
 		// Arithmetic instructions:
 		instr_g2_op_add,
 		instr_g2_op_adc,
+		// (ADD register rB to reg Pair rAp)
+		instr_g2_op_addpb,
+		// ([16-bit] ADD reg Pair rBp to reg Pair rAp)
+		instr_g2_op_addp,
 		
 		instr_g2_op_sub,
 		instr_g2_op_sbc,
+		// (SuBtract 8-bit register rB from reg Pair rAp)
+		instr_g2_op_subpb,
+		// ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
+		instr_g2_op_subp,
 		
 		instr_g2_op_cmp,
+		// (16-bit comparison of rAp and rBp)
+		instr_g2_op_cmpp,
 		
 		// Bitwise instructions with two register operands:
 		instr_g2_op_and,
@@ -274,7 +289,14 @@ package pkg_instr_dec;
 	function ig2_get_ra_index_is_for_pair;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
 		ig2_get_ra_index_is_for_pair 
-			= ( ( test_ig2_opcode == instr_g2_op_invp )
+			= ( ( test_ig2_opcode == instr_g2_op_addpb )
+			|| ( test_ig2_opcode == instr_g2_op_addp )
+			|| ( test_ig2_opcode == instr_g2_op_subpb )
+			|| ( test_ig2_opcode == instr_g2_op_subp )
+			|| ( test_ig2_opcode == instr_g2_op_cmpp )
+			
+			
+			|| ( test_ig2_opcode == instr_g2_op_invp )
 			|| ( test_ig2_opcode == instr_g2_op_negp )
 			
 			|| ( test_ig2_opcode == instr_g2_op_lslp )
@@ -295,7 +317,12 @@ package pkg_instr_dec;
 	function ig2_get_rb_index_is_for_pair;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
 		ig2_get_rb_index_is_for_pair
-			= ( ( test_ig2_opcode == instr_g2_op_cpyp )
+			= ( ( test_ig2_opcode == instr_g2_op_addp )
+			|| ( test_ig2_opcode == instr_g2_op_subp )
+			|| ( test_ig2_opcode == instr_g2_op_cmpp )
+			
+			
+			|| ( test_ig2_opcode == instr_g2_op_cpyp )
 			|| ( test_ig2_opcode == instr_g2_op_swp )
 			|| ( test_ig2_opcode == instr_g2_op_ldr )
 			|| ( test_ig2_opcode == instr_g2_op_str ) );
@@ -323,6 +350,9 @@ package pkg_instr_dec;
 		
 		// Skip instr_g1_op_cmpi because it CAN'T change registers
 		//// || ( test_ig1_opcode == instr_g1_op_cmpi )
+		// Bitwise instructions with two operands:
+			|| ( test_ig1_opcode == instr_g1_op_andi )
+			|| ( test_ig1_opcode == instr_g1_op_orri )
 		
 		//Copy instructions:
 		
@@ -391,9 +421,14 @@ package pkg_instr_dec;
 	function ig2_get_rap_instr_can_change_pc;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
 		
-		// Complement instructions with one register operand (rB ignored):
 		ig2_get_rap_instr_can_change_pc
-			= ( ( test_ig2_opcode == instr_g2_op_invp )
+			= ( ( test_ig2_opcode == instr_g2_op_addpb )
+			|| ( test_ig2_opcode == instr_g2_op_addp )
+			|| ( test_ig2_opcode == instr_g2_op_subpb )
+			|| ( test_ig2_opcode == instr_g2_op_subp )
+		
+		// Complement instructions with one register operand (rB ignored):
+			|| ( test_ig2_opcode == instr_g2_op_invp )
 			|| ( test_ig2_opcode == instr_g2_op_negp )
 		
 		// Bitshifting (and rotating) instructions that do a 16-bit shift
