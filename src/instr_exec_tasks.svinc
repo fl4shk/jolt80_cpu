@@ -173,19 +173,82 @@ task finish_exec_ldst_instr;
 			case (final_ig2_opcode)
 				pkg_instr_dec::instr_g2_op_ldr:
 				begin
-					`get_final_ig2_reg_a <= temp_data_in;
+					if (!data_ready)
+					begin
+						//$display("ldr:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						`get_final_ig2_reg_a <= temp_data_in;
+						//$display("ldr:  Data IS READY");
+					end
 				end
 				pkg_instr_dec::instr_g2_op_str:
 				begin
-					// Wait a cycle
+					//// Wait a cycle
+					//if (!data_ready)
+					//begin
+					//	$display("str:  Data NOT ready");
+					//end
+					//
+					//else // if (data_ready)
+					//begin
+					//	$display("str:  Data IS READY");
+					//end
 				end
 				pkg_instr_dec::instr_g2_op_ldrab:
 				begin
-					`get_final_ig2_reg_a <= temp_data_in;
+					if (!data_ready)
+					begin
+						//$display("ldrab:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						`get_final_ig2_reg_a <= temp_data_in;
+						//$display("ldrab:  Data IS READY");
+					end
 				end
 				pkg_instr_dec::instr_g2_op_strsa:
 				begin
-					// Wait a cycle
+					//// Wait a cycle
+					//if (!data_ready)
+					//begin
+					//	$display("strsa:  Data NOT ready");
+					//end
+					//
+					//else // if (data_ready)
+					//begin
+					//	$display("strsa:  Data IS READY");
+					//end
+				end
+				pkg_instr_dec::instr_g2_op_ldfab:
+				begin
+					if (!data_ready)
+					begin
+						//$display("ldfab:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						true_proc_flags <= temp_data_in;
+						//$display("ldfab:  Data IS READY");
+					end
+				end
+				
+				pkg_instr_dec::instr_g2_op_stfsa:
+				begin
+					//// Wait a cycle
+					//if (!data_ready)
+					//begin
+					//	$display("stfsa:  Data NOT ready");
+					//end
+					//
+					//else // if (data_ready)
+					//begin
+					//	$display("stfsa:  Data IS READY");
+					//end
 				end
 				
 				default:
@@ -201,14 +264,32 @@ task finish_exec_ldst_instr;
 			case (final_ig3_opcode)
 				pkg_instr_dec::instr_g3_op_ldrx:
 				begin
-					$display( "ldrx:  %h %h", final_ig3_ra_index,
-						temp_data_in );
-					`get_final_ig3_reg_a <= temp_data_in;
+					if (!data_ready)
+					begin
+						//$display("ldrx:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						//$display( "ldrx:  %h %h", final_ig3_ra_index,
+						//	temp_data_in );
+						`get_final_ig3_reg_a <= temp_data_in;
+						//$display("ldrx:  Data IS READY");
+					end
 				end
 				
 				pkg_instr_dec::instr_g3_op_strx:
 				begin
-					// Wait a cycle
+					//// Wait a cycle
+					//if (!data_ready)
+					//begin
+					//	$display("strx:  Data NOT ready");
+					//end
+					//
+					//else // if (data_ready)
+					//begin
+					//	$display("strx:  Data IS READY");
+					//end
 				end
 				
 				default:
@@ -230,12 +311,31 @@ task finish_exec_ldst_instr;
 			case (final_ig5_opcode)
 				pkg_instr_dec::instr_g5_op_ldrxi:
 				begin
-					`get_final_ig5_reg_a <= temp_data_in;
+					if (!data_ready)
+					begin
+						//$display("ldrxi:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						`get_final_ig5_reg_a <= temp_data_in;
+						//$display("ldrxi:  Data IS READY");
+					end
 				end
 				
 				pkg_instr_dec::instr_g5_op_strxi:
 				begin
-					// Wait a cycle
+					//// Wait a cycle
+					
+					//if (!data_ready)
+					//begin
+					//	$display("strxi:  Data NOT ready");
+					//end
+					//
+					//else // if (data_ready)
+					//begin
+					//	$display("strxi:  Data IS READY");
+					//end
 				end
 				
 				default:
@@ -262,7 +362,10 @@ task finish_exec_ldst_instr;
 	//$display("waiting\t\ta\t\tcycle");
 	
 	
-	prep_load_instr_hi_generic();
+	if (data_ready)
+	begin
+		prep_load_instr_hi_generic();
+	end
 	
 endtask
 

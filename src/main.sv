@@ -272,7 +272,7 @@ module spcpu
 	// (mainly for internal ALU usage)
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	//bit [`cpu_reg_msb_pos:0] temp_pc[0:1];
-	bit did_prep_ldst_instr;
+	//bit did_prep_ldst_instr;
 	//bit [`cpu_addr_msb_pos:0] temp_store_addr;
 	
 	
@@ -495,7 +495,7 @@ module spcpu
 			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
 			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
 		
-		did_prep_ldst_instr <= 0;
+		//did_prep_ldst_instr <= 0;
 		
 		
 		//curr_state <= pkg_cpu::cpu_st_begin_0;

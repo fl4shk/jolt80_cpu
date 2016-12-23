@@ -640,15 +640,34 @@ task prep_alu_instr_grp_2_generic;
 		//begin
 		//end
 		
+		
+		// 8-bit Push/pop style instructions:
+		
+		// (Add 1 the reg pair rBp, then LoaD contents into Register rA
+		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldrab:
 		begin
 			do_alu_op_addp_no_flags( ig2_rb_index, 0, 1 );
 		end
+		// (STore reg rA to memory at address contained in reg pair rBp,
+		// then Add 1 the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_strsa:
 		begin
 			do_alu_op_subp_no_flags( ig2_rb_index, 0, 1 );
 		end
-		
+		// (Add 1 to the reg pair rBp, then LoaD a byte containing
+		// processor Flags (other bits cleared) into the processor flags)
+		pkg_instr_dec::instr_g2_op_ldfab:
+		begin
+			do_alu_op_addp_no_flags( ig2_rb_index, 0, 1 );
+		end
+		// (STore a byte containing the current processor flags (other bits
+		// cleared) to memory at address contained in reg pair rBp, then
+		// Add 1 the reg pair rBp)
+		pkg_instr_dec::instr_g2_op_stfsa:
+		begin
+			do_alu_op_subp_no_flags( ig2_rb_index, 0, 1 );
+		end
 		
 		default:
 		begin
@@ -892,51 +911,57 @@ task start_exec_instr_from_grp_2;
 		// (LoaD contents into Register rA from memory at address in rBp)
 		pkg_instr_dec::instr_g2_op_ldr:
 		begin
-			// Wait an extra cycle
-			if (!data_ready)
-			begin
-				if (!did_prep_ldst_instr)
-				begin
-					did_prep_ldst_instr <= 1;
-					prep_load_8_with_addr(`get_final_ig2_rpair_b);
-				end
-				
-				else
-				begin
-					req_rdwr <= 0;
-				end
-			end
+			//// Wait an extra cycle
+			//if (!data_ready)
+			//begin
+			//	if (!did_prep_ldst_instr)
+			//	begin
+			//		did_prep_ldst_instr <= 1;
+			//		prep_load_8_with_addr(`get_final_ig2_rpair_b);
+			//	end
+			//	
+			//	else
+			//	begin
+			//		req_rdwr <= 0;
+			//	end
+			//end
+			//
+			//else // if (data_ready)
+			//begin
+			//	did_prep_ldst_instr <= 0;
+			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			//end
 			
-			else // if (data_ready)
-			begin
-				did_prep_ldst_instr <= 0;
-				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			end
+			prep_load_8_with_addr(`get_final_ig2_rpair_b);
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// (STore Register rA contents to memory at address in rBp)
 		pkg_instr_dec::instr_g2_op_str :
 		begin
-			if (!data_ready)
-			begin
-				if (!did_prep_ldst_instr)
-				begin
-					did_prep_ldst_instr <= 1;
-					prep_store_8( `get_final_ig2_reg_a, 
-						`get_final_ig2_rpair_b );
-				end
-				
-				else
-				begin
-					req_rdwr <= 0;
-				end
-			end
+			//if (!data_ready)
+			//begin
+			//	if (!did_prep_ldst_instr)
+			//	begin
+			//		did_prep_ldst_instr <= 1;
+			//		prep_store_8( `get_final_ig2_reg_a, 
+			//			`get_final_ig2_rpair_b );
+			//	end
+			//	
+			//	else
+			//	begin
+			//		req_rdwr <= 0;
+			//	end
+			//end
+			//
+			//else // if (data_ready)
+			//begin
+			//	did_prep_ldst_instr <= 0;
+			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			//end
 			
-			else // if (data_ready)
-			begin
-				did_prep_ldst_instr <= 0;
-				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			end
+			prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// 8-bit Push/pop style instructions:
@@ -945,63 +970,30 @@ task start_exec_instr_from_grp_2;
 		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldrab:
 		begin
-			// Wait an extra cycle
-			if (!data_ready)
-			begin
-				if (!did_prep_ldst_instr)
-				begin
-					did_prep_ldst_instr <= 1;
-					// 
-					//prep_load_8_with_addr(`get_final_ig2_rpair_b);
-					prep_load_8_with_addr(`get_alu_out_16);
-					finish_alu_op_with_dest_rpair();
-				end
-				
-				else
-				begin
-					req_rdwr <= 0;
-				end
-			end
-			
-			else // if (data_ready)
-			begin
-				did_prep_ldst_instr <= 0;
-				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			end
+			prep_load_8_with_addr(`get_alu_out_16);
+			finish_alu_op_with_dest_rpair();
+			//did_prep_ldst_instr <= 0;
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// (STore reg rA to memory at address contained in reg pair rBp,
 		// then Add 1 the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_strsa:
 		begin
-			if (!data_ready)
-			begin
-				if (!did_prep_ldst_instr)
-				begin
-					did_prep_ldst_instr <= 1;
-					prep_store_8( `get_final_ig2_reg_a, 
-						`get_final_ig2_rpair_b );
-					finish_alu_op_with_dest_rpair();
-				end
-				
-				else
-				begin
-					req_rdwr <= 0;
-				end
-			end
-			
-			else // if (data_ready)
-			begin
-				did_prep_ldst_instr <= 0;
-				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			end
+			prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
+			finish_alu_op_with_dest_rpair();
+			//did_prep_ldst_instr <= 0;
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// (Add 1 to the reg pair rBp, then LoaD a byte containing
 		// processor Flags (other bits cleared) into the processor flags)
 		pkg_instr_dec::instr_g2_op_ldfab:
 		begin
-			
+			prep_load_8_with_addr(`get_alu_out_16);
+			finish_alu_op_with_dest_rpair();
+			//did_prep_ldst_instr <= 0;
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// (STore a byte containing the current processor flags (other bits
@@ -1009,7 +1001,10 @@ task start_exec_instr_from_grp_2;
 		// Add 1 the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_stfsa:
 		begin
-			
+			prep_store_8( true_proc_flags, `get_final_ig2_rpair_b );
+			finish_alu_op_with_dest_rpair();
+			//did_prep_ldst_instr <= 0;
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		

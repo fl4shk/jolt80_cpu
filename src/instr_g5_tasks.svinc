@@ -217,67 +217,80 @@ task start_exec_instr_from_grp_5;
 		// value] into rA)
 		pkg_instr_dec::instr_g5_op_ldrxi:
 		begin
-			//$display("instr_g5_op_ldrxi:  %h %h %h\t\t%d",
-			//	`get_final_ig5_rpair_b, instr_in_lo,
-			//	( `get_final_ig5_rpair_b + instr_in_lo ),
-			//	final_ig5_rbp_index );
+			////$display("instr_g5_op_ldrxi:  %h %h %h\t\t%d",
+			////	`get_final_ig5_rpair_b, instr_in_lo,
+			////	( `get_final_ig5_rpair_b + instr_in_lo ),
+			////	final_ig5_rbp_index );
+			//
+			//if (!data_ready)
+			//begin
+			//	if (!did_prep_ldst_instr)
+			//	begin
+			//		did_prep_ldst_instr <= 1;
+			//		prep_load_8_with_addr( `get_final_ig5_rpair_b
+			//			+ instr_in_lo );
+			//	end
+			//	
+			//	else
+			//	begin
+			//		req_rdwr <= 0;
+			//	end
+			//end
+			//
+			//else // if (data_ready)
+			//begin
+			//	did_prep_ldst_instr <= 0;
+			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			//end
 			
-			if (!data_ready)
-			begin
-				if (!did_prep_ldst_instr)
-				begin
-					did_prep_ldst_instr <= 1;
-					prep_load_8_with_addr( `get_final_ig5_rpair_b
-						+ instr_in_lo );
-				end
-				
-				else
-				begin
-					req_rdwr <= 0;
-				end
-			end
 			
-			else // if (data_ready)
-			begin
-				did_prep_ldst_instr <= 0;
-				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			end
+			
+			// This 16-bit addition SHOULD use the ALU
+			prep_load_8_with_addr( `get_final_ig5_rpair_b + instr_in_lo );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// (Store rA to memory at address [rBp + 16-bit Immediate value])
 		pkg_instr_dec::instr_g5_op_strxi:
 		begin
-			//$display( "strxi:  %h, %h, %h, %h", temp_data_in,
-			//	`get_final_ig5_rpair_b, instr_in_lo, 
-			//	( `get_final_ig5_rpair_b + instr_in_lo ) );
-			//$display( "strxi:  r%dp", final_ig5_ra_index );
-			//$display( "strxi:  %h %h", 
-			//	instr_in_hi[ `instr_g5_ihi_ra_index_range_hi
-			//	: `instr_g5_ihi_ra_index_range_lo ],
-			//	instr_in_hi[ `instr_g5_ihi_rbp_index_range_hi
-			//	: `instr_g5_ihi_rbp_index_range_lo ] );
+			////$display( "strxi:  %h, %h, %h, %h", temp_data_in,
+			////	`get_final_ig5_rpair_b, instr_in_lo, 
+			////	( `get_final_ig5_rpair_b + instr_in_lo ) );
+			////$display( "strxi:  r%dp", final_ig5_ra_index );
+			////$display( "strxi:  %h %h", 
+			////	instr_in_hi[ `instr_g5_ihi_ra_index_range_hi
+			////	: `instr_g5_ihi_ra_index_range_lo ],
+			////	instr_in_hi[ `instr_g5_ihi_rbp_index_range_hi
+			////	: `instr_g5_ihi_rbp_index_range_lo ] );
+			//
+			//if (!data_ready)
+			//begin
+			//	if (!did_prep_ldst_instr)
+			//	begin
+			//		did_prep_ldst_instr <= 1;
+			//		prep_store_8( `get_final_ig5_reg_a, 
+			//			( `get_final_ig5_rpair_b + instr_in_lo ) );
+			//	end
+			//	
+			//	else
+			//	begin
+			//		req_rdwr <= 0;
+			//	end
+			//end
+			//
+			////else // if (data_ready)
+			//if (data_ready)
+			//begin
+			//	did_prep_ldst_instr <= 0;
+			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+			//end
 			
-			if (!data_ready)
-			begin
-				if (!did_prep_ldst_instr)
-				begin
-					did_prep_ldst_instr <= 1;
-					prep_store_8( `get_final_ig5_reg_a, 
-						( `get_final_ig5_rpair_b + instr_in_lo ) );
-				end
-				
-				else
-				begin
-					req_rdwr <= 0;
-				end
-			end
 			
-			//else // if (data_ready)
-			if (data_ready)
-			begin
-				did_prep_ldst_instr <= 0;
-				curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			end
+			
+			// This 16-bit addition SHOULD use the ALU
+			prep_store_8( `get_final_ig5_reg_a, 
+				( `get_final_ig5_rpair_b + instr_in_lo ) );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		default:
