@@ -387,8 +387,9 @@ task prep_alu_instr_grp_2_generic;
 		// ([16-bit] ADD reg Pair rBp to reg Pair rAp)
 		pkg_instr_dec::instr_g2_op_addp:
 		begin
-			do_alu_op_addp( ra_index, cpu_regs[rb_index], 
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_addp( ra_index,
+				cpu_regs[`make_reg_ind_from_pi(rb_index)], 
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		
 		pkg_instr_dec::instr_g2_op_sub:
@@ -407,8 +408,9 @@ task prep_alu_instr_grp_2_generic;
 		// ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
 		pkg_instr_dec::instr_g2_op_subp:
 		begin
-			do_alu_op_subp( ra_index, cpu_regs[rb_index], 
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_subp( ra_index,
+				cpu_regs[`make_reg_ind_from_pi(rb_index)], 
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		
 		pkg_instr_dec::instr_g2_op_cmp:
@@ -418,8 +420,9 @@ task prep_alu_instr_grp_2_generic;
 		// (16-bit comparison of rAp and rBp)
 		pkg_instr_dec::instr_g2_op_cmpp:
 		begin
-			do_alu_op_cmpp( ra_index, cpu_regs[rb_index], 
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_cmpp( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)], 
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		
 		

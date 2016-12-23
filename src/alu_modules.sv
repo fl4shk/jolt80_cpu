@@ -344,19 +344,6 @@ module alu
 		//	= { pkg_alu::addsub_op_add, proc_flags_in, a_in_hi, a_in_lo, 
 		//	b_in_hi, b_in_lo };
 		
-		//if ( !( ( oper == pkg_alu::alu_op_add )
-		//	|| ( oper == pkg_alu::alu_op_adc )
-		//	|| ( oper == pkg_alu::alu_op_addpb )
-		//	|| ( oper == pkg_alu::alu_op_addp )
-		//	|| ( oper == pkg_alu::alu_op_addpsnx )
-		//	|| ( oper == pkg_alu::alu_op_sub )
-		//	|| ( oper == pkg_alu::alu_op_sbc )
-		//	|| ( oper == pkg_alu::alu_op_subpb )
-		//	|| ( oper == pkg_alu::alu_op_subp ) ) )
-		//begin
-		//	
-		//end
-		
 		
 		case (oper)
 		// Arithmetic operations
