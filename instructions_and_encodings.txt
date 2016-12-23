@@ -80,8 +80,8 @@ Group 2 (The instruction group with the most opcodes):
     
     Complement instructions with one register operand (rB ignored):
       1. inv (one's complement of rA)
-      2. neg (two's complement of rA)
-      3. invp (one's complement of rAp)
+      2. invp (one's complement of rAp)
+      3. neg (two's complement of rA)
       4. negp (two's complement of rAp) 
     
     Bitshifting (and rotating) instructions that use the value of rB as the
@@ -113,7 +113,9 @@ Group 2 (The instruction group with the most opcodes):
     Copy instructions:
       1. cpy (CoPY from reg rB to reg rA)
       2. cpyp (CoPY from reg Pair rBp to reg Pair rAp)
-      
+      3. cpyfrf (Clear reg rA, then CoPY FRom Flags to reg rA)
+      4. cpytof (CoPY TO Flags from reg rA)
+    
     Swap instructions:
       1. swp (SWap register Pair, also can be used as a combined "call",
       "jump", and "return" instruction by swapping some other register pair
@@ -128,6 +130,24 @@ Group 2 (The instruction group with the most opcodes):
       1. ldr (LoaD contents into Register rA from memory)
       2. str (STore Register rA contents to memory)
 
+    8-bit Push/pop style instructions:
+      1. ldrab (Add 1 the reg pair rBp, then LoaD contents into
+      Register rA from memory at address contained in reg pair rBp)
+      
+      2. strsa (STore reg rA to memory at address contained in reg pair
+      rBp, then Add 1 the reg pair rBp)
+      
+      3. ldfab (Add 1 to the reg pair rBp, then LoaD a byte containing
+      processor Flags (other bits cleared) into the processor flags)
+      
+      4. strsa (STore a byte containing the current processor flags (other
+      bits cleared) to memory at address contained in reg pair rBp, then
+      Add 1 the reg pair rBp)
+    
+    Interrupt instructions:
+      1. eni (ENable Interrupts)
+      2. dii (DIsable Interrupts)
+    
 
 Group 3 (Instructions with one register and two register pairs):  
   Encoding:  1100 ooaa aabb bccc
@@ -168,11 +188,10 @@ can be 16-bit immediate values):
   Instructions
     Extended copy instructions:
       1. cpypi (COPY Pair Immediate, which sets the a register pair rAp
-      to a 16-bit value in one instruction, but in twice the number of
-      cycles due to using more than two bytes [can be used a as a jump
-      immediate by copying a 16-bit immediate value to the pc] [this
-      instruction ONLY has an advantage over using two successive cpyi
-      instructions when used to copy a 16-bit immediate value to the pc])
+      to a 16-bit value in one instruction, which is faster than using two
+      successive cpyi instructions to copy two 8-bit halves of a 16-bit
+      value into a register pair [can be used a as a jump immediate by
+      copying a 16-bit immediate value to the pc])
     Call instructions
       1. calli (CALL Immediate, which sets the link register to the
       return address, then sets the program counter to the destination

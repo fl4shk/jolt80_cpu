@@ -159,6 +159,10 @@ package pkg_instr_dec;
 		// (CoPY from reg Pair rBp to reg Pair rAp)
 		instr_g2_op_cpyp,
 		
+		// (Clear reg rA, then CoPY FRom Flags to reg rA)
+		instr_g2_op_cpyfrf,
+		// (CoPY TO Flags from reg rA)
+		instr_g2_op_cpytof,
 		
 		// Swap instructions:
 		// (SWap register Pair, also can be used as a combined "call",
@@ -181,7 +185,35 @@ package pkg_instr_dec;
 		instr_g2_op_ldr,
 		
 		// (STore Register rA contents to memory at address in rBp)
-		instr_g2_op_str 
+		instr_g2_op_str,
+		
+		
+		
+		// 8-bit Push/pop style instructions:
+		
+		// (Add 1 the reg pair rBp, then LoaD contents into Register rA
+		// from memory at address contained in reg pair rBp)
+		instr_g2_op_ldrab,
+		
+		// (STore reg rA to memory at address contained in reg pair rBp,
+		// then Add 1 the reg pair rBp)
+		instr_g2_op_strsa,
+		
+		// (Add 1 to the reg pair rBp, then LoaD a byte containing
+		// processor Flags (other bits cleared) into the processor flags)
+		instr_g2_op_ldfab,
+		
+		// (STore a byte containing the current processor flags (other bits
+		// cleared) to memory at address contained in reg pair rBp, then
+		// Add 1 the reg pair rBp)
+		instr_g2_op_stfsa,
+		
+		
+		// Interrupt instructions (these ignore BOTH rA and rB):
+		// (ENable Interrupts)
+		instr_g2_op_eni,
+		// (DIsable Interrupts)
+		instr_g2_op_dii
 		
 	} instr_grp_2_oper;
 	
@@ -325,7 +357,12 @@ package pkg_instr_dec;
 			|| ( test_ig2_opcode == instr_g2_op_cpyp )
 			|| ( test_ig2_opcode == instr_g2_op_swp )
 			|| ( test_ig2_opcode == instr_g2_op_ldr )
-			|| ( test_ig2_opcode == instr_g2_op_str ) );
+			|| ( test_ig2_opcode == instr_g2_op_str ) 
+			
+			|| ( test_ig2_opcode == instr_g2_op_ldrab )
+			|| ( test_ig2_opcode == instr_g2_op_strsa )
+			|| ( test_ig2_opcode == instr_g2_op_ldfab )
+			|| ( test_ig2_opcode == instr_g2_op_stfsa ) );
 	endfunction
 	
 	function ig5_get_ra_index_is_for_pair;
@@ -415,9 +452,15 @@ package pkg_instr_dec;
 		
 		// Copy instructions:
 			|| ( test_ig2_opcode == instr_g2_op_cpy )
+			|| ( test_ig2_opcode == instr_g2_op_cpyfrf )
 		
 		// 8-bit Load/store instructions:
-			|| ( test_ig2_opcode == instr_g2_op_ldr ) );
+			|| ( test_ig2_opcode == instr_g2_op_ldr )
+			
+		// 8-bit Push/pop style instructions:
+		// (Add 1 the reg pair rBp, then LoaD contents into Register rA
+		// from memory at address contained in reg pair rBp)
+			|| ( test_ig2_opcode == instr_g2_op_ldrab ) );
 	endfunction
 	
 	function ig2_get_rap_instr_can_change_pc;
@@ -503,7 +546,11 @@ package pkg_instr_dec;
 	function ig2_get_instr_is_ldst;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
 		ig2_get_instr_is_ldst = ( ( test_ig2_opcode == instr_g2_op_ldr )
-			|| ( test_ig2_opcode == instr_g2_op_str ) );
+			|| ( test_ig2_opcode == instr_g2_op_str )
+			|| ( test_ig2_opcode == instr_g2_op_ldrab )
+			|| ( test_ig2_opcode == instr_g2_op_strsa )
+			|| ( test_ig2_opcode == instr_g2_op_ldfab )
+			|| ( test_ig2_opcode == instr_g2_op_stfsa ) );
 	endfunction
 	
 	function ig3_get_instr_is_ldst;

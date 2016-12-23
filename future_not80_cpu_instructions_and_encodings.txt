@@ -79,13 +79,15 @@ Group 2 (The instruction group with the most opcodes):
       big endian])
       
     
-    Bitwise instructions with two register (or reg pair) operands:
+    Bitwise instructions with two register operands:
       1. and
-      2. andp (store rAp AND rBp in rAp)
-      3. orr
-      4. orrp (store rAp OR rBp in rAp)
-      5. xor
-      6. xorp (store rAp XOR rBp in rAp)
+      2. orr
+      3. xor
+    
+    Bitwise instructions with two reg pair operands:
+      1. andp (store rAp AND rBp in rAp)
+      2. orrp (store rAp OR rBp in rAp)
+      3. xorp (store rAp XOR rBp in rAp)
     
     Complement and absolute value instructions with one register (or reg
     pair) operand (rB ignored):
@@ -142,6 +144,8 @@ Group 2 (The instruction group with the most opcodes):
     Copy instructions:
       1. cpy (CoPY from reg rB to reg rA)
       2. cpyp (CoPY from reg Pair rBp to reg Pair rAp)
+      3. cpyfrf (Clear reg rA, then CoPY FRom Flags to reg rA)
+      4. cpytof (CoPY TO Flags from reg rA)
       
     Swap instructions:
       1. swp (SWap register Pair, also can be used as a combined "call",
@@ -162,8 +166,15 @@ Group 2 (The instruction group with the most opcodes):
       1. ldrab (Add 1 the reg pair rBp, then LoaD contents into
       Register rA from memory at address contained in reg pair rBp)
       
-      2. strsa (Store reg rA to memory at address contained in reg pair
+      2. strsa (STore reg rA to memory at address contained in reg pair
       rBp, then Add 1 the reg pair rBp)
+      
+      3. ldfab (Add 1 to the reg pair rBp, then LoaD a byte containing
+      processor Flags (other bits cleared) into the processor flags)
+      
+      4. stfsa (STore a byte containing the current processor flags (other
+      bits cleared) to memory at address contained in reg pair rBp, then
+      Add 1 the reg pair rBp)
       
     
     16-bit Load/store instructions:
@@ -182,7 +193,10 @@ Group 2 (The instruction group with the most opcodes):
       2. stpsa (STore 16-bit contents [big endian] of reg Pair rAp to
       memory at address contained in reg pair rBp, then Subtract 2 from the
       reg pair rBp, )
-
+    
+    Interrupt instructions (these ignore BOTH rA and rB):
+      1. eni (ENable Interrupts)
+      2. dii (DIsable Interrupts)
 
 Group 3 (Instructions with one register and two register pairs):  
   Encoding:  1100 ooaa aabb bccc
@@ -232,11 +246,10 @@ can be 16-bit immediate values):
       
     Extended copy instructions:
       1. cpypi (COPY Pair Immediate, which sets the a register pair rAp
-      to a 16-bit value in one instruction, but in twice the number of
-      cycles due to using more than two bytes [can be used a as a jump
-      immediate by copying a 16-bit immediate value to the pc] [this
-      instruction ONLY has an advantage over using two successive cpyi
-      instructions when used to copy a 16-bit immediate value to the pc])
+      to a 16-bit value in one instruction, which is faster than using two
+      successive cpyi instructions to copy two 8-bit halves of a 16-bit
+      value into a register pair [can be used a as a jump immediate by
+      copying a 16-bit immediate value to the pc])
     Call instructions
       1. calli (CALL Immediate, which sets the link register to the
       return address, then sets the program counter to the destination
