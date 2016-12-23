@@ -340,6 +340,8 @@ package pkg_instr_dec;
 	// the pc (though it might NOT change, in which case we need to update
 	// the pc normally)
 	
+	// I have a hunch that these functions are NOT actually necessary
+	
 	function ig1_get_ra_instr_can_change_pc;
 		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
 		

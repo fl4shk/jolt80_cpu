@@ -437,13 +437,13 @@ module spcpu
 	// This is used to determine when to stop simulation
 	logic [5:0] data_in_is_0_counter;
 	
-	always @ ( posedge clk )
-	//always
-	begin
-		#1
-		$display( "curr_state:  %h", curr_state );
-		
-	end
+	//always @ ( posedge clk )
+	////always
+	//begin
+	//	#1
+	//	$display( "curr_state:  %h", curr_state );
+	//	
+	//end
 	
 	
 	
@@ -552,10 +552,11 @@ module spcpu
 				$display();
 				
 				
+				//$display( "Load Instruction High:  %h %h %h", temp_data_in,
+				//	`get_cpu_rp_pc, data_inout_addr );
+				//$display();
+				
 				// Back up temp_data_in, init_instr_grp, and pc
-				$display( "Load Instruction High:  %h %h %h", temp_data_in,
-					`get_cpu_rp_pc, data_inout_addr );
-				$display();
 				instr_in_hi <= temp_data_in;
 				final_instr_grp <= init_instr_grp;
 				prev_pc <= `get_cpu_rp_pc;
@@ -582,8 +583,8 @@ module spcpu
 				if (!init_instr_is_32_bit)
 				begin
 					curr_state <= pkg_cpu::cpu_st_start_exec_instr;
-					$display( "Instruction is 16-bit, so don't request ",
-						"another 16 bits of data." );
+					//$display( "Instruction is 16-bit, so don't request ",
+					//	"another 16 bits of data." );
 					req_rdwr <= 0;
 					
 					
@@ -601,7 +602,7 @@ module spcpu
 				// Handle 32-bit instructions
 				else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
 				begin
-					$display("Instruction is 32-bit");
+					//$display("Instruction is 32-bit");
 					//req_rdwr <= 1;
 					seq_logic_grab_pc_inc_outputs();
 					prep_load_instr_lo_reg();
@@ -624,12 +625,12 @@ module spcpu
 			
 			else // if (!data_ready)
 			begin
-				$display();
-				$display();
-				$display();
-				$display();
-				$display("Load Instruction High:  Data NOT ready");
 				//$display();
+				//$display();
+				//$display();
+				//$display();
+				//$display("Load Instruction High:  Data NOT ready");
+				////$display();
 			end
 			
 		end
@@ -646,10 +647,10 @@ module spcpu
 				//seq_logic_grab_pc_adjuster_outputs();
 				third_prev_pc <= the_pc_inc_pc_out;
 				
-				$display( "Load Instruction Low:  %h %h %h %h", 
-					instr_in_hi, temp_data_in, `get_cpu_rp_pc, 
-					data_inout_addr );
-				$display();
+				//$display( "Load Instruction Low:  %h %h %h %h", 
+				//	instr_in_hi, temp_data_in, `get_cpu_rp_pc, 
+				//	data_inout_addr );
+				//$display();
 				
 				//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
 				//	the_pc_inc_pc_out );
@@ -660,8 +661,8 @@ module spcpu
 			
 			else // if (!data_ready)
 			begin
-				$display("Load Instruction Low:  Data NOT ready");
-				//$display();
+				//$display("Load Instruction Low:  Data NOT ready");
+				////$display();
 			end
 		end
 		
@@ -669,7 +670,6 @@ module spcpu
 		// Instruction execution states
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
-			$display("start_exec_instr()");
 			start_exec_instr();
 		end
 		

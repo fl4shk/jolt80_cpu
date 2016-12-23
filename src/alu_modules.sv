@@ -45,9 +45,8 @@ module sign_extend_adder
 	
 	import pkg_pflags::*;
 	
-	//always @ (*)
-	//always @ (activator)
-	always @ ( a_in_hi, a_in_lo, b_in_hi, b_in_lo )
+	always @ (*)
+	//always @ ( a_in_hi, a_in_lo, b_in_hi, b_in_lo )
 	//always_comb
 	begin
 		proc_flags_out[pkg_pflags::pf_slot_z] = 0;
@@ -391,9 +390,6 @@ module alu
 				init_addsub_oper_16( pkg_alu::addsub_op_addpb, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
 				
-				$display( "alu_op_addpb:  %h %h %h",
-					addsub_proc_flags_out[pkg_pflags::pf_slot_c],
-					addsub_out_hi, addsub_out_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
 					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
