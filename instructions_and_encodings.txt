@@ -140,11 +140,11 @@ Group 2 (The instruction group with the most opcodes):
       3. ldfab (Add 1 to the reg pair rBp, then LoaD a byte containing
       processor Flags (other bits cleared) into the processor flags)
       
-      4. strsa (STore a byte containing the current processor flags (other
+      4. stfsa (STore a byte containing the current processor flags (other
       bits cleared) to memory at address contained in reg pair rBp, then
       Add 1 the reg pair rBp)
     
-    Interrupt instructions:
+    Interrupt instructions (these ignore BOTH rA and rB):
       1. eni (ENable Interrupts)
       2. dii (DIsable Interrupts)
     
