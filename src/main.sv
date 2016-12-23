@@ -114,6 +114,12 @@ module spcpu_test_bench;
 	//	.read_data_out_16(test_mem_read_data_out_16),
 	//	.data_ready(test_cpu_data_ready) );
 	
+	
+	
+	
+	
+	//// This needs to have a wrapper put around it when I actually use 
+	//// SPCPU in my FPGA board
 	//mixed_width_true_dual_port_ram #(8,16,15) dedotated_wam
 	//	( .addr1(test_cpu_data_inout_addr),
 	//	.addr2(test_mem_addr_2),
@@ -125,17 +131,6 @@ module spcpu_test_bench;
 	//	.data_out1(test_mem_read_data_out_8),
 	//	.data_out2(test_mem_read_data_out_16) );
 	
-	//tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
-	//	.req_rdwr(test_cpu_req_rdwr),
-	//	.addr_in(test_cpu_data_inout_addr),
-	//	.write_data_in_8(test_mem_write_data_in_8),
-	//	.write_data_in_16(test_mem_write_data_in_16),
-	//	.data_acc_sz(test_cpu_data_acc_sz),
-	//	.write_data_we_8(test_mem_write_data_we_8),
-	//	.write_data_we_16(test_mem_write_data_we_16),
-	//	.read_data_out_8(test_mem_read_data_out_8),
-	//	.read_data_out_16(test_mem_read_data_out_16),
-	//	.data_ready(test_cpu_data_ready) );
 	
 	tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
 		.req_rdwr(test_cpu_req_rdwr),
@@ -150,13 +145,6 @@ module spcpu_test_bench;
 		.data_ready(test_mem_data_ready) );
 	
 	
-	//spcpu test_cpu( .clk(clk), .reset(reset),
-	//	.data_ready(test_cpu_data_ready),
-	//	.data_inout(test_cpu_data_inout_direct),
-	//	.data_inout_addr(test_cpu_data_inout_addr),
-	//	.data_acc_sz(test_cpu_data_acc_sz),
-	//	.data_inout_we(test_cpu_data_inout_we),
-	//	.req_rdwr(test_cpu_req_rdwr) );
 	spcpu test_cpu( .clk(tb_clk), .reset(test_cpu_reset),
 		.data_ready(test_cpu_data_ready),
 		.temp_data_in(test_cpu_temp_data_in),
@@ -187,17 +175,17 @@ module spcpu_test_bench;
 		
 	end
 	
-	//always @ ( posedge tb_half_clk )
-	always @ ( posedge tb_clk )
-	begin
-		////$display( "%h %h %h %h", test_cpu_data_inout_direct,
-		////	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
-		////	test_cpu_data_inout_we );
-		//$display( "In Test bench:  %h %h\t\t%h %h %h", 
-		//	test_cpu_temp_data_in, test_cpu_temp_data_out, 
-		//	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
-		//	test_cpu_data_inout_we );
-	end
+	////always @ ( posedge tb_half_clk )
+	//always @ ( posedge tb_clk )
+	//begin
+	//	////$display( "%h %h %h %h", test_cpu_data_inout_direct,
+	//	////	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
+	//	////	test_cpu_data_inout_we );
+	//	//$display( "In Test bench:  %h %h\t\t%h %h %h", 
+	//	//	test_cpu_temp_data_in, test_cpu_temp_data_out, 
+	//	//	test_cpu_data_inout_addr, test_cpu_data_acc_sz, 
+	//	//	test_cpu_data_inout_we );
+	//end
 	
 	
 endmodule

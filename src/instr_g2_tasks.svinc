@@ -48,13 +48,15 @@ task disassemble_grp_2_instr;
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_addpb )
 	begin
-		$display( "addpb r%dp, r%d", final_ig2_ra_index, 
+		$display( "addpb r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_addp )
 	begin
-		$display( "addp r%dp, r%d", final_ig2_ra_index, 
-			final_ig2_rb_index );
+		$display( "addp r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
+			`make_reg_ind_from_pi(final_ig2_rb_index) );
 	end
 	
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_sub )
@@ -67,7 +69,8 @@ task disassemble_grp_2_instr;
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_subpb )
 	begin
-		$display( "subpb r%dp, r%d", final_ig2_ra_index, 
+		$display( "subpb r%dp, r%d", 
+			`make_reg_ind_from_pi(final_ig2_ra_index), 
 			final_ig2_rb_index );
 	end
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_subp )
