@@ -415,8 +415,11 @@ task prep_alu_if_needed_init;
 	
 	else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
 	begin
+		// This should really never happen
+		$display( "WARNING:  prep_alu_if_needed_init() was used with a ",
+			"group 5 instruction!" );
 		prep_alu_instr_grp_5_generic( ig5_opcode, ig5_ra_index, 
-			ig5_rbp_index, ig5_ra_index_is_for_pair );
+			ig5_rbp_index, ig5_ra_index_is_for_pair, 0 );
 	end
 	
 	
@@ -435,12 +438,16 @@ task prep_alu_if_needed_final;
 	
 	if ( final_instr_grp == pkg_instr_dec::instr_grp_1 )
 	begin
+		$display( "WARNING:  prep_alu_if_needed_final() was used with a ",
+			"group 1 instruction!" );
 		prep_alu_instr_grp_1_generic( final_ig1_opcode, final_ig1_ra_index, 
 			final_ig1_imm_value_8 );
 	end
 	
 	else if ( final_instr_grp == pkg_instr_dec::instr_grp_2 )
 	begin
+		$display( "WARNING:  prep_alu_if_needed_final() was used with a ",
+			"group 2 instruction!" );
 		prep_alu_instr_grp_2_generic( final_ig2_opcode, final_ig2_ra_index, 
 			final_ig2_rb_index, final_ig2_ra_index_is_for_pair, 
 			final_ig2_rb_index_is_for_pair );
@@ -448,12 +455,16 @@ task prep_alu_if_needed_final;
 	
 	else if ( final_instr_grp == pkg_instr_dec::instr_grp_3 )
 	begin
+		$display( "WARNING:  prep_alu_if_needed_final() was used with a ",
+			"group 3 instruction!" );
 		prep_alu_instr_grp_3_generic( final_ig3_opcode, final_ig3_ra_index, 
 			final_ig3_rbp_index, final_ig3_rcp_index );
 	end
 	
 	else if ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
 	begin
+		$display( "WARNING:  prep_alu_if_needed_final() was used with a ",
+			"group 4 instruction!" );
 		prep_alu_instr_grp_4_generic( final_ig4_opcode, 
 			final_ig4_imm_value_8 );
 	end
@@ -461,7 +472,8 @@ task prep_alu_if_needed_final;
 	else if ( final_instr_grp == pkg_instr_dec::instr_grp_5 )
 	begin
 		prep_alu_instr_grp_5_generic( final_ig5_opcode, final_ig5_ra_index, 
-			final_ig5_rbp_index, final_ig5_ra_index_is_for_pair );
+			final_ig5_rbp_index, final_ig5_ra_index_is_for_pair,
+			temp_data_in );
 	end
 	
 	

@@ -647,26 +647,26 @@ task prep_alu_instr_grp_2_generic;
 		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldrab:
 		begin
-			do_alu_op_addp_no_flags( ig2_rb_index, 0, 1 );
+			do_alu_op_addp_no_flags( rb_index, 0, 1 );
 		end
 		// (STore reg rA to memory at address contained in reg pair rBp,
 		// then Add 1 the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_strsa:
 		begin
-			do_alu_op_subp_no_flags( ig2_rb_index, 0, 1 );
+			do_alu_op_subp_no_flags( rb_index, 0, 1 );
 		end
 		// (Add 1 to the reg pair rBp, then LoaD a byte containing
 		// processor Flags (other bits cleared) into the processor flags)
 		pkg_instr_dec::instr_g2_op_ldfab:
 		begin
-			do_alu_op_addp_no_flags( ig2_rb_index, 0, 1 );
+			do_alu_op_addp_no_flags( rb_index, 0, 1 );
 		end
 		// (STore a byte containing the current processor flags (other bits
 		// cleared) to memory at address contained in reg pair rBp, then
 		// Add 1 the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_stfsa:
 		begin
-			do_alu_op_subp_no_flags( ig2_rb_index, 0, 1 );
+			do_alu_op_subp_no_flags( rb_index, 0, 1 );
 		end
 		
 		default:
@@ -970,6 +970,7 @@ task start_exec_instr_from_grp_2;
 		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldrab:
 		begin
+			// Load from memory at address contained in new reg pair rBp
 			prep_load_8_with_addr(`get_alu_out_16);
 			finish_alu_op_with_dest_rpair();
 			//did_prep_ldst_instr <= 0;
@@ -980,6 +981,7 @@ task start_exec_instr_from_grp_2;
 		// then Add 1 the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_strsa:
 		begin
+			// Store to memory at address contained in old reg pair rBp
 			prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
 			finish_alu_op_with_dest_rpair();
 			//did_prep_ldst_instr <= 0;
@@ -990,6 +992,7 @@ task start_exec_instr_from_grp_2;
 		// processor Flags (other bits cleared) into the processor flags)
 		pkg_instr_dec::instr_g2_op_ldfab:
 		begin
+			// Load from memory at address contained in new reg pair rBp
 			prep_load_8_with_addr(`get_alu_out_16);
 			finish_alu_op_with_dest_rpair();
 			//did_prep_ldst_instr <= 0;
@@ -1001,6 +1004,7 @@ task start_exec_instr_from_grp_2;
 		// Add 1 the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_stfsa:
 		begin
+			// Store to memory at address contained in old reg pair rBp
 			prep_store_8( true_proc_flags, `get_final_ig2_rpair_b );
 			finish_alu_op_with_dest_rpair();
 			//did_prep_ldst_instr <= 0;
@@ -1008,6 +1012,17 @@ task start_exec_instr_from_grp_2;
 		end
 		
 		
+		// Interrupt instructions (these ignore BOTH rA and rB):
+		// (ENable Interrupts)
+		pkg_instr_dec::instr_g2_op_eni:
+		begin
+			$display("WARNING!  eni is not yet implemented!");
+		end
+		// (DIsable Interrupts)
+		pkg_instr_dec::instr_g2_op_dii:
+		begin
+			$display("WARNING!  dii is not yet implemented!");
+		end
 		
 		
 		default:

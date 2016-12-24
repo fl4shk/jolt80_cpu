@@ -96,6 +96,31 @@ task prep_alu_instr_grp_3_generic;
 	input [`instr_g3_rcp_index_msb_pos:0] rcp_index;
 	
 	
+	case (opcode)
+		// Indexed Load/store instructions:
+		
+		// Load 8-bit value from memory at address [rBp + rCp] into rA
+		pkg_instr_dec::instr_g3_op_ldrx:
+		begin
+			do_alu_op_addp_no_flags( rbp_index,
+				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1 ]);
+		end
+		
+		// Store rA to memory at address [rBp + rCp]
+		pkg_instr_dec::instr_g3_op_strx:
+		begin
+			do_alu_op_addp_no_flags( rbp_index,
+				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1 ]);
+		end
+		
+		default:
+		begin
+			$display("Illegal Group 3 Instruction!");
+		end
+	endcase
+	
 endtask
 
 task start_exec_instr_from_grp_3;
@@ -112,75 +137,18 @@ task start_exec_instr_from_grp_3;
 		// Load 8-bit value from memory at address [rBp + rCp] into rA
 		pkg_instr_dec::instr_g3_op_ldrx:
 		begin
-			////$display( "ldrx:  %h %h", final_ig3_rbp_index,
-			////	final_ig3_rcp_index );
-			//
-			//if (!data_ready)
-			//begin
-			//	if (!did_prep_ldst_instr)
-			//	begin
-			//		did_prep_ldst_instr <= 1;
-			//		prep_load_8_with_addr( `get_final_ig3_rpair_b 
-			//			+ `get_final_ig3_rpair_c );
-			//	end
-			//	
-			//	else
-			//	begin
-			//		req_rdwr <= 0;
-			//	end
-			//end
-			//
-			//else // if (data_ready)
-			//begin
-			//	did_prep_ldst_instr <= 0;
-			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			//end
-			
-			
-			// This 16-bit addition SHOULD use the ALU
-			prep_load_8_with_addr( `get_final_ig3_rpair_b 
-				+ `get_final_ig3_rpair_c );
+			//prep_load_8_with_addr( `get_final_ig3_rpair_b 
+			//	+ `get_final_ig3_rpair_c );
+			prep_load_8_with_addr(`get_alu_out_16);
 			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
 		// Store rA to memory at address [rBp + rCp]
 		pkg_instr_dec::instr_g3_op_strx:
 		begin
-			////$display( "strx:  %d %d %d\t\t%h %h %h", final_ig3_ra_index,
-			////	final_ig3_rbp_index, final_ig3_rcp_index, 
-			////	`get_final_ig3_reg_a, `get_final_ig3_rpair_b, 
-			////	`get_final_ig3_rpair_c );
-			////$display( "%d %d\t\t%d %d", final_ig3_rbp_index, 
-			////	final_ig3_rcp_index,
-			////	`make_reg_ind_from_pi(final_ig3_rbp_index), 
-			////	`make_reg_ind_from_pi(final_ig3_rcp_index) );
-			//
-			//if (!data_ready)
-			//begin
-			//	if (!did_prep_ldst_instr)
-			//	begin
-			//		did_prep_ldst_instr <= 1;
-			//		prep_store_8( `get_final_ig3_reg_a, 
-			//			( `get_final_ig3_rpair_b 
-			//			+ `get_final_ig3_rpair_c ) );
-			//	end
-			//	
-			//	else
-			//	begin
-			//		req_rdwr <= 0;
-			//	end
-			//end
-			//
-			//else // if (data_ready)
-			//begin
-			//	did_prep_ldst_instr <= 0;
-			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			//end
-			
-			
-			// This 16-bit addition SHOULD use the ALU
-			prep_store_8( `get_final_ig3_reg_a, ( `get_final_ig3_rpair_b 
-				+ `get_final_ig3_rpair_c ) );
+			//prep_store_8( `get_final_ig3_reg_a, ( `get_final_ig3_rpair_b 
+			//	+ `get_final_ig3_rpair_c ) );
+			prep_store_8( `get_final_ig3_reg_a, `get_alu_out_16 );
 			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		

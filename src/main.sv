@@ -22,10 +22,18 @@
 //`include "src/cpu_extras_defines.svinc"
 
 
+
+// use_half_clock is intended to be used for simulation only
+`define use_half_clock
+
 module spcpu_test_bench;
 	
-	//bit clk_gen_reset, tb_half_clk, tb_mem_clk;
+	`ifdef use_half_clock
+	bit clk_gen_reset, tb_half_clk, tb_mem_clk;
+	`else
 	bit clk_gen_reset, tb_clk;
+	`endif
+	
 	
 	bit test_mem_reset;
 	
@@ -34,12 +42,15 @@ module spcpu_test_bench;
 	bit test_cpu_reset;
 	
 	
-	//tb_half_clk_gen half_clk_gen( .reset(clk_gen_reset), 
-	//	.half_clk(tb_half_clk) );
-	//tb_memory_clk_gen mem_clk_gen( .reset(clk_gen_reset), 
-	//	.mem_clk(tb_mem_clk) );
-	
+	`ifdef use_half_clock
+	tb_half_clk_gen half_clk_gen( .reset(clk_gen_reset), 
+		.half_clk(tb_half_clk) );
+	tb_memory_clk_gen mem_clk_gen( .reset(clk_gen_reset), 
+		.mem_clk(tb_mem_clk) );
+	`else
 	tb_clk_gen clk_gen( .reset(clk_gen_reset), .clk(tb_clk) );
+	`endif
+	
 	
 	
 	
@@ -87,6 +98,8 @@ module spcpu_test_bench;
 	//	? test_mem_read_data_out_8 : test_mem_read_data_out_16 )
 	//	: `cpu_data_inout_16_width'hz );
 	
+	
+	
 	assign test_cpu_temp_data_in
 		= ( ( test_cpu_data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
 		? test_mem_read_data_out_8 : test_mem_read_data_out_16 );
@@ -132,7 +145,11 @@ module spcpu_test_bench;
 	//	.data_out2(test_mem_read_data_out_16) );
 	
 	
+	`ifdef use_half_clock
+	tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset), 
+	`else
 	tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
+	`endif
 		.req_rdwr(test_cpu_req_rdwr),
 		.addr_in(test_cpu_data_inout_addr),
 		.write_data_in_8(test_mem_write_data_in_8),
@@ -145,7 +162,11 @@ module spcpu_test_bench;
 		.data_ready(test_mem_data_ready) );
 	
 	
+	`ifdef use_half_clock
+	spcpu test_cpu( .clk(tb_half_clk), .reset(test_cpu_reset),
+	`else
 	spcpu test_cpu( .clk(tb_clk), .reset(test_cpu_reset),
+	`endif
 		.data_ready(test_cpu_data_ready),
 		.temp_data_in(test_cpu_temp_data_in),
 		.temp_data_out(test_cpu_temp_data_out),
@@ -206,13 +227,13 @@ endmodule
 `define instr_16_num_bytes 2
 `define instr_32_num_bytes 4
 
-// The next value of the PC after a non-PC-changing 16-bit instruction, or
-// the next value of data_inout_addr after loading the high 16 bits of a
+//// The next value of the PC after a non-PC-changing 16-bit instruction, or
+//// the next value of data_inout_addr after loading the high 16 bits of a
 // 32-bit instruction
 //`define get_pc_after_reg_instr_16 ( `get_cpu_rp_pc + `instr_16_num_bytes )
 //`define get_pc_after_reg_instr ( `get_cpu_rp_pc + `instr_16_num_bytes )
 
-// The next value of the PC after a non-PC-changing 32-bit instruction
+//// The next value of the PC after a non-PC-changing 32-bit instruction
 //`define get_pc_after_reg_instr_32 ( `get_cpu_rp_pc + `instr_32_num_bytes )
 
 
@@ -478,7 +499,6 @@ module spcpu
 	//always_ff @ ( posedge clk )
 	begin
 	
-	//$display( "do_stall:  %h", do_stall );
 	
 	if (reset)
 	begin
@@ -506,15 +526,6 @@ module spcpu
 		prep_load_16_no_addr();
 	end
 	
-	//else if ( do_stall && !reset )
-	//begin
-	//	req_rdwr <= 0;
-	//	
-	//	$display( "do_stall && !reset:  %h %h %h %h", curr_state, 
-	//		temp_data_in, `get_cpu_rp_pc, data_inout_addr );
-	//end
-	
-	//else if ( !do_stall && !reset )
 	else //if (!reset)
 	begin
 		//$display( "req_rdwr, data_ready:  %h %h", req_rdwr, 
@@ -618,8 +629,8 @@ module spcpu
 				//$display();
 				//$display();
 				//$display();
-				//$display("Load Instruction High:  Data NOT ready");
-				////$display();
+				$display("Load Instruction High:  Data NOT ready");
+				$display();
 			end
 			
 		end
@@ -650,8 +661,8 @@ module spcpu
 			
 			else // if (!data_ready)
 			begin
-				//$display("Load Instruction Low:  Data NOT ready");
-				////$display();
+				$display("Load Instruction Low:  Data NOT ready");
+				$display();
 			end
 		end
 		

@@ -389,72 +389,72 @@ module tb_clk_gen( input bit reset, output bit clk );
 endmodule
 
 
-//// This module is intended for use as a clock generator for things besides
-//// instances of tb_memory
-//module tb_half_clk_gen( input bit reset, output bit half_clk );
-//	
-//	bit local_half_clk, ready;
-//	
-//	assign half_clk = local_half_clk;
-//	
-//	always @ (reset)
-//	begin
-//		if (reset)
-//		begin
-//			local_half_clk = 1'b0;
-//			
-//			ready = 1'b0;
-//			
-//			#2
-//			ready = 1'b1;
-//		end
-//	end
-//	
-//	always
-//	begin
-//		#2
-//		
-//		if (ready)
-//		begin
-//			local_half_clk = !local_half_clk;
-//		end
-//	end
-//	
-//endmodule
-//
-//
-//// This module is intended for use as a clock generator for tb_memory in
-//// test_benches
-//module tb_memory_clk_gen( input bit reset, output bit mem_clk );
-//	
-//	bit local_mem_clk, ready;
-//	
-//	assign mem_clk = local_mem_clk;
-//	
-//	always @ (reset)
-//	begin
-//		if (reset)
-//		begin
-//			local_mem_clk = 1'b0;
-//			
-//			ready = 1'b0;
-//			
-//			#1
-//			ready = 1'b1;
-//		end
-//	end
-//	
-//	always
-//	begin
-//		#1
-//		
-//		if (ready)
-//		begin
-//			local_mem_clk = !local_mem_clk;
-//		end
-//	end
-//	
-//endmodule
+// This module is intended for use as a clock generator for things besides
+// instances of tb_memory
+module tb_half_clk_gen( input bit reset, output bit half_clk );
+	
+	bit local_half_clk, ready;
+	
+	assign half_clk = local_half_clk;
+	
+	always @ (reset)
+	begin
+		if (reset)
+		begin
+			local_half_clk = 1'b0;
+			
+			ready = 1'b0;
+			
+			#2
+			ready = 1'b1;
+		end
+	end
+	
+	always
+	begin
+		#2
+		
+		if (ready)
+		begin
+			local_half_clk = !local_half_clk;
+		end
+	end
+	
+endmodule
+
+
+// This module is intended for use as a clock generator for tb_memory in
+// test_benches
+module tb_memory_clk_gen( input bit reset, output bit mem_clk );
+	
+	bit local_mem_clk, ready;
+	
+	assign mem_clk = local_mem_clk;
+	
+	always @ (reset)
+	begin
+		if (reset)
+		begin
+			local_mem_clk = 1'b0;
+			
+			ready = 1'b0;
+			
+			#1
+			ready = 1'b1;
+		end
+	end
+	
+	always
+	begin
+		#1
+		
+		if (ready)
+		begin
+			local_mem_clk = !local_mem_clk;
+		end
+	end
+	
+endmodule
 
 
 

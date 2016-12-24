@@ -151,7 +151,31 @@ task prep_alu_instr_grp_5_generic;
 	input [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
 	input [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;
 	input ra_index_is_for_pair;
+	input [`instr_g5_ilo_imm_value_msb_pos:0] imm_value_16;
 	
+	case (opcode)
+		pkg_instr_dec::instr_g5_op_ldrxi:
+		begin
+			do_alu_op_addp_no_flags( `make_reg_pair_w_pi(rbp_index),
+				imm_value_16[ `cpu_imm_value_16_msb_pos
+				: `cpu_imm_value_8_width ],
+				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
+		end
+		
+		pkg_instr_dec::instr_g5_op_strxi:
+		begin
+			do_alu_op_addp_no_flags( `make_reg_pair_w_pi(rbp_index),
+				imm_value_16[ `cpu_imm_value_16_msb_pos
+				: `cpu_imm_value_8_width ],
+				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
+		end
+		
+		default:
+		begin
+			alu_was_used <= 0;
+		end
+		
+	endcase
 	
 endtask
 
@@ -245,8 +269,9 @@ task start_exec_instr_from_grp_5;
 			
 			
 			
-			// This 16-bit addition SHOULD use the ALU
-			prep_load_8_with_addr( `get_final_ig5_rpair_b + instr_in_lo );
+			//// This 16-bit addition SHOULD use the ALU
+			////prep_load_8_with_addr( `get_final_ig5_rpair_b + instr_in_lo );
+			prep_load_8_with_addr(`get_alu_out_16);
 			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
@@ -287,9 +312,10 @@ task start_exec_instr_from_grp_5;
 			
 			
 			
-			// This 16-bit addition SHOULD use the ALU
-			prep_store_8( `get_final_ig5_reg_a, 
-				( `get_final_ig5_rpair_b + instr_in_lo ) );
+			//// This 16-bit addition SHOULD use the ALU
+			//prep_store_8( `get_final_ig5_reg_a, 
+			//	( `get_final_ig5_rpair_b + instr_in_lo ) );
+			prep_store_8( `get_final_ig5_reg_a, `get_alu_out_16 );
 			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		
