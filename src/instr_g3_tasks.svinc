@@ -91,9 +91,11 @@ endtask
 
 task prep_alu_instr_grp_3_generic;
 	input [`instr_g3_op_msb_pos:0] opcode;
-	input [`instr_g3_ra_index_msb_pos:0] ra_index;
-	input [`instr_g3_rbp_index_msb_pos:0] rbp_index;
-	input [`instr_g3_rcp_index_msb_pos:0] rcp_index;
+	input [`cpu_reg_arr_msb_pos:0] ra_index;
+	//input [`instr_g3_rbp_index_msb_pos:0] rbp_index;
+	//input [`instr_g3_rcp_index_msb_pos:0] rcp_index;
+	input [`cpu_reg_arr_msb_pos:0] rbp_index;
+	input [`cpu_reg_arr_msb_pos:0] rcp_index;
 	
 	
 	case (opcode)
@@ -104,7 +106,7 @@ task prep_alu_instr_grp_3_generic;
 		begin
 			do_alu_op_addp_no_flags( rbp_index,
 				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1 ]);
+				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1'b1 ]);
 		end
 		
 		// Store rA to memory at address [rBp + rCp]
@@ -112,7 +114,7 @@ task prep_alu_instr_grp_3_generic;
 		begin
 			do_alu_op_addp_no_flags( rbp_index,
 				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1 ]);
+				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1'b1 ]);
 		end
 		
 		default:

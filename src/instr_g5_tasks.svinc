@@ -148,15 +148,16 @@ endtask
 
 task prep_alu_instr_grp_5_generic;
 	input [`instr_g5_op_msb_pos:0] opcode;
-	input [`instr_g5_ihi_ra_index_msb_pos:0] ra_index;
-	input [`instr_g5_ihi_rbp_index_msb_pos:0] rbp_index;
+	input [`cpu_reg_arr_msb_pos:0] ra_index;
+	input [`cpu_reg_arr_msb_pos:0] rbp_index;
 	input ra_index_is_for_pair;
-	input [`instr_g5_ilo_imm_value_msb_pos:0] imm_value_16;
+	input [`cpu_reg_arr_msb_pos:0] imm_value_16;
 	
 	case (opcode)
 		pkg_instr_dec::instr_g5_op_ldrxi:
 		begin
-			do_alu_op_addp_no_flags( `make_reg_pair_w_pi(rbp_index),
+			do_alu_op_addp_no_flags
+				( `make_reg_pair_w_pi(rbp_index),
 				imm_value_16[ `cpu_imm_value_16_msb_pos
 				: `cpu_imm_value_8_width ],
 				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
@@ -164,7 +165,8 @@ task prep_alu_instr_grp_5_generic;
 		
 		pkg_instr_dec::instr_g5_op_strxi:
 		begin
-			do_alu_op_addp_no_flags( `make_reg_pair_w_pi(rbp_index),
+			do_alu_op_addp_no_flags
+				( `make_reg_pair_w_pi(rbp_index),
 				imm_value_16[ `cpu_imm_value_16_msb_pos
 				: `cpu_imm_value_8_width ],
 				imm_value_16[`cpu_imm_value_8_msb_pos:0] );

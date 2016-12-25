@@ -78,8 +78,8 @@ module tb_memory
 	begin
 		if (!req_rdwr)
 		begin
-			can_rdwr <= 1;
 			data_ready <= 0;
+			can_rdwr <= 1;
 		end
 		
 		else // if (req_rdwr)
@@ -88,6 +88,23 @@ module tb_memory
 			can_rdwr <= !can_rdwr;
 		end
 	end
+	
+	// Use this with wrappers around real FPGA block RAM (not test bench
+	// stuff)
+	//always @ ( posedge clk )
+	//begin
+	//	can_rdwr <= !can_rdwr;
+	//	
+	//	if (!req_rdwr)
+	//	begin
+	//		data_ready <= 0;
+	//	end
+	//	
+	//	else // if (req_rdwr)
+	//	begin
+	//		data_ready <= can_rdwr;
+	//	end
+	//end
 	
 	
 	
@@ -143,217 +160,6 @@ module tb_memory
 	end
 	
 endmodule
-
-
-
-//module dual_port_memory
-//	( input bit clk, 
-//	input bit [`cpu_addr_msb_pos:0] addr_in_a, addr_in_b,
-//	input bit [`cpu_data_inout_8_msb_pos:0] write_data_in_a,
-//		write_data_in_b,
-//	
-//	// Write enable
-//	input bit write_data_we_a, write_data_we_b,
-//	output bit [`cpu_data_inout_8_msb_pos:0] read_data_out_a,
-//		read_data_out_b );
-//	
-//	
-//	parameter num_bytes = 17'h10000;
-//	
-//	
-//	bit [`cpu_data_inout_8_msb_pos
-
-
-
-//// Test ROM/RAM (though mainly RAM with some initial values)
-//// Synchronous reads and writes
-//module test_memory
-//	
-//	//( input bit clk, input bit reset,
-//	//input tb_mem_inputs the_inputs,
-//	//output bit [`cpu_data_inout_16_msb_pos:0] read_data_out );
-//	( input bit clk, input bit req_rdwr,
-//	input bit [`cpu_addr_msb_pos:0] addr_in,
-//	input bit [`cpu_data_inout_8_msb_pos:0] write_data_in_8,
-//	input bit [`cpu_data_inout_16_msb_pos:0] write_data_in_16,
-//	
-//	
-//	// Write enable
-//	input bit write_data_we_8, write_data_we_16,
-//	output bit [`cpu_data_inout_8_msb_pos:0] read_data_out_8,
-//	output bit [`cpu_data_inout_16_msb_pos:0] read_data_out_16,
-//	output bit data_ready );
-//	
-//	import pkg_cpu::*;
-//	import pkg_instr_dec::*;
-//	
-//	
-//	
-//	parameter num_bytes = 17'h10000;
-//	
-//	
-//	// The memory (DON'T change this to a bit array!)
-//	//logic [`cpu_data_inout_8_msb_pos:0] mem[ 0 : ( num_bytes - 1 ) ];
-//	bit [`cpu_data_inout_8_msb_pos:0] mem[ 0 : ( num_bytes - 1 ) ];
-//	
-//	////bit can_write;
-//	//bit can_rdwr;
-//	
-//	//assign read_data_out = ( the_inputs.read_data_acc_sz 
-//	//	== pkg_cpu::cpu_data_acc_sz_8 ) ? mem[the_inputs.read_addr_in]
-//	//	: `make_mem_pair(the_inputs.read_addr_in);
-//	
-//	//bit [1:0] temp_counter;
-//	
-//	
-//	initial $readmemh( "readmemh_input.txt.ignore", mem, 0, 
-//		( num_bytes - 1 ) ); 
-//	//initial data_ready = 0;
-//	initial data_ready = 1;
-//	
-//	
-//	//always_ff @ ( posedge clk )
-//	//begin
-//	//	if (req_rdwr)
-//	//	begin
-//	//		if (!temp_counter)
-//	//		begin
-//	//			////$display("tb_memory:  yes req_rdwr, not temp_counter[1]");
-//	//			//$display("tb_memory:  1 0");
-//	//			data_ready <= 0;
-//	//			temp_counter <= temp_counter + 1;
-//	//		end
-//	//		
-//	//		else
-//	//		begin
-//	//			///$display("tb_memory:  yes req_rdwr, yes temp_counter[1]");
-//	//			//$display("tb_memory:  1 1");
-//	//			data_ready <= 1;
-//	//			temp_counter <= 0;
-//	//		end
-//	//	end
-//	//end
-//	
-//	always_ff @ ( posedge clk )
-//	begin
-//		//if (temp_counter)
-//		//begin
-//			if ( write_data_we_8 == 1'b0 )
-//			begin
-//				// Read 8-bit data
-//				$display( "8-bit read:  %h, %h", addr_in, 
-//					mem[addr_in] );
-//				read_data_out_8 <= { `cpu_data_inout_8_width'h0,
-//					mem[addr_in] };
-//			end
-//			
-//			if ( write_data_we_16 == 1'b0 )
-//			begin
-//				// Read 16-bit data
-//				//$display( "16-bit read:  %h, %h", addr_in, 
-//				//	`make_mem_pair(addr_in) );
-//				read_data_out_16 <= `make_mem_pair(addr_in);
-//			end
-//			
-//			//else // if ( write_data_we_8 == 1'b1 )
-//			//else if ( write_data_we_16 == 1'b0 )
-//			if ( ( write_data_we_8 == 1'b1 ) 
-//				&& ( write_data_we_16 == 1'b0 ) )
-//			begin
-//				// Write 8-bit data
-//				$display( "8-bit write:  %h, %h", addr_in,
-//					write_data_in_8[`cpu_data_inout_8_msb_pos:0] );
-//				mem[addr_in] 
-//					<= write_data_in_8[`cpu_data_inout_8_msb_pos:0];
-//			end
-//			
-//			else if ( ( write_data_we_8 == 1'b0 )
-//				&& ( write_data_we_16 == 1'b1 ) );
-//			begin
-//				// Write 16-bit data
-//				$display( "16-bit write:  %h", write_data_in_16 );
-//				`make_mem_pair(addr_in) <= write_data_in_16;
-//			end
-//		//end
-//	end
-//	
-//endmodule
-
-
-//// Quartus II SystemVerilog Template
-////
-//// True Dual-Port RAM with single clock and different data width on the two
-//// ports
-////
-//// The first datawidth and the widths of the addresses are specified The
-//// second data width is equal to DATA_WIDTH1 * RATIO, where RATIO = (1 <<
-//// (ADDRESS_WIDTH1 - ADDRESS_WIDTH2) RATIO must have value that is
-//// supported by the memory blocks in your target device.  Otherwise, no RAM
-//// will be inferred.  
-////
-//// Read-during-write behavior returns old data for all combinations of read
-//// and write on both ports
-////
-//// This style of RAM cannot be used on certain devices, e.g. Stratix V; in
-//// that case use the template for Dual-Port RAM with new data on
-//// read-during write on the same port
-//
-//module mixed_width_true_dual_port_ram
-//	#(parameter int
-//		DATA_WIDTH1 = 8,
-//		ADDRESS_WIDTH1 = 10,
-//		ADDRESS_WIDTH2 = 8)
-//	(
-//		input [ADDRESS_WIDTH1-1:0] addr1,
-//		input [ADDRESS_WIDTH2-1:0] addr2,
-//		input [DATA_WIDTH1      -1:0] data_in1, 
-//		input [DATA_WIDTH1*(1<<(ADDRESS_WIDTH1 - ADDRESS_WIDTH2))-1:0] 
-//			data_in2, 
-//		input we1, we2, clk,
-//		output reg [DATA_WIDTH1-1      :0] data_out1,
-//		output reg [DATA_WIDTH1*(1<<(ADDRESS_WIDTH1 - ADDRESS_WIDTH2))-1:0] 
-//			data_out2 );
-//	
-//	// valid values are 2,4,8... family dependent
-//	localparam RATIO = 1 << (ADDRESS_WIDTH1 - ADDRESS_WIDTH2); 
-//	localparam DATA_WIDTH2 = DATA_WIDTH1 * RATIO;
-//	localparam RAM_DEPTH = 1 << ADDRESS_WIDTH2;
-//	
-//	
-//	// Use a multi-dimensional packed array to model the different read/ram
-//	// width
-//	reg [RATIO-1:0] [DATA_WIDTH1-1:0] ram[0:RAM_DEPTH-1];
-//	
-//	reg [DATA_WIDTH1-1:0] data_reg1;
-//	reg [DATA_WIDTH2-1:0] data_reg2;
-//	
-//	initial $readmemh( "readmemh_input_16.txt.ignore", ram ); 
-//	//initial
-//	//begin
-//	//	$readmemh( "readmemh_input_16.txt.ignore", ram, 0, 
-//	//		( 1 << ADDRESS_WIDTH2 ) - 1 );
-//	//end
-//	
-//	
-//	// Port A
-//	always@(posedge clk)
-//	begin
-//		if(we1)
-//			ram[addr1 / RATIO][addr1 % RATIO] <= data_in1;
-//		data_reg1 <= ram[addr1 / RATIO][addr1 % RATIO];
-//	end
-//	assign data_out1 = data_reg1;
-//	
-//	// port B
-//	always@(posedge clk)
-//	begin
-//		if(we2)
-//			ram[addr2] <= data_in2;
-//		data_reg2 <= ram[addr2];
-//	end
-//	
-//	assign data_out2 = data_reg2;
-//endmodule : mixed_width_true_dual_port_ram
 
 
 

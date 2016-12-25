@@ -92,6 +92,8 @@ task prep_load_instr_hi_after_reg;
 	//advance_pc_etc_after_reg
 	
 	//$display("There MIGHT be a problem with prep_load_instr_hi_after_reg");
+	
+	
 	if ( data_inout_addr == `get_cpu_rp_pc )
 	begin
 		prep_load_16_no_addr();
@@ -101,6 +103,7 @@ task prep_load_instr_hi_after_reg;
 	begin
 		prep_load_16_with_addr(`get_cpu_rp_pc);
 	end
+	
 endtask
 
 
@@ -159,6 +162,7 @@ task prep_load_instr_hi_generic;
 			// If the instruction is a call instruction
 			else
 			begin
+				$display("Instead, it was a call instruction");
 				prep_load_16_no_addr();
 			end
 		end
@@ -218,12 +222,12 @@ task latch_logic_prep_pc_inc_after_non_bc_ipc;
 		|| ( final_instr_is_32_bit
 		&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
 	begin
-		//$display("nice");
+		$display("nice");
 		latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
 	end
 	else
 	begin
-		//$display("oh no");
+		$display("oh no");
 		latch_logic_prep_pc_inc_generic(0);
 	end
 	//latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);

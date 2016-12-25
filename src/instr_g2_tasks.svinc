@@ -428,8 +428,8 @@ endtask
 
 task prep_alu_instr_grp_2_generic;
 	input [`instr_g2_op_msb_pos:0] opcode;
-	input [`instr_g2_ra_index_msb_pos:0] ra_index;
-	input [`instr_g2_rb_index_msb_pos:0] rb_index;
+	input [`cpu_reg_arr_msb_pos:0] ra_index;
+	input [`cpu_reg_arr_msb_pos:0] rb_index;
 	input ra_index_is_for_pair, rb_index_is_for_pair;
 	
 	case (opcode)
