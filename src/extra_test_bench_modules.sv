@@ -74,37 +74,37 @@ module tb_memory
 	
 	
 	
-	always @ ( posedge clk )
-	begin
-		if (!req_rdwr)
-		begin
-			data_ready <= 0;
-			can_rdwr <= 1;
-		end
-		
-		else // if (req_rdwr)
-		begin
-			data_ready <= can_rdwr;
-			can_rdwr <= !can_rdwr;
-		end
-	end
-	
-	// Use this with wrappers around real FPGA block RAM (not test bench
-	// stuff)
 	//always @ ( posedge clk )
 	//begin
-	//	can_rdwr <= !can_rdwr;
-	//	
 	//	if (!req_rdwr)
 	//	begin
 	//		data_ready <= 0;
+	//		can_rdwr <= 1;
 	//	end
 	//	
 	//	else // if (req_rdwr)
 	//	begin
 	//		data_ready <= can_rdwr;
+	//		can_rdwr <= !can_rdwr;
 	//	end
 	//end
+	
+	// Use this with wrappers around real FPGA block RAM (though it also
+	// works for test benches, apparently)
+	always @ ( posedge clk )
+	begin
+		can_rdwr <= !can_rdwr;
+		
+		if (!req_rdwr)
+		begin
+			data_ready <= 0;
+		end
+		
+		else // if (req_rdwr)
+		begin
+			data_ready <= can_rdwr;
+		end
+	end
 	
 	
 	
