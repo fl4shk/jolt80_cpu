@@ -354,8 +354,8 @@ module spcpu
 		
 		// Disable interrupts to start with (require the program to enable
 		// interrupts)
-		ints_enabled <= 0;
 		int_ret_addr <= 0;
+		ints_enabled <= 0;
 		
 		
 		//data_in_is_0_counter <= 0;
@@ -377,13 +377,23 @@ module spcpu
 				curr_state <= pkg_cpu::cpu_st_begin_0;
 				
 				// Hardcoded address
-				prep_load_16_with_addr(`cpu_addr_width'h8000);
+				prep_load_16_with_addr(`cpu_reset_start_addr_storage_addr);
 			end
 			
 			//else // if (!data_ready)
 			//begin
 			//	$display("cpu_st_after_reset:  Data NOT ready");
 			//end
+		end
+		
+		else if ( curr_state == pkg_cpu::cpu_st_after_interrupt )
+		begin
+			if (data_ready)
+			begin
+				curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+				
+				// Hardcoded address
+			end
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_begin_0 )
@@ -411,86 +421,106 @@ module spcpu
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
 		begin
+			
 			//debug_disp_regs_and_proc_flags();
 			//$display();
 			//$display();
 			
 			if (data_ready)
 			begin
-				debug_disp_regs_and_proc_flags();
-				$display();
-				$display();
-				
-				
-				$display( "(Extra) Load Instruction High:  %h %h %h", 
-					temp_data_in, `get_cpu_rp_pc, data_inout_addr );
-				$display();
-				
-				// Back up temp_data_in, init_instr_grp, and pc
-				instr_in_hi <= temp_data_in;
-				final_instr_grp <= init_instr_grp;
-				prev_pc <= `get_cpu_rp_pc;
-				second_prev_pc <= the_pc_inc_pc_out;
-				
-				
-				// Back up the decoded instruction contents to be used on
-				// cycles after the current one.
-				back_up_ig1_instr_contents();
-				back_up_ig2_instr_contents();
-				back_up_ig3_instr_contents();
-				back_up_ig4_instr_contents();
-				back_up_ig5_instr_contents();
-				
-				update_extra_ig1_pc_stuff();
-				update_extra_ig2_pc_stuff();
-				update_extra_ig3_pc_stuff();
-				//update_extra_ig4_pc_stuff();
-				update_extra_ig5_pc_stuff();
-				
-				
-				
-				//if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
-				if (!init_instr_is_32_bit)
+				//if ( !interrupt || ( interrupt && !ints_enabled ) )
+				//if ( interrupt && ints_enabled )
+				if (1)
 				begin
-					curr_state <= pkg_cpu::cpu_st_start_exec_instr;
-					//$display( "Instruction is 16-bit, so don't request ",
-					//	"another 16 bits of data." );
-					req_rdwr <= 0;
+					debug_disp_regs_and_proc_flags();
+					$display();
+					$display();
 					
 					
-					prep_alu_if_needed_init();
-					seq_logic_grab_pc_inc_outputs();
+					$display( "(Extra) Load Instruction High:  %h %h %h", 
+						temp_data_in, `get_cpu_rp_pc, data_inout_addr );
+					$display();
+					
+					// Back up temp_data_in, init_instr_grp, and pc
+					instr_in_hi <= temp_data_in;
+					final_instr_grp <= init_instr_grp;
+					prev_pc <= `get_cpu_rp_pc;
+					second_prev_pc <= the_pc_inc_pc_out;
 					
 					
-					//if ( init_instr_grp == pkg_instr_dec::instr_grp_2 )
+					// Back up the decoded instruction contents to be used
+					// on cycles after the current one.
+					back_up_ig1_instr_contents();
+					back_up_ig2_instr_contents();
+					back_up_ig3_instr_contents();
+					back_up_ig4_instr_contents();
+					back_up_ig5_instr_contents();
+					
+					update_extra_ig1_pc_stuff();
+					update_extra_ig2_pc_stuff();
+					update_extra_ig3_pc_stuff();
+					//update_extra_ig4_pc_stuff();
+					update_extra_ig5_pc_stuff();
+					
+					
+					
+					//if ( init_instr_grp != pkg_instr_dec::instr_grp_5 )
+					if (!init_instr_is_32_bit)
+					begin
+						curr_state <= pkg_cpu::cpu_st_start_exec_instr;
+						//$display( "Instruction is 16-bit, so don't ",
+						//	"request another 16 bits of data." );
+						req_rdwr <= 0;
+						
+						
+						prep_alu_if_needed_init();
+						seq_logic_grab_pc_inc_outputs();
+						
+						
+						//if ( init_instr_grp 
+						//	== pkg_instr_dec::instr_grp_2 )
+						//begin
+						//	$display( "Barebones ig2 disassemble:  ",
+						//		"%h %h %h", ig2_opcode, ig2_ra_index, 
+						//		ig2_rb_index );
+						//end
+					end
+					
+					// Handle 32-bit instructions
+					else if ( init_instr_grp 
+						== pkg_instr_dec::instr_grp_5 )
+					begin
+						//$display("Instruction is 32-bit");
+						//req_rdwr <= 1;
+						seq_logic_grab_pc_inc_outputs();
+						prep_load_instr_lo_reg();
+					end
+					
+					//else if ( init_instr_grp 
+					//	== pkg_instr_dec::instr_grp_... )
 					//begin
-					//	$display( "Barebones ig2 disassemble:  %h %h %h", 
-					//		ig2_opcode, ig2_ra_index, ig2_rb_index );
+					//	
 					//end
-				end
-				
-				// Handle 32-bit instructions
-				else if ( init_instr_grp == pkg_instr_dec::instr_grp_5 )
-				begin
-					//$display("Instruction is 32-bit");
-					//req_rdwr <= 1;
-					seq_logic_grab_pc_inc_outputs();
-					prep_load_instr_lo_reg();
-				end
-				
-				//else if ( init_instr_grp == pkg_instr_dec::instr_grp_... )
-				//begin
-				//	
-				//end
-				
-				
-				else // if ( init_instr_grp 
-					// == pkg_instr_dec::instr_grp_unknown )
-				begin
-					$display("Unknown instruction encoding");
+					
+					
+					else // if ( init_instr_grp 
+						// == pkg_instr_dec::instr_grp_unknown )
+					begin
+						$display("Unknown instruction encoding");
+						
+					end
 					
 				end
 				
+				
+				else // if ( !( interrupt && ints_enabled ) )
+				begin
+					$display("Starting interrupt");
+					int_ret_addr <= `get_cpu_rp_pc;
+					curr_state <= pkg_cpu::cpu_st_after_interrupt;
+					prep_load_16_with_addr
+						(`cpu_int_start_addr_storage_addr);
+				end
 			end
 			
 			else // if (!data_ready)
@@ -499,12 +529,11 @@ module spcpu
 				//$display();
 				//$display();
 				//$display();
-				//$display( "Load Instruction High:  Data NOT ready, %h %h", 
-				//	`get_cpu_rp_pc, data_inout_addr );
+				//$display( "Load Instruction High:  Data NOT ready, ",
+				//	"%h %h", `get_cpu_rp_pc, data_inout_addr );
 				$display( "Load Instruction High:  Data NOT ready" );
 				$display();
 			end
-			
 		end
 		
 		
@@ -557,53 +586,53 @@ module spcpu
 		
 		
 		
-		else // if ( curr_state 
-			// == pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
-		begin
-			$display( "Check whether the pc was actually changed by a ",
-				 "non-branch, non-call instruction" );
-			
-			//$display( "%h %h\t%h %h", final_instr_is_32_bit, 
-			//	`get_cpu_rp_pc, prev_pc, second_prev_pc );
-			//$display( "%h\t%h %h\t%h %h %h", final_instr_is_32_bit, 
-			//	`get_cpu_rp_pc, data_inout_addr, prev_pc, second_prev_pc,
-			//	third_prev_pc );
-			
-			// Check if the pc was ACTUALLY changed
-			//if ( prev_pc == `get_cpu_rp_pc )
-			//if ( ( !final_instr_is_32_bit 
-			//	&& ( prev_pc == `get_cpu_rp_pc ) )
-			//	|| ( final_instr_is_32_bit
-			//	&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
-			if ( ( !final_instr_is_32_bit 
-				&& ( second_prev_pc == `get_cpu_rp_pc ) )
-				|| ( final_instr_is_32_bit
-				&& ( third_prev_pc == `get_cpu_rp_pc ) ) )
-			begin
-				$display("The pc was not actually changed");
-				//seq_logic_grab_pc_inc_outputs();
-			end
-			
-			else
-			begin
-				//seq_logic_grab_pc_inc_outputs();
-				$display("The pc WAS changed");
-			end
-			
-			//prep_load_instr_hi_generic();
-			//seq_logic_grab_pc_adjuster_outputs();
-			
-			//seq_logic_grab_pc_
-			//set_pc_and_dio_addr(
-			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-			//seq_logic_grab_pc_inc_outputs();
-			//prep_load_16_no_addr();
-			prep_load_16_with_addr(`get_cpu_rp_pc);
-			req_rdwr <= 1;
-			
-			//prep_load_instr_hi_after_reg();
-			
-		end
+		//else // if ( curr_state 
+		//	// == pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
+		//begin
+		//	$display( "Check whether the pc was actually changed by a ",
+		//		 "non-branch, non-call instruction" );
+		//	
+		//	//$display( "%h %h\t%h %h", final_instr_is_32_bit, 
+		//	//	`get_cpu_rp_pc, prev_pc, second_prev_pc );
+		//	//$display( "%h\t%h %h\t%h %h %h", final_instr_is_32_bit, 
+		//	//	`get_cpu_rp_pc, data_inout_addr, prev_pc, second_prev_pc,
+		//	//	third_prev_pc );
+		//	
+		//	// Check if the pc was ACTUALLY changed
+		//	//if ( prev_pc == `get_cpu_rp_pc )
+		//	//if ( ( !final_instr_is_32_bit 
+		//	//	&& ( prev_pc == `get_cpu_rp_pc ) )
+		//	//	|| ( final_instr_is_32_bit
+		//	//	&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
+		//	if ( ( !final_instr_is_32_bit 
+		//		&& ( second_prev_pc == `get_cpu_rp_pc ) )
+		//		|| ( final_instr_is_32_bit
+		//		&& ( third_prev_pc == `get_cpu_rp_pc ) ) )
+		//	begin
+		//		$display("The pc was not actually changed");
+		//		//seq_logic_grab_pc_inc_outputs();
+		//	end
+		//	
+		//	else
+		//	begin
+		//		//seq_logic_grab_pc_inc_outputs();
+		//		$display("The pc WAS changed");
+		//	end
+		//	
+		//	//prep_load_instr_hi_generic();
+		//	//seq_logic_grab_pc_adjuster_outputs();
+		//	
+		//	//seq_logic_grab_pc_
+		//	//set_pc_and_dio_addr(
+		//	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+		//	//seq_logic_grab_pc_inc_outputs();
+		//	//prep_load_16_no_addr();
+		//	prep_load_16_with_addr(`get_cpu_rp_pc);
+		//	req_rdwr <= 1;
+		//	
+		//	//prep_load_instr_hi_after_reg();
+		//	
+		//end
 		
 	end
 	

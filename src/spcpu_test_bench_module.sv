@@ -38,8 +38,8 @@ module spcpu_test_bench;
 	bit test_mem_reset;
 	
 	
-	// reset signal for test_cpu
-	bit test_cpu_reset;
+	// reset and interrupt signals for test_cpu
+	bit test_cpu_reset, test_cpu_interrupt;
 	
 	
 	`ifdef use_half_clock
@@ -163,10 +163,11 @@ module spcpu_test_bench;
 	
 	
 	`ifdef use_half_clock
-	spcpu test_cpu( .clk(tb_half_clk), .reset(test_cpu_reset),
+	spcpu test_cpu( .clk(tb_half_clk), 
 	`else
-	spcpu test_cpu( .clk(tb_clk), .reset(test_cpu_reset),
+	spcpu test_cpu( .clk(tb_clk),
 	`endif
+		.reset(test_cpu_reset), .interrupt(test_cpu_interrupt),
 		.data_ready(test_cpu_data_ready),
 		.temp_data_in(test_cpu_temp_data_in),
 		.temp_data_out(test_cpu_temp_data_out),
@@ -182,6 +183,7 @@ module spcpu_test_bench;
 	begin
 		clk_gen_reset = 1'b1;
 		test_cpu_reset = 1'b0;
+		test_cpu_interrupt = 1'b0;
 		//$display(test_cpu_reset);
 		
 		#4
@@ -194,6 +196,12 @@ module spcpu_test_bench;
 		#4
 		test_cpu_reset = 1'b0;
 		
+		
+		#80
+		test_cpu_interrupt = 1'b1;
+		
+		//#90
+		//test_cpu_interrupt = 1'b0;
 	end
 	
 	////always @ ( posedge tb_half_clk )

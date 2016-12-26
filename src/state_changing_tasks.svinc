@@ -104,7 +104,8 @@ task prep_load_instr_hi_after_reg;
 	//	prep_load_16_with_addr(`get_cpu_rp_pc);
 	//end
 	
-	prep_load_16_with_addr(`get_cpu_rp_pc);
+	//prep_load_16_with_addr(`get_cpu_rp_pc);
+	prep_load_16_no_addr();
 	
 	
 	//prep_load_16_no_addr();
@@ -121,17 +122,17 @@ task prep_load_instr_hi_generic;
 	begin
 		//$display("!instr_is_branch_or_call");
 		
-		//prep_load_instr_hi_after_reg();
-		if (!non_bc_instr_possibly_changes_pc)
-		begin
-			//$display("!non_bc_instr_possibly_changes_pc");
-			prep_load_instr_hi_after_reg();
-		end
-		
-		else // if (non_bc_instr_possibly_changes_pc)
-		begin
-			curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
-		end
+		prep_load_instr_hi_after_reg();
+		//if (!non_bc_instr_possibly_changes_pc)
+		//begin
+		//	//$display("!non_bc_instr_possibly_changes_pc");
+		//	prep_load_instr_hi_after_reg();
+		//end
+		//
+		//else // if (non_bc_instr_possibly_changes_pc)
+		//begin
+		//	curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
+		//end
 	end
 	
 	else // if (instr_is_branch_or_call)

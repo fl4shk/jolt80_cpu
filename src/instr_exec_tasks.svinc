@@ -128,10 +128,10 @@ task exec_any_call;
 	//	: third_prev_pc );
 	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc 
 	//	: second_prev_pc );
-	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
-	//	: third_prev_pc );
-	`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc
-		: second_prev_pc );
+	`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
+		: third_prev_pc );
+	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc
+	//	: second_prev_pc );
 	
 	//`get_cpu_rp_lr <= third_prev_pc + 2;
 	//`get_cpu_rp_lr <= prev_pc + 4;

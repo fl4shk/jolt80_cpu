@@ -98,5 +98,10 @@
 
 
 
+// Vector stuff
+`define cpu_reset_start_addr_storage_addr (`cpu_addr_width'h8000)
+`define cpu_int_start_addr_storage_addr (`cpu_addr_width'h8002)
+
+
 
 `endif		// cpu_extras_defines_svinc

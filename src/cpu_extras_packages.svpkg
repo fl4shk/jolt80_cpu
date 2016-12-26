@@ -62,6 +62,7 @@ package pkg_cpu;
 	typedef enum bit [`cpu_state_msb_pos:0]
 	{
 		cpu_st_after_reset,
+		cpu_st_after_interrupt,
 		
 		
 		//// This state exists so the first instruction can be 
@@ -83,11 +84,11 @@ package pkg_cpu;
 		//// Finish executing a multi-cycle instruction (this is the second
 		//// cycle of instruction execution)
 		//cpu_st_finish_exec_instr,
-		cpu_st_finish_exec_ldst_instr,
+		cpu_st_finish_exec_ldst_instr
 		
-		// Check if the PC was changed to a new value before deciding
-		// whether to 
-		cpu_st_update_pc_after_non_bc_ipc
+		//// Check if the PC was changed to a new value before deciding
+		//// whether to 
+		//cpu_st_update_pc_after_non_bc_ipc
 		
 	} cpu_state;
 	
