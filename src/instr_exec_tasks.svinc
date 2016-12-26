@@ -49,10 +49,10 @@ task set_reg_pair_with_pi;
 	input [`cpu_rp_msb_pos:0] val;
 	
 	
+	//$display( "pair_index, val:  %h, %h", pair_index, val );
 	`make_reg_pair_w_pi(pair_index) <= val;
 	if ( pair_index == pkg_cpu::cpu_rp_pc_pind )
 	begin
-		$display( "pair_index:  %h", pair_index );
 		data_inout_addr <= val;
 	end
 	

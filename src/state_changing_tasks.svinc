@@ -94,6 +94,15 @@ task prep_load_instr_hi_after_reg;
 	//$display("There MIGHT be a problem with prep_load_instr_hi_after_reg");
 	
 	
+	if (final_instr_is_ldst)
+	begin
+		prep_load_16_with_addr(`get_cpu_rp_pc);
+	end
+	
+	else // if (!final_instr_is_ldst)
+	begin
+		prep_load_16_no_addr();
+	end
 	//if ( data_inout_addr == `get_cpu_rp_pc )
 	//begin
 	//	prep_load_16_no_addr();
@@ -105,7 +114,7 @@ task prep_load_instr_hi_after_reg;
 	//end
 	
 	//prep_load_16_with_addr(`get_cpu_rp_pc);
-	prep_load_16_no_addr();
+	//prep_load_16_no_addr();
 	
 	
 	//prep_load_16_no_addr();

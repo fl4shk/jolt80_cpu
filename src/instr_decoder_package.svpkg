@@ -597,33 +597,33 @@ package pkg_instr_dec;
 	// the pc (though it might NOT change, in which case we need to update
 	// the pc normally)
 	
-	function ig1_get_ra_instr_can_change_pc;
-		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
-		
-		ig1_get_ra_instr_can_change_pc
-		// Arithmetic instructions:
-			= ( ( test_ig1_opcode == instr_g1_op_addi )
-			|| ( test_ig1_opcode == instr_g1_op_adci )
-		
-		// Skip instr_g1_op_cmpi because it CAN'T change registers
-		//// || ( test_ig1_opcode == instr_g1_op_cmpi )
-		// Bitwise instructions with two operands:
-			|| ( test_ig1_opcode == instr_g1_op_andi )
-			|| ( test_ig1_opcode == instr_g1_op_orri )
-		
-		//Copy instructions:
-		
-		// (CoPY Immediate)
-			|| ( test_ig1_opcode == instr_g1_op_cpyi ) );
-		
-	endfunction
-	function ig1_get_rap_instr_can_change_pc;
-		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
-		
-		ig1_get_rap_instr_can_change_pc
-			= ( test_ig1_opcode == instr_g1_op_addpbi )
-			|| ( test_ig1_opcode == instr_g1_op_subpbi );
-	endfunction
+	//function ig1_get_ra_instr_can_change_pc;
+	//	input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
+	//	
+	//	ig1_get_ra_instr_can_change_pc
+	//	// Arithmetic instructions:
+	//		= ( ( test_ig1_opcode == instr_g1_op_addi )
+	//		|| ( test_ig1_opcode == instr_g1_op_adci )
+	//	
+	//	// Skip instr_g1_op_cmpi because it CAN'T change registers
+	//	//// || ( test_ig1_opcode == instr_g1_op_cmpi )
+	//	// Bitwise instructions with two operands:
+	//		|| ( test_ig1_opcode == instr_g1_op_andi )
+	//		|| ( test_ig1_opcode == instr_g1_op_orri )
+	//	
+	//	//Copy instructions:
+	//	
+	//	// (CoPY Immediate)
+	//		|| ( test_ig1_opcode == instr_g1_op_cpyi ) );
+	//	
+	//endfunction
+	//function ig1_get_rap_instr_can_change_pc;
+	//	input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
+	//	
+	//	ig1_get_rap_instr_can_change_pc
+	//		= ( test_ig1_opcode == instr_g1_op_addpbi )
+	//		|| ( test_ig1_opcode == instr_g1_op_subpbi );
+	//endfunction
 	
 	
 	// The call instruction ALWAYS changes the pc
@@ -740,31 +740,31 @@ package pkg_instr_dec;
 	// Simplify the ig2_get_..._instr_can_change_pc functions by making
 	// them assume that they can change the PC if the PC is included as an
 	// operand
-	function ig2_get_ra_instr_can_change_pc;
-		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
-		ig2_get_ra_instr_can_change_pc
-			= !ig2_get_ra_index_is_for_pair(test_ig2_opcode);
-	endfunction
+	//function ig2_get_ra_instr_can_change_pc;
+	//	input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+	//	ig2_get_ra_instr_can_change_pc
+	//		= !ig2_get_ra_index_is_for_pair(test_ig2_opcode);
+	//endfunction
+	//
+	//function ig2_get_rap_instr_can_change_pc;
+	//	input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+	//	ig2_get_rap_instr_can_change_pc
+	//		= ig2_get_ra_index_is_for_pair(test_ig2_opcode);
+	//endfunction
+	//
+	//function ig2_get_rbp_instr_can_change_pc;
+	//	input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+	//	ig2_get_rbp_instr_can_change_pc 
+	//		= ig2_get_rb_index_is_for_pair(test_ig2_opcode);
+	//endfunction
 	
-	function ig2_get_rap_instr_can_change_pc;
-		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
-		ig2_get_rap_instr_can_change_pc
-			= ig2_get_ra_index_is_for_pair(test_ig2_opcode);
-	endfunction
-	
-	function ig2_get_rbp_instr_can_change_pc;
-		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
-		ig2_get_rbp_instr_can_change_pc 
-			= ig2_get_rb_index_is_for_pair(test_ig2_opcode);
-	endfunction
 	
 	
-	
-	function ig3_get_ra_instr_can_change_pc;
-		input [`instr_g3_op_msb_pos:0] test_ig3_opcode;
-		ig3_get_ra_instr_can_change_pc
-			= ( test_ig3_opcode == instr_g3_op_ldrx );
-	endfunction
+	//function ig3_get_ra_instr_can_change_pc;
+	//	input [`instr_g3_op_msb_pos:0] test_ig3_opcode;
+	//	ig3_get_ra_instr_can_change_pc
+	//		= ( test_ig3_opcode == instr_g3_op_ldrx );
+	//endfunction
 	
 	// The calli instruction ALWAYS changes the pc
 	function ig5_get_instr_definitely_changes_pc;
@@ -775,17 +775,17 @@ package pkg_instr_dec;
 		
 	endfunction
 	
-	function ig5_get_ra_instr_can_change_pc;
-		input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
-		ig5_get_ra_instr_can_change_pc
-			= ( test_ig5_opcode == instr_g5_op_ldrxi );
-	endfunction
-	
-	function ig5_get_rap_instr_can_change_pc;
-		input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
-		ig5_get_rap_instr_can_change_pc
-			= ( test_ig5_opcode == instr_g5_op_cpypi );
-	endfunction
+	//function ig5_get_ra_instr_can_change_pc;
+	//	input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
+	//	ig5_get_ra_instr_can_change_pc
+	//		= ( test_ig5_opcode == instr_g5_op_ldrxi );
+	//endfunction
+	//
+	//function ig5_get_rap_instr_can_change_pc;
+	//	input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
+	//	ig5_get_rap_instr_can_change_pc
+	//		= ( test_ig5_opcode == instr_g5_op_cpypi );
+	//endfunction
 	
 	
 	// Functions for checking whether an instruction is a load or store

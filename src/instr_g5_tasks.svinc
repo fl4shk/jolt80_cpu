@@ -91,9 +91,9 @@ task disassemble_grp_5_instr;
 endtask
 
 
-task update_ipc_pc_for_grp_5_instr;
+//task update_ipc_pc_for_grp_5_instr;
 //task update_grp_5_instr_is_bc;
-//task update_instr_is_bc_for_grp_5_instr;
+task update_instr_is_bc_for_grp_5_instr;
 	
 	
 	if ( pkg_instr_dec::ig5_get_instr_definitely_changes_pc

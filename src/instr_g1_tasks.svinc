@@ -95,25 +95,25 @@ task disassemble_grp_1_instr;
 endtask
 
 
-task update_ipc_pc_for_grp_1_instr;
+//task update_ipc_pc_for_grp_1_instr;
 //task update_grp_1_instr_is_bc;
-//task update_instr_is_bc_for_grp_1_instr;
+task update_instr_is_bc_for_grp_1_instr;
 	
-	if (final_ig1_pc_contains_ra)
-	begin
-		if ( pkg_instr_dec::ig1_get_ra_instr_can_change_pc(ig1_opcode) )
-		begin
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-	end
-	
-	else if (final_ig1_pc_contains_rap)
-	begin
-		if ( pkg_instr_dec::ig1_get_rap_instr_can_change_pc(ig1_opcode) )
-		begin
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-	end
+	//if (final_ig1_pc_contains_ra)
+	//begin
+	//	if ( pkg_instr_dec::ig1_get_ra_instr_can_change_pc(ig1_opcode) )
+	//	begin
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
+	//end
+	//
+	//else if (final_ig1_pc_contains_rap)
+	//begin
+	//	if ( pkg_instr_dec::ig1_get_rap_instr_can_change_pc(ig1_opcode) )
+	//	begin
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
+	//end
 	
 	
 endtask

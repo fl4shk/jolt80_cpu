@@ -702,9 +702,9 @@ endtask
 
 
 
-task update_ipc_pc_for_grp_2_instr;
+//task update_ipc_pc_for_grp_2_instr;
 //task update_grp_2_instr_is_bc;
-//task update_instr_is_bc_for_grp_2_instr;
+task update_instr_is_bc_for_grp_2_instr;
 	
 	
 	// The call instruction ALWAYS changes pc
@@ -715,41 +715,41 @@ task update_ipc_pc_for_grp_2_instr;
 		instr_is_branch_or_call = 1;
 	end
 	
-	else if (final_ig2_pc_contains_ra)
-	begin
-		if ( pkg_instr_dec::ig2_get_ra_instr_can_change_pc(ig2_opcode) )
-		begin
-			//$display("final_ig2_pc_contains_ra and stuff");
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-		
-	end
-	
-	// Don't need to check this
-	//else if (final_ig2_pc_contains_rb)
+	//else if (final_ig2_pc_contains_ra)
 	//begin
+	//	if ( pkg_instr_dec::ig2_get_ra_instr_can_change_pc(ig2_opcode) )
+	//	begin
+	//		//$display("final_ig2_pc_contains_ra and stuff");
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
 	//	
 	//end
-	
-	else if (final_ig2_rap_is_pc)
-	begin
-		if ( pkg_instr_dec::ig2_get_rap_instr_can_change_pc(ig2_opcode) )
-		begin
-			//$display("final_ig2_rap_is_pc and stuff");
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-		
-	end
-	
-	else if (final_ig2_rbp_is_pc)
-	begin
-		// Swap instructions:
-		if ( pkg_instr_dec::ig2_get_rbp_instr_can_change_pc(ig2_opcode) )
-		begin
-			//$display("final_ig2_rbp_is_pc and stuff");
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-	end
+	//
+	//// Don't need to check this
+	////else if (final_ig2_pc_contains_rb)
+	////begin
+	////	
+	////end
+	//
+	//else if (final_ig2_rap_is_pc)
+	//begin
+	//	if ( pkg_instr_dec::ig2_get_rap_instr_can_change_pc(ig2_opcode) )
+	//	begin
+	//		//$display("final_ig2_rap_is_pc and stuff");
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
+	//	
+	//end
+	//
+	//else if (final_ig2_rbp_is_pc)
+	//begin
+	//	// Swap instructions:
+	//	if ( pkg_instr_dec::ig2_get_rbp_instr_can_change_pc(ig2_opcode) )
+	//	begin
+	//		//$display("final_ig2_rbp_is_pc and stuff");
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
+	//end
 	
 	
 	

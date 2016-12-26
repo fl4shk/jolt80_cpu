@@ -24,7 +24,7 @@
 
 
 // use_half_clock is intended to be used for simulation only
-//`define use_half_clock
+`define use_half_clock
 
 module spcpu_test_bench;
 	
