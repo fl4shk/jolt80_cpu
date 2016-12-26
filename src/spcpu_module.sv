@@ -365,6 +365,8 @@ module spcpu
 	
 	else //if (!reset)
 	begin
+		//$display( "PC and data_inout_addr:  %h %h", `get_cpu_rp_pc,
+		//	data_inout_addr );
 		//$display( "req_rdwr, data_ready:  %h %h", req_rdwr, 
 		//	data_ready );
 		
@@ -392,10 +394,12 @@ module spcpu
 				curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 				//prep_load_16_no_addr();
 				
-				`get_cpu_rp_pc <= temp_data_in;
+				//`get_cpu_rp_pc <= temp_data_in;
+				set_pc_and_dio_addr(temp_data_in);
 				
 				//prep_load_16_with_addr(`get_cpu_rp_pc);
-				prep_load_16_with_addr(temp_data_in);
+				//prep_load_16_with_addr(temp_data_in);
+				prep_load_16_no_addr();
 				
 			end
 			
@@ -418,9 +422,9 @@ module spcpu
 				$display();
 				
 				
-				//$display( "Load Instruction High:  %h %h %h", temp_data_in,
-				//	`get_cpu_rp_pc, data_inout_addr );
-				//$display();
+				$display( "(Extra) Load Instruction High:  %h %h %h", 
+					temp_data_in, `get_cpu_rp_pc, data_inout_addr );
+				$display();
 				
 				// Back up temp_data_in, init_instr_grp, and pc
 				instr_in_hi <= temp_data_in;
@@ -495,7 +499,9 @@ module spcpu
 				//$display();
 				//$display();
 				//$display();
-				$display("Load Instruction High:  Data NOT ready");
+				//$display( "Load Instruction High:  Data NOT ready, %h %h", 
+				//	`get_cpu_rp_pc, data_inout_addr );
+				$display( "Load Instruction High:  Data NOT ready" );
 				$display();
 			end
 			
@@ -513,10 +519,10 @@ module spcpu
 				//seq_logic_grab_pc_adjuster_outputs();
 				third_prev_pc <= the_pc_inc_pc_out;
 				
-				//$display( "Load Instruction Low:  %h %h %h %h", 
-				//	instr_in_hi, temp_data_in, `get_cpu_rp_pc, 
-				//	data_inout_addr );
-				//$display();
+				$display( "(Extra) Load Instruction Low:  %h %h %h %h", 
+					instr_in_hi, temp_data_in, `get_cpu_rp_pc, 
+					data_inout_addr );
+				$display();
 				
 				//$display( "nice curr_state.  the_pc_inc_pc_out:  %h", 
 				//	the_pc_inc_pc_out );
@@ -536,6 +542,11 @@ module spcpu
 		// Instruction execution states
 		else if ( curr_state == pkg_cpu::cpu_st_start_exec_instr )
 		begin
+			//if (final_instr_is_32_bit)
+			//begin
+			//	$display( "%h\t%h %h %h", `get_cpu_rp_pc, prev_pc, 
+			//		second_prev_pc, third_prev_pc );
+			//end
 			start_exec_instr();
 		end
 		
@@ -554,13 +565,20 @@ module spcpu
 			
 			//$display( "%h %h\t%h %h", final_instr_is_32_bit, 
 			//	`get_cpu_rp_pc, prev_pc, second_prev_pc );
+			//$display( "%h\t%h %h\t%h %h %h", final_instr_is_32_bit, 
+			//	`get_cpu_rp_pc, data_inout_addr, prev_pc, second_prev_pc,
+			//	third_prev_pc );
 			
 			// Check if the pc was ACTUALLY changed
 			//if ( prev_pc == `get_cpu_rp_pc )
+			//if ( ( !final_instr_is_32_bit 
+			//	&& ( prev_pc == `get_cpu_rp_pc ) )
+			//	|| ( final_instr_is_32_bit
+			//	&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
 			if ( ( !final_instr_is_32_bit 
-				&& ( prev_pc == `get_cpu_rp_pc ) )
+				&& ( second_prev_pc == `get_cpu_rp_pc ) )
 				|| ( final_instr_is_32_bit
-				&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
+				&& ( third_prev_pc == `get_cpu_rp_pc ) ) )
 			begin
 				$display("The pc was not actually changed");
 				//seq_logic_grab_pc_inc_outputs();
@@ -578,8 +596,9 @@ module spcpu
 			//seq_logic_grab_pc_
 			//set_pc_and_dio_addr(
 			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-			seq_logic_grab_pc_inc_outputs();
+			//seq_logic_grab_pc_inc_outputs();
 			//prep_load_16_no_addr();
+			prep_load_16_with_addr(`get_cpu_rp_pc);
 			req_rdwr <= 1;
 			
 			//prep_load_instr_hi_after_reg();
@@ -631,27 +650,36 @@ module spcpu
 			if ( final_instr_grp == pkg_instr_dec::instr_grp_1 )
 			begin
 				update_ipc_pc_for_grp_1_instr();
+				//update_grp_1_instr_is_bc();
+				//update_instr_is_bc_for_grp_1_instr();
 			end
 			
 			else if ( final_instr_grp == pkg_instr_dec::instr_grp_2 )
 			begin
 				update_ipc_pc_for_grp_2_instr();
+				//update_grp_2_instr_is_bc();
+				//update_instr_is_bc_for_grp_2_instr();
 			end
 			
 			else if ( final_instr_grp == pkg_instr_dec::instr_grp_3 )
 			begin
 				update_ipc_pc_for_grp_3_instr();
+				//update_grp_3_instr_is_bc();
+				//update_instr_is_bc_for_grp_3_instr();
 			end
 			
 			else if ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
 			begin
-				
 				update_ipc_pc_for_grp_4_instr();
+				//update_grp_4_instr_is_bc();
+				//update_instr_is_bc_for_grp_4_instr();
 			end
 			
 			else if ( final_instr_grp == pkg_instr_dec::instr_grp_5 )
 			begin
 				update_ipc_pc_for_grp_5_instr();
+				//update_grp_5_instr_is_bc();
+				//update_instr_is_bc_for_grp_5_instr();
 			end
 		end
 		

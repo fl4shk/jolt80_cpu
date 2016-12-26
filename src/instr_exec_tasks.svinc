@@ -26,6 +26,38 @@
 //	
 //endtask
 
+task set_reg;
+	input [`all_regs_index_msb_pos:0] reg_index;
+	input [`cpu_reg_msb_pos:0] val;
+	
+	cpu_regs[reg_index] <= val;
+	
+	if ( reg_index == pkg_cpu::cpu_rp_pc_hi_rind )
+	begin
+		data_inout_addr[`cpu_rp_msb_pos:`cpu_reg_width] <= val;
+	end
+	
+	else if ( reg_index == pkg_cpu::cpu_rp_pc_lo_rind )
+	begin
+		data_inout_addr[`cpu_reg_msb_pos:0] <= val;
+	end
+	
+endtask
+
+task set_reg_pair_with_pi;
+	input [`all_regs_index_msb_pos:0] pair_index;
+	input [`cpu_rp_msb_pos:0] val;
+	
+	
+	`make_reg_pair_w_pi(pair_index) <= val;
+	if ( pair_index == pkg_cpu::cpu_rp_pc_pind )
+	begin
+		$display( "pair_index:  %h", pair_index );
+		data_inout_addr <= val;
+	end
+	
+endtask
+
 task finish_alu_op_with_dest_reg;
 	if (alu_dest_reg_was_modded)
 	begin
@@ -34,7 +66,8 @@ task finish_alu_op_with_dest_reg;
 		//$display( "Finish ALU op with dest reg:  %d %h %h", 
 		//	alu_dest_reg_index, cpu_regs[alu_dest_reg_index], 
 		//	`get_alu_out_8 );
-		cpu_regs[alu_dest_reg_index] <= `get_alu_out_8;
+		//cpu_regs[alu_dest_reg_index] <= `get_alu_out_8;
+		set_reg( alu_dest_reg_index, `get_alu_out_8 );
 	end
 	//else
 	//begin
@@ -50,7 +83,8 @@ endtask
 task finish_alu_op_with_dest_rpair;
 	if (alu_dest_rpair_was_modded)
 	begin
-		`make_reg_pair_w_pi(alu_dest_rpair_index) <= `get_alu_out_16;
+		//`make_reg_pair_w_pi(alu_dest_rpair_index) <= `get_alu_out_16;
+		set_reg_pair_with_pi( alu_dest_rpair_index, `get_alu_out_16 );
 	end
 	if (alu_modded_proc_flags)
 	begin
@@ -58,18 +92,18 @@ task finish_alu_op_with_dest_rpair;
 	end
 endtask
 
-task finish_alu_op_with_dest_val_16;
-	output [`cpu_addr_msb_pos:0] val_16_out;
-	
-	if (alu_dest_rpair_was_modded)
-	begin
-		val_16_out <= `get_alu_out_16;
-	end
-	if (alu_modded_proc_flags)
-	begin
-		true_proc_flags <= alu_proc_flags_out;
-	end
-endtask
+//task finish_alu_op_with_dest_val_16;
+//	output [`cpu_addr_msb_pos:0] val_16_out;
+//	
+//	if (alu_dest_rpair_was_modded)
+//	begin
+//		val_16_out <= `get_alu_out_16;
+//	end
+//	if (alu_modded_proc_flags)
+//	begin
+//		true_proc_flags <= alu_proc_flags_out;
+//	end
+//endtask
 
 //task start_exec_shared_non_ldst_suffix;
 //	if (!non_bc_instr_possibly_changes_pc)
@@ -90,8 +124,14 @@ task exec_any_call;
 	//`get_cpu_rp_lr <= `get_cpu_rp_pc;
 	
 	//`get_cpu_rp_lr <= prev_pc + ( !final_instr_is_32_bit ? 2 : 4 );
-	`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
-		: third_prev_pc );
+	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
+	//	: third_prev_pc );
+	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc 
+	//	: second_prev_pc );
+	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
+	//	: third_prev_pc );
+	`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc
+		: second_prev_pc );
 	
 	//`get_cpu_rp_lr <= third_prev_pc + 2;
 	//`get_cpu_rp_lr <= prev_pc + 4;
@@ -104,6 +144,8 @@ task exec_any_call;
 	//	`get_cpu_rp_lr <= third_prev_pc;
 	//end
 	//`get_cpu_rp_lr <= second_prev_pc;
+	
+	//$display(
 	set_pc_and_dio_addr(next_pc_and_dio_addr);
 endtask
 
@@ -180,7 +222,8 @@ task finish_exec_ldst_instr;
 					
 					else // if (data_ready)
 					begin
-						`get_final_ig2_reg_a <= temp_data_in;
+						//`get_final_ig2_reg_a <= temp_data_in;
+						set_reg( final_ig2_ra_index, temp_data_in );
 						$display("ldr:  Data IS READY");
 					end
 				end
@@ -206,7 +249,8 @@ task finish_exec_ldst_instr;
 					
 					else // if (data_ready)
 					begin
-						`get_final_ig2_reg_a <= temp_data_in;
+						//`get_final_ig2_reg_a <= temp_data_in;
+						set_reg( final_ig2_ra_index, temp_data_in );
 						$display("ldrab:  Data IS READY");
 					end
 				end
@@ -273,7 +317,8 @@ task finish_exec_ldst_instr;
 					begin
 						//$display( "ldrx:  %h %h", final_ig3_ra_index,
 						//	temp_data_in );
-						`get_final_ig3_reg_a <= temp_data_in;
+						//`get_final_ig3_reg_a <= temp_data_in;
+						set_reg( final_ig3_ra_index, temp_data_in );
 						$display("ldrx:  Data IS READY");
 					end
 				end
@@ -318,7 +363,8 @@ task finish_exec_ldst_instr;
 					
 					else // if (data_ready)
 					begin
-						`get_final_ig5_reg_a <= temp_data_in;
+						//`get_final_ig5_reg_a <= temp_data_in;
+						set_reg( final_ig5_ra_index, temp_data_in );
 						$display("ldrxi:  Data IS READY");
 					end
 				end

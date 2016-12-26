@@ -635,105 +635,130 @@ package pkg_instr_dec;
 			|| ( test_ig2_opcode == instr_g2_op_reti ) );
 	endfunction
 	
+	//function ig2_get_ra_instr_can_change_pc;
+	//	input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+	//	// Arithmetic instructions:
+	//	ig2_get_ra_instr_can_change_pc
+	//		= ( ( test_ig2_opcode == instr_g2_op_add )
+	//		|| ( test_ig2_opcode == instr_g2_op_adc )
+	//		
+	//		|| ( test_ig2_opcode == instr_g2_op_sub )
+	//		|| ( test_ig2_opcode == instr_g2_op_sbc )
+	//	
+	//	// Bitwise instructions with two register operands:
+	//		|| ( test_ig2_opcode == instr_g2_op_and )
+	//		|| ( test_ig2_opcode == instr_g2_op_orr )
+	//		|| ( test_ig2_opcode == instr_g2_op_xor )
+	//	
+	//	// Complement instructions with one register operand (rB ignored):
+	//		|| ( test_ig2_opcode == instr_g2_op_inv )
+	//		|| ( test_ig2_opcode == instr_g2_op_neg )
+	//	
+	//	
+	//	// Bitshifting (and rotating) instructions that use the value of rB
+	//	// as the number of bits to shift by:
+	//		|| ( test_ig2_opcode == instr_g2_op_lsl )
+	//		|| ( test_ig2_opcode == instr_g2_op_lsr )
+	//		|| ( test_ig2_opcode == instr_g2_op_asr )
+	//		|| ( test_ig2_opcode == instr_g2_op_rol )
+	//		|| ( test_ig2_opcode == instr_g2_op_ror )
+	//	
+	//	
+	//	// Bit rotating instructions that use carry as bit 8 for a 9-bit
+	//	// rotate of { carry, rA } by one bit:
+	//		|| ( test_ig2_opcode == instr_g2_op_rolc )
+	//		|| ( test_ig2_opcode == instr_g2_op_rorc )
+	//	
+	//	
+	//	// Copy instructions:
+	//		|| ( test_ig2_opcode == instr_g2_op_cpy )
+	//		|| ( test_ig2_opcode == instr_g2_op_cpyfrf )
+	//	
+	//	// 8-bit Load/store instructions:
+	//		|| ( test_ig2_opcode == instr_g2_op_ldr )
+	//		
+	//	// 8-bit Push/pop style instructions:
+	//	// (Add 1 the reg pair rBp, then LoaD contents into Register rA
+	//	// from memory at address contained in reg pair rBp)
+	//		|| ( test_ig2_opcode == instr_g2_op_ldrab ) );
+	//endfunction
+	//
+	//
+	//function ig2_get_rap_instr_can_change_pc;
+	//	input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+	//	
+	//	ig2_get_rap_instr_can_change_pc
+	//		= ( ( test_ig2_opcode == instr_g2_op_addpb )
+	//		|| ( test_ig2_opcode == instr_g2_op_addp )
+	//		|| ( test_ig2_opcode == instr_g2_op_subpb )
+	//		|| ( test_ig2_opcode == instr_g2_op_subp )
+	//	
+	//	// Complement instructions with one register operand (rB ignored):
+	//		|| ( test_ig2_opcode == instr_g2_op_invp )
+	//		|| ( test_ig2_opcode == instr_g2_op_negp )
+	//	
+	//	// Bitshifting (and rotating) instructions that do a 16-bit shift
+	//	// or rotate on the reg pair rAp, using rB as the number of bits to
+	//	// shift by:
+	//		|| ( test_ig2_opcode == instr_g2_op_lslp )
+	//		|| ( test_ig2_opcode == instr_g2_op_lsrp )
+	//		|| ( test_ig2_opcode == instr_g2_op_asrp )
+	//		|| ( test_ig2_opcode == instr_g2_op_rolp )
+	//		|| ( test_ig2_opcode == instr_g2_op_rorp )
+	//	
+	//	
+	//	// Bit rotating instructions that use carry as bit 16 for a 17-bit
+	//	// rotate of { carry, rAp } by one bit:
+	//		|| ( test_ig2_opcode == instr_g2_op_rolcp )
+	//		|| ( test_ig2_opcode == instr_g2_op_rorcp )
+	//	
+	//	// Copy instructions:
+	//		|| ( test_ig2_opcode == instr_g2_op_cpyp )
+	//	
+	//	// Swap instructions:
+	//	// (SWap register Pair, also can be used as a combined "call",
+	//	// "jump", and "return" instruction by swapping some other register
+	//	// pair with the "pc" [r14p] register pair)
+	//		|| ( test_ig2_opcode == instr_g2_op_swp )
+	//	
+	//	
+	//	// Extra Interrupt Instructions
+	//	// (Swap the Interrupt Return Address and rAp)
+	//		|| ( test_ig2_opcode == instr_g2_op_swpira )
+	//	// (CoPY the Interrupt Return Address to rAp)
+	//		|| ( test_ig2_opcode == instr_g2_op_cpypira ) );
+	//	
+	//endfunction
+	//
+	//function ig2_get_rbp_instr_can_change_pc;
+	//	input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+	//	ig2_get_rbp_instr_can_change_pc 
+	//		= ( test_ig2_opcode == instr_g2_op_swp );
+	//endfunction
+	
+	
+	// Simplify the ig2_get_..._instr_can_change_pc functions by making
+	// them assume that they can change the PC if the PC is included as an
+	// operand
 	function ig2_get_ra_instr_can_change_pc;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
-		// Arithmetic instructions:
 		ig2_get_ra_instr_can_change_pc
-			= ( ( test_ig2_opcode == instr_g2_op_add )
-			|| ( test_ig2_opcode == instr_g2_op_adc )
-			
-			|| ( test_ig2_opcode == instr_g2_op_sub )
-			|| ( test_ig2_opcode == instr_g2_op_sbc )
-		
-		// Bitwise instructions with two register operands:
-			|| ( test_ig2_opcode == instr_g2_op_and )
-			|| ( test_ig2_opcode == instr_g2_op_orr )
-			|| ( test_ig2_opcode == instr_g2_op_xor )
-		
-		// Complement instructions with one register operand (rB ignored):
-			|| ( test_ig2_opcode == instr_g2_op_inv )
-			|| ( test_ig2_opcode == instr_g2_op_neg )
-		
-		
-		// Bitshifting (and rotating) instructions that use the value of rB
-		// as the number of bits to shift by:
-			|| ( test_ig2_opcode == instr_g2_op_lsl )
-			|| ( test_ig2_opcode == instr_g2_op_lsr )
-			|| ( test_ig2_opcode == instr_g2_op_asr )
-			|| ( test_ig2_opcode == instr_g2_op_rol )
-			|| ( test_ig2_opcode == instr_g2_op_ror )
-		
-		
-		// Bit rotating instructions that use carry as bit 8 for a 9-bit
-		// rotate of { carry, rA } by one bit:
-			|| ( test_ig2_opcode == instr_g2_op_rolc )
-			|| ( test_ig2_opcode == instr_g2_op_rorc )
-		
-		
-		// Copy instructions:
-			|| ( test_ig2_opcode == instr_g2_op_cpy )
-			|| ( test_ig2_opcode == instr_g2_op_cpyfrf )
-		
-		// 8-bit Load/store instructions:
-			|| ( test_ig2_opcode == instr_g2_op_ldr )
-			
-		// 8-bit Push/pop style instructions:
-		// (Add 1 the reg pair rBp, then LoaD contents into Register rA
-		// from memory at address contained in reg pair rBp)
-			|| ( test_ig2_opcode == instr_g2_op_ldrab ) );
+			= !ig2_get_ra_index_is_for_pair(test_ig2_opcode);
 	endfunction
 	
 	function ig2_get_rap_instr_can_change_pc;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
-		
 		ig2_get_rap_instr_can_change_pc
-			= ( ( test_ig2_opcode == instr_g2_op_addpb )
-			|| ( test_ig2_opcode == instr_g2_op_addp )
-			|| ( test_ig2_opcode == instr_g2_op_subpb )
-			|| ( test_ig2_opcode == instr_g2_op_subp )
-		
-		// Complement instructions with one register operand (rB ignored):
-			|| ( test_ig2_opcode == instr_g2_op_invp )
-			|| ( test_ig2_opcode == instr_g2_op_negp )
-		
-		// Bitshifting (and rotating) instructions that do a 16-bit shift
-		// or rotate on the reg pair rAp, using rB as the number of bits to
-		// shift by:
-			|| ( test_ig2_opcode == instr_g2_op_lslp )
-			|| ( test_ig2_opcode == instr_g2_op_lsrp )
-			|| ( test_ig2_opcode == instr_g2_op_asrp )
-			|| ( test_ig2_opcode == instr_g2_op_rolp )
-			|| ( test_ig2_opcode == instr_g2_op_rorp )
-		
-		
-		// Bit rotating instructions that use carry as bit 16 for a 17-bit
-		// rotate of { carry, rAp } by one bit:
-			|| ( test_ig2_opcode == instr_g2_op_rolcp )
-			|| ( test_ig2_opcode == instr_g2_op_rorcp )
-		
-		// Copy instructions:
-			|| ( test_ig2_opcode == instr_g2_op_cpyp )
-		
-		// Swap instructions:
-		// (SWap register Pair, also can be used as a combined "call",
-		// "jump", and "return" instruction by swapping some other register
-		// pair with the "pc" [r14p] register pair)
-			|| ( test_ig2_opcode == instr_g2_op_swp )
-		
-		
-		// Extra Interrupt Instructions
-		// (Swap the Interrupt Return Address and rAp)
-			|| ( test_ig2_opcode == instr_g2_op_swpira )
-		// (CoPY the Interrupt Return Address to rAp)
-			|| ( test_ig2_opcode == instr_g2_op_cpypira ) );
-		
+			= ig2_get_ra_index_is_for_pair(test_ig2_opcode);
 	endfunction
 	
 	function ig2_get_rbp_instr_can_change_pc;
 		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
 		ig2_get_rbp_instr_can_change_pc 
-			= ( test_ig2_opcode == instr_g2_op_swp );
+			= ig2_get_rb_index_is_for_pair(test_ig2_opcode);
 	endfunction
+	
+	
 	
 	function ig3_get_ra_instr_can_change_pc;
 		input [`instr_g3_op_msb_pos:0] test_ig3_opcode;

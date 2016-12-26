@@ -92,6 +92,8 @@ endtask
 
 
 task update_ipc_pc_for_grp_5_instr;
+//task update_grp_5_instr_is_bc;
+//task update_instr_is_bc_for_grp_5_instr;
 	
 	
 	if ( pkg_instr_dec::ig5_get_instr_definitely_changes_pc
@@ -101,29 +103,29 @@ task update_ipc_pc_for_grp_5_instr;
 		instr_is_branch_or_call = 1;
 	end
 	
-	else if (final_ig5_pc_contains_ra)
-	begin
-		if ( pkg_instr_dec::ig5_get_ra_instr_can_change_pc
-			(final_ig5_opcode) )
-		begin
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-	end
-	
-	else if (final_ig5_rap_is_pc)
-	begin
-		if ( pkg_instr_dec::ig5_get_rap_instr_can_change_pc
-			(final_ig5_opcode) )
-		begin
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-	end
-	
-	// Don't need to check this
-	//else if (final_ig5_rbp_is_pc)
+	//else if (final_ig5_pc_contains_ra)
 	//begin
-	//	
+	//	if ( pkg_instr_dec::ig5_get_ra_instr_can_change_pc
+	//		(final_ig5_opcode) )
+	//	begin
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
 	//end
+	//
+	//else if (final_ig5_rap_is_pc)
+	//begin
+	//	if ( pkg_instr_dec::ig5_get_rap_instr_can_change_pc
+	//		(final_ig5_opcode) )
+	//	begin
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
+	//end
+	//
+	//// Don't need to check this
+	////else if (final_ig5_rbp_is_pc)
+	////begin
+	////	
+	////end
 	
 endtask
 
@@ -212,7 +214,8 @@ task start_exec_instr_from_grp_5;
 		// pc])
 		pkg_instr_dec::instr_g5_op_cpypi:
 		begin
-			`get_final_ig5_rpair_a <= instr_in_lo;
+			//`get_final_ig5_rpair_a <= instr_in_lo;
+			set_reg_pair_with_pi( final_ig5_ra_index, instr_in_lo );
 		end
 		
 		// Call instructions

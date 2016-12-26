@@ -99,7 +99,7 @@ bit final_ig5_ra_index_is_for_pair;
 
 bit final_ig5_pc_contains_ra, final_ig5_rap_is_pc, final_ig5_rbp_is_pc;
 
-// If the instruction is a branch or call instruction
+// If the instruction is a branch or call instruction (or reti)
 bit instr_is_branch_or_call;
 // If the pc was POSSIBLY changed by a non-branch, non-call
 // instruction

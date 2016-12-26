@@ -92,6 +92,8 @@ endtask
 
 // ALL Instructions in group 4 change the PC
 task update_ipc_pc_for_grp_4_instr;
+//task update_grp_4_instr_is_bc;
+//task update_instr_is_bc_for_grp_4_instr;
 	//non_bc_instr_possibly_changes_pc = 1;
 	instr_is_branch_or_call = 1;
 endtask

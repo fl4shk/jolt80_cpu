@@ -63,13 +63,15 @@ task disassemble_grp_3_instr;
 endtask
 
 task update_ipc_pc_for_grp_3_instr;
-	if (final_ig3_pc_contains_ra)
-	begin
-		if ( pkg_instr_dec::ig3_get_ra_instr_can_change_pc(ig3_opcode) )
-		begin
-			non_bc_instr_possibly_changes_pc = 1;
-		end
-	end
+//task update_grp_3_instr_is_bc;
+//task update_instr_is_bc_for_grp_3_instr;
+	//if (final_ig3_pc_contains_ra)
+	//begin
+	//	if ( pkg_instr_dec::ig3_get_ra_instr_can_change_pc(ig3_opcode) )
+	//	begin
+	//		non_bc_instr_possibly_changes_pc = 1;
+	//	end
+	//end
 	
 endtask
 

@@ -96,6 +96,8 @@ endtask
 
 
 task update_ipc_pc_for_grp_1_instr;
+//task update_grp_1_instr_is_bc;
+//task update_instr_is_bc_for_grp_1_instr;
 	
 	if (final_ig1_pc_contains_ra)
 	begin
@@ -261,7 +263,8 @@ task start_exec_instr_from_grp_1;
 		// (CoPY Immediate)
 		pkg_instr_dec::instr_g1_op_cpyi:
 		begin
-			`get_final_ig1_reg_a <= final_ig1_imm_value_8;
+			//`get_final_ig1_reg_a <= final_ig1_imm_value_8;
+			set_reg( final_ig1_ra_index, final_ig1_imm_value_8 );
 		end
 		
 		default:

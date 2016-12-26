@@ -94,15 +94,22 @@ task prep_load_instr_hi_after_reg;
 	//$display("There MIGHT be a problem with prep_load_instr_hi_after_reg");
 	
 	
-	if ( data_inout_addr == `get_cpu_rp_pc )
-	begin
-		prep_load_16_no_addr();
-	end
+	//if ( data_inout_addr == `get_cpu_rp_pc )
+	//begin
+	//	prep_load_16_no_addr();
+	//end
+	//
+	//else // if ( data_inout_addr != `get_cpu_rp_pc )
+	//begin
+	//	prep_load_16_with_addr(`get_cpu_rp_pc);
+	//end
 	
-	else // if ( data_inout_addr != `get_cpu_rp_pc )
-	begin
-		prep_load_16_with_addr(`get_cpu_rp_pc);
-	end
+	prep_load_16_with_addr(`get_cpu_rp_pc);
+	
+	
+	//prep_load_16_no_addr();
+	//set_pc_and_dio_addr(the_pc_inc_pc_out);
+	//seq_logic_grab_pc_inc_outputs();
 	
 endtask
 
@@ -114,23 +121,23 @@ task prep_load_instr_hi_generic;
 	begin
 		//$display("!instr_is_branch_or_call");
 		
-		prep_load_instr_hi_after_reg();
-		//if (!non_bc_instr_possibly_changes_pc)
-		//begin
-		//	//$display("!non_bc_instr_possibly_changes_pc");
-		//	prep_load_instr_hi_after_reg();
-		//end
-		//
-		//else // if (non_bc_instr_possibly_changes_pc)
-		//begin
-		//	curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
-		//end
+		//prep_load_instr_hi_after_reg();
+		if (!non_bc_instr_possibly_changes_pc)
+		begin
+			//$display("!non_bc_instr_possibly_changes_pc");
+			prep_load_instr_hi_after_reg();
+		end
+		
+		else // if (non_bc_instr_possibly_changes_pc)
+		begin
+			curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
+		end
 	end
 	
 	else // if (instr_is_branch_or_call)
 	begin
 		$display("prep load instr hi generic:  instr is bc");
-		$display( "pc:  %h %h", `get_cpu_rp_pc, `get_pc_adjuster_outputs );
+		//$display( "pc:  %h %h", `get_cpu_rp_pc, `get_pc_adjuster_outputs );
 		curr_state <= pkg_cpu::cpu_st_load_instr_hi;
 		//prep_load_16_with_addr(`get_cpu_rp_pc);
 		
@@ -214,25 +221,25 @@ task latch_logic_prep_pc_inc_during_load_instr_portion;
 	latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
 endtask
 
-task latch_logic_prep_pc_inc_after_non_bc_ipc;
-	//$display("prep PC incrementer after non branch/call IPC");
-	
-	
-	if ( ( !final_instr_is_32_bit 
-		&& ( prev_pc == `get_cpu_rp_pc ) )
-		|| ( final_instr_is_32_bit
-		&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
-	begin
-		$display("nice");
-		latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
-	end
-	else
-	begin
-		$display("oh no");
-		latch_logic_prep_pc_inc_generic(0);
-	end
-	//latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
-endtask
+//task latch_logic_prep_pc_inc_after_non_bc_ipc;
+//	//$display("prep PC incrementer after non branch/call IPC");
+//	
+//	
+//	if ( ( !final_instr_is_32_bit 
+//		&& ( prev_pc == `get_cpu_rp_pc ) )
+//		|| ( final_instr_is_32_bit
+//		&& ( second_prev_pc == `get_cpu_rp_pc ) ) )
+//	begin
+//		$display("nice");
+//		latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
+//	end
+//	else
+//	begin
+//		$display("oh no");
+//		latch_logic_prep_pc_inc_generic(0);
+//	end
+//	//latch_logic_prep_pc_inc_generic(`instr_16_num_bytes);
+//endtask
 
 task seq_logic_grab_pc_inc_outputs;
 	//$display( "seq_logic_grab_pc_inc_outputs:  %h", the_pc_inc_pc_out );
