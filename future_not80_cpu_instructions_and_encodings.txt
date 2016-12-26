@@ -59,144 +59,148 @@ Group 2 (The instruction group with the most opcodes):
     register rB, or reg pair r(bbbb/2)p [denoted rBp, so the least
     significant bit of bbbb is ignored] (b)
   Instructions:  
-    Arithmetic instructions:
-      1. add
-      2. adc
-      3. addpb (ADD register rB to reg Pair rAp)
-      4. addp ([16-bit] ADD reg Pair rBp to reg Pair rAp)
+    Arithmetic instructions (rA and rB):
+      add
+      adc
+      addpb (ADD register rB to reg Pair rAp)
+      addp ([16-bit] ADD reg Pair rBp to reg Pair rAp)
       
-      5. sub
-      6. sbc
-      7. subpb (SuBtract 8-bit register rB from reg Pair rAp)
-      8. subp ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
+      sub
+      sbc
+      subpb (SuBtract 8-bit register rB from reg Pair rAp)
+      subp ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
       
-      9. cmp
-      10. cmpp (16-bit comparison of rAp and rBp)
+      cmp
+      cmpp (16-bit comparison of rAp and rBp)
       
-      11. umul (Unsigned MULtiply rA by rB, storing results in rAp [16-bit,
+      umul (Unsigned MULtiply rA by rB, storing results in rAp [16-bit,
       big endian])
-      12. smul (Signed MULtiply rA by rB, storing results in rAp [16-bit,
+      smul (Signed MULtiply rA by rB, storing results in rAp [16-bit,
       big endian])
       
     
     Bitwise instructions with two register operands:
-      1. and
-      2. orr
-      3. xor
+      and
+      orr
+      xor
     
     Bitwise instructions with two reg pair operands:
-      1. andp (store rAp AND rBp in rAp)
-      2. orrp (store rAp OR rBp in rAp)
-      3. xorp (store rAp XOR rBp in rAp)
+      andp (store rAp AND rBp in rAp)
+      orrp (store rAp OR rBp in rAp)
+      xorp (store rAp XOR rBp in rAp)
     
     Complement and absolute value instructions with one register (or reg
     pair) operand (rB ignored):
-      1. inv (one's complement of rA)
-      2. invp (one's complement of rAp)
-      3. neg (two's complement of rA)
-      4. negp (two's complement of rAp) 
-      5. abs (store the absolute value of rA to rA)
-      6. absp (store the absolute of rAp to rAp)
+      inv (one's complement of rA)
+      invp (one's complement of rAp)
+      neg (two's complement of rA)
+      negp (two's complement of rAp) 
+      abs (store the absolute value of rA to rA)
+      absp (store the absolute of rAp to rAp)
     
     
     Bitshifting (and rotating) instructions that use the value of rB as the
     number of bits to shift by:
-      1. lsl
-      2. lsr
-      3. asr
-      4. rol
-      5. ror
+      lsl
+      lsr
+      asr
+      rol
+      ror
     
     Bit rotating instructions that use carry as bit 8 for a 9-bit rotate
     of { carry, rA } by one bit:
-      1. rolc
-      2. rorc
-    
-    Bitshifting (and rotating) instructions that shift or rotate rA by one
-    bit at a time:
-      1. lsls (LSL by Single bit)
-      2. lsrs (LSR by Single bit)
-      3. asrs (ASR by Single bit)
-      4. rols (ROL by Single bit)
-      5. rors (ROR by Single bit)
+      rolc
+      rorc
     
     Bitshifting (and rotating) instructions that do a 16-bit shift or
     rotate on the reg pair rAp, using rB as the number of bits to shift by:
-      1. lslp
-      2. lsrp
-      3. asrp
-      4. rolp
-      5. rorp
+      lslp
+      lsrp
+      asrp
+      rolp
+      rorp
     
     Bit rotating instructions that use carry as bit 16 for a 17-bit rotate
     of { carry, rAp } by one bit:
-      1. rolcp
-      2. rorcp
-    
-    Bitshifting (and rotating) instructions that shift or rotate rA by one
-    bit at a time:
-      1. lslps (LSL by Single bit)
-      2. lsrps (LSR by Single bit)
-      3. asrps (ASR by Single bit)
-      4. rolps (ROL by Single bit)
-      5. rorps (ROR by Single bit)
+      rolcp
+      rorcp
     
     Copy instructions:
-      1. cpy (CoPY from reg rB to reg rA)
-      2. cpyp (CoPY from reg Pair rBp to reg Pair rAp)
-      3. cpyfrf (Clear reg rA, then CoPY FRom Flags to reg rA)
-      4. cpytof (CoPY TO Flags from reg rA)
+      cpy (CoPY from reg rB to reg rA)
+      cpyp (CoPY from reg Pair rBp to reg Pair rAp)
+      cpyfrf (Clear reg rA, then CoPY FRom Flags to reg rA)
+      cpytof (CoPY TO Flags from reg rA)
       
     Swap instructions:
-      1. swp (SWap register Pair, also can be used as a combined "call",
+      swp (SWap register Pair, also can be used as a combined "call",
       "jump", and "return" instruction by swapping some other register pair
       with the "pc" [r14p] register pair)
     
     Call instruction (Description:  sets the link register to the return
     address, then sets the program counter to the address contained in
     the reg pair rAp):
-      1. call (CALL subroutine at address in reg pair rAp)
+      call (CALL subroutine at address in reg pair rAp)
     
     8-bit Load/store instructions:
-      1. ldr (LoaD contents into Register rA from memory)
-      2. str (STore Register rA contents to memory)
+      ldr (LoaD contents into Register rA from memory)
+      str (STore Register rA contents to memory)
       
       
     8-bit Push/pop style instructions:
-      1. ldrab (Add 1 the reg pair rBp, then LoaD contents into
+      ldrab (Add 1 the reg pair rBp, then LoaD 8-bit contents into
       Register rA from memory at address contained in reg pair rBp)
       
-      2. strsa (STore reg rA to memory at address contained in reg pair
-      rBp, then Add 1 the reg pair rBp)
+      strab (Add 1 to the reg pair rBp, then STore reg rA to memory at
+      address contained in reg pair rBp)
       
-      3. ldfab (Add 1 to the reg pair rBp, then LoaD a byte containing
+      ldrsa (LoaD reg rA from memory at address contained in reg pair
+      rBp, then Subtract 1 from the reg pair rBp)
+      
+      strsa (STore reg rA to memory at address contained in reg pair
+      rBp, then Subtract 1 from the reg pair rBp)
+      
+      
+      ldfab (Add 1 to the reg pair rBp, then LoaD a byte containing
       processor Flags (other bits cleared) into the processor flags)
       
-      4. stfsa (STore a byte containing the current processor flags (other
+      stfsa (STore a byte containing the current processor flags (other
       bits cleared) to memory at address contained in reg pair rBp, then
       Add 1 the reg pair rBp)
       
     
     16-bit Load/store instructions:
-      1. ldp (LoaD 16-bit contents [big endian] into reg Pair rAp from
+      ldp (LoaD 16-bit contents [big endian] into reg Pair rAp from
       memory at address contained in reg pair rBp)
       
-      2. stp (Store 16-bit contents [big endian] of reg Pair rAp to memory
+      stp (Store 16-bit contents [big endian] of reg Pair rAp to memory
       at address contained in reg pair rBp)
       
       
     16-bit Push/pop style instructions:
-      1. ldpab (Add 2 to the reg pair rBb, then LoaD 16-bit contents [big
+      ldpab (Add 2 to the reg pair rBb, then LoaD 16-bit contents [big
       endian] into reg Pair rAp from memory at address contained in reg
       pair rBp)
       
-      2. stpsa (STore 16-bit contents [big endian] of reg Pair rAp to
+      stpab (Add 2 to the reg pair rBp, then STore 16-bit contents [big
+      endian] of reg Pair rAp to memory at address contained in reg pair
+      rBp)
+      
+      ldpsa (LoaD 16-bit contents [big endian] into reg Pair rAp from
       memory at address contained in reg pair rBp, then Subtract 2 from the
-      reg pair rBp, )
+      reg pair rBb)
+      
+      stpsa (STore 16-bit contents [big endian] of reg Pair rAp to
+      memory at address contained in reg pair rBp, then Subtract 2 from the
+      reg pair rBp)
     
     Interrupt instructions (these ignore BOTH rA and rB):
-      1. eni (ENable Interrupts)
-      2. dii (DIsable Interrupts)
+      eni (ENable Interrupts)
+      dii (DIsable Interrupts)
+      reti (Set the PC to Interrupt RETurn address and enable
+      interrupts)
+    Extra Interrupt Instructions
+      swpira (Swap the Interrupt Return Address and rAp)
+      cpypira (CoPY the Interrupt Return Address to rAp)
 
 Group 3 (Instructions with one register and two register pairs):  
   Encoding:  1100 ooaa aabb bccc
@@ -204,7 +208,7 @@ Group 3 (Instructions with one register and two register pairs):
     reg pair rBp [not always used] (b); reg pair rCp (c); 
     high byte of 16-bit immediate value (i);
     low byte of 16-bit immediate value (j);
-  Instructions
+  Instructions:
     Indexed Load/store instructions:
       1. ldrx (Load 8-bit value from memory at address [rBp + rCp] into rA)
       2. strx (Store rA to memory at address [rBp + rCp])
@@ -216,6 +220,7 @@ Group 3 (Instructions with one register and two register pairs):
 Group 4 (Branching instructions):  
   Encoding:  1101 oooo iiii iiii
   Encoding description:  op (o); immediate value (i)
+  Instructions:
     Branching instructions (note that iiii iiii is a SIGNED 8-bit integer):
       1. bra (branch always)
       2. bnv (branch never, a form of NOP)
@@ -241,9 +246,7 @@ can be 16-bit immediate values):
     reg pair rBp [not always used] (b);  
     high byte of 16-bit immediate value (i);
     low byte of 16-bit immediate value (j);
-  Instructions
-    Arithmetic instructions:
-      
+  Instructions:
     Extended copy instructions:
       1. cpypi (COPY Pair Immediate, which sets the a register pair rAp
       to a 16-bit value in one instruction, which is faster than using two
@@ -265,6 +268,18 @@ can be 16-bit immediate values):
       4. stpxi (Store rAp to memory at address [rBp + 16-bit
       Immediate value])
 
+Group 6 (Reg pair operations with a 4-bit immediate value):
+  Encoding:  1110 01oo oaaa iiii
+  Encoding description:  op (o); reg pair rAp (a); 
+    4-bit immediate value (i)
+  Instructions:
+    Bitshifting operations:
+      1. lslpi
+      2. lsrpi
+      3. asrpi
+      4. rolpi
+      5. rorpi
+      
 
 
 

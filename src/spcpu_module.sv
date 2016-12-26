@@ -61,7 +61,7 @@
 // The CPU itself
 module spcpu
 	
-	( input bit clk, input bit reset, input bit data_ready,
+	( input bit clk, reset, data_ready, interrupt,
 	
 	// Data being read in or written out
 	//inout [`cpu_data_inout_16_msb_pos:0] data_inout,
@@ -103,6 +103,14 @@ module spcpu
 	// 16 programmer-visible CPU regs and 2 registers ONLY for internal use
 	// (mainly for internal ALU usage)
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
+	
+	// Interrupt return address
+	bit [`cpu_addr_msb_pos:0] int_ret_addr;
+	
+	// Whether interrupts are enabled or not
+	bit ints_enabled;
+	
+	
 	//bit [`cpu_reg_msb_pos:0] temp_pc[0:1];
 	//bit did_prep_ldst_instr;
 	//bit [`cpu_addr_msb_pos:0] temp_store_addr;
@@ -324,17 +332,31 @@ module spcpu
 		data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
 		
 		
-		// Clear every CPU register
+		//// Clear every CPU register
+		//{ cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3], 
+		//	cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
+		//	cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
+		//	cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
+		
+		// Clear every non-PC CPU register
 		{ cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3], 
 			cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
 			cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
-			cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15] } <= 0;
+			cpu_regs[12], cpu_regs[13] } <= 0;
 		
 		//did_prep_ldst_instr <= 0;
 		
 		
 		//curr_state <= pkg_cpu::cpu_st_begin_0;
+		//curr_state <= 0;
+		
 		curr_state <= 0;
+		
+		// Disable interrupts to start with (require the program to enable
+		// interrupts)
+		ints_enabled <= 0;
+		int_ret_addr <= 0;
+		
 		
 		//data_in_is_0_counter <= 0;
 		
@@ -346,12 +368,41 @@ module spcpu
 		//$display( "req_rdwr, data_ready:  %h %h", req_rdwr, 
 		//	data_ready );
 		
-		if ( curr_state == pkg_cpu::cpu_st_begin_0 )
+		if ( curr_state == pkg_cpu::cpu_st_after_reset )
 		begin
-			//curr_state <= curr_state + 1;
-			curr_state <= pkg_cpu::cpu_st_load_instr_hi;
-			//prep_load_16_no_addr();
-			prep_load_16_with_addr(`get_cpu_rp_pc);
+			if (data_ready)
+			begin
+				curr_state <= pkg_cpu::cpu_st_begin_0;
+				
+				// Hardcoded address
+				prep_load_16_with_addr(`cpu_addr_width'h8000);
+			end
+			
+			//else // if (!data_ready)
+			//begin
+			//	$display("cpu_st_after_reset:  Data NOT ready");
+			//end
+		end
+		
+		else if ( curr_state == pkg_cpu::cpu_st_begin_0 )
+		begin
+			if (data_ready)
+			begin
+				//curr_state <= curr_state + 1;
+				curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+				//prep_load_16_no_addr();
+				
+				`get_cpu_rp_pc <= temp_data_in;
+				
+				//prep_load_16_with_addr(`get_cpu_rp_pc);
+				prep_load_16_with_addr(temp_data_in);
+				
+			end
+			
+			else // if (!data_ready)
+			begin
+				$display("cpu_st_begin_0:  Data NOT ready");
+			end
 		end
 		
 		else if ( curr_state == pkg_cpu::cpu_st_load_instr_hi )
@@ -501,6 +552,8 @@ module spcpu
 			$display( "Check whether the pc was actually changed by a ",
 				 "non-branch, non-call instruction" );
 			
+			//$display( "%h %h\t%h %h", final_instr_is_32_bit, 
+			//	`get_cpu_rp_pc, prev_pc, second_prev_pc );
 			
 			// Check if the pc was ACTUALLY changed
 			//if ( prev_pc == `get_cpu_rp_pc )
@@ -608,11 +661,13 @@ module spcpu
 		//	$display("latch_logic in finish_exec_ldst_instr");
 		//end
 		
-		else if ( curr_state 
-			== pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
-		begin
-			latch_logic_prep_pc_inc_after_non_bc_ipc();
-		end
+		
+		//else if ( curr_state 
+		//	== pkg_cpu::cpu_st_update_pc_after_non_bc_ipc )
+		//begin
+		//	latch_logic_prep_pc_inc_after_non_bc_ipc();
+		//end
+		
 		
 		
 		//else

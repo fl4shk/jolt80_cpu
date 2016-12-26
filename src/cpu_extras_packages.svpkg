@@ -61,6 +61,9 @@ package pkg_cpu;
 	
 	typedef enum bit [`cpu_state_msb_pos:0]
 	{
+		cpu_st_after_reset,
+		
+		
 		//// This state exists so the first instruction can be 
 		cpu_st_begin_0,
 		//cpu_st_begin_1,

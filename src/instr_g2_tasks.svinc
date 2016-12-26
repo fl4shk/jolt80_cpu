@@ -299,7 +299,7 @@ task disassemble_grp_2_instr;
 	end
 	
 	// (STore reg rA to memory at address contained in reg pair rBp,
-	// then Add 1 the reg pair rBp)
+	// then Subtract 1 from the reg pair rBp)
 	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_strsa )
 	begin
 		$display( "strsa r%d, r%dp", final_ig2_ra_index,
@@ -650,7 +650,7 @@ task prep_alu_instr_grp_2_generic;
 			do_alu_op_addp_no_flags( rb_index, 0, 1 );
 		end
 		// (STore reg rA to memory at address contained in reg pair rBp,
-		// then Add 1 the reg pair rBp)
+		// then Subtract 1 from the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_strsa:
 		begin
 			do_alu_op_subp_no_flags( rb_index, 0, 1 );
@@ -1016,12 +1016,33 @@ task start_exec_instr_from_grp_2;
 		// (ENable Interrupts)
 		pkg_instr_dec::instr_g2_op_eni:
 		begin
-			$display("WARNING!  eni is not yet implemented!");
+			//$display("WARNING!  eni is not yet implemented!");
+			ints_enabled <= 1;
 		end
 		// (DIsable Interrupts)
 		pkg_instr_dec::instr_g2_op_dii:
 		begin
-			$display("WARNING!  dii is not yet implemented!");
+			//$display("WARNING!  dii is not yet implemented!");
+			ints_enabled <= 0;
+		end
+		
+		
+		// (Set the PC to Interrupt RETurn address and enable interrupts)
+		pkg_instr_dec::instr_g2_op_reti:
+		begin
+			ints_enabled <= 1;
+		end
+		
+		// Extra Interrupt Instructions
+		// (Swap the Interrupt Return Address and rAp)
+		pkg_instr_dec::instr_g2_op_swpira:
+		begin
+			
+		end
+		// (CoPY the Interrupt Return Address to rAp)
+		pkg_instr_dec::instr_g2_op_cpypira :
+		begin
+			
 		end
 		
 		
