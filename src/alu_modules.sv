@@ -219,8 +219,8 @@ module adder_subtractor
 				//proc_flags_out[pkg_pflags::pf_slot_c] 
 				//	= ~proc_flags_out[pkg_pflags::pf_slot_c];
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { 1'b0, a_in_hi, a_in_lo } + { 9'h0, (~b_in_lo) } 
-					+ 17'b1;
+					= { 1'b0, a_in_hi, a_in_lo } 
+					+ { 1'b0, ~{ 8'h0, b_in_lo } } + 17'b1;
 				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
 			end
 			
