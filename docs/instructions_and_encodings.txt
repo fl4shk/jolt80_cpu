@@ -64,9 +64,16 @@ Group 2 (The instruction group with the most opcodes):
     Arithmetic instructions:
       add
       adc
+      addpb (ADD register rB to reg Pair rAp)
+      addp ([16-bit] ADD reg Pair rBp to reg Pair rAp)
+      
       sub
       sbc
+      subpb (SuBtract 8-bit register rB from reg Pair rAp)
+      subp ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
+      
       cmp
+      cmpp (16-bit comparison of rAp and rBp)
     
     Bitwise instructions with two register operands:
       and
