@@ -197,8 +197,8 @@ module spcpu_test_bench;
 		test_cpu_reset = 1'b0;
 		
 		
-		#80
-		test_cpu_interrupt = 1'b1;
+		//#80
+		//test_cpu_interrupt = 1'b1;
 		
 		//#90
 		//test_cpu_interrupt = 1'b0;

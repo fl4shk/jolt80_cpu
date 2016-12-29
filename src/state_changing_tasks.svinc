@@ -83,10 +83,21 @@ endtask
 
 
 
+task set_curr_state;
+	input [`cpu_state_msb_pos:0] n_curr_state;
+	curr_state <= n_curr_state;
+	
+	if ( n_curr_state == pkg_cpu::cpu_st_load_instr_hi )
+	begin
+		wait_counter <= 0;
+	end
+endtask
+
 
 // Advance the PC after a non-branch, non-call instruction
 task prep_load_instr_hi_after_reg;
-	curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+	set_curr_state(pkg_cpu::cpu_st_load_instr_hi);
 	//advance_pc_etc_after_load_instr_part();
 	
 	//advance_pc_etc_after_reg
@@ -140,7 +151,8 @@ task prep_load_instr_hi_generic;
 		//
 		//else // if (non_bc_instr_possibly_changes_pc)
 		//begin
-		//	curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
+		//	//curr_state <= pkg_cpu::cpu_st_update_pc_after_non_bc_ipc;
+		//	set_curr_state(pkg_cpu::cpu_st_update_pc_after_non_bc_ipc);
 		//end
 	end
 	
@@ -148,7 +160,8 @@ task prep_load_instr_hi_generic;
 	begin
 		$display("prep load instr hi generic:  instr is bc");
 		//$display( "pc:  %h %h", `get_cpu_rp_pc, `get_pc_adjuster_outputs );
-		curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+		//curr_state <= pkg_cpu::cpu_st_load_instr_hi;
+		set_curr_state(pkg_cpu::cpu_st_load_instr_hi);
 		//prep_load_16_with_addr(`get_cpu_rp_pc);
 		
 		if (final_branch_was_taken)
@@ -189,7 +202,8 @@ task prep_load_instr_hi_generic;
 endtask
 
 task prep_load_instr_lo_reg;
-	curr_state <= pkg_cpu::cpu_st_load_instr_lo;
+	//curr_state <= pkg_cpu::cpu_st_load_instr_lo;
+	set_curr_state(pkg_cpu::cpu_st_load_instr_lo);
 	prep_load_16_no_addr();
 endtask
 

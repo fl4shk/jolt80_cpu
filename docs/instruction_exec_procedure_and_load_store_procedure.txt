@@ -1,0 +1,84 @@
+-- INSTRUCTION EXECUTION PROECURE AND LOAD/STORE PROCEDURE --
+
+
+
+The CPU will wait for the outside world to tell it that the load or store
+is complete before it does anything else (including loading a 16-bit
+instructions or half of a 32-bit instruction).  Basically, the CPU will
+wait until the outside world sets the "data_ready" CPU input high.  
+
+The CPU also lets the outside world know when it wants to read or write
+through its "req_rdwr" output.
+
+
+
+
+
+
+
+Data Loading/Storing Procedure Part 1:
+  * The CPU sets "req_rdwr" to high, "data_acc_sz" to the size of the
+  load (0 for 8-bit load, 1 for 16-bit load), and "data_inout_we" to 0.
+Data Loading/Storing Procedure Part 2:
+  * The CPU waits for the outside world to set the CPU input called
+  "data_ready" to high.  This may take more than one cycle depending on how
+  quickly the outside world can access the memory.  On the SAME cycle that
+  "data_ready" is set to high, the CPU WILL start doing something else.
+
+
+
+Instruction Execution Procedure (assuming no interrupts or resets happen):
+  * NOTE that ON THE CYCLE BEFORE AN INSTRUCTION IS STARTED, Data
+  Loading/Storing Procedure Part 1 (Start a 16-bit Load of a 16-bit
+  Instruction or 16-bit Load of the high 16 bits of a 32-bit instruction)
+  is performed.
+
+
+16-bit instructions that DON'T do an 8-bit load or store:
+  * Data Loading/Storing Procedure Part 2 is performed (Finish a 16-bit
+  Load of a 16-bit Instruction).
+  * The instruction is executed.  Also, perform Data Loading/Storing
+  Procedure Part 1 (Start a 16-bit Load of a 16-bit Instruction or the high
+  16 bits of a 32-bit Instruction).
+
+
+
+16-bit instructions that DO do an 8-bit load or store:
+  * Data Loading/Storing Procedure Part 2 is performed (Finish a 16-bit
+  Load of a 16-bit Instruction).
+  * Start executing the instruction:  Data Loading/Storing Procedure Part 1
+  is performed (Start an 8-bit Load or Store).
+  * Finish executing the instruction:  Data Loading/Storing Procedure Part
+  2 is performed (Finish an 8-bit Load or Store).  Also, perform Data
+  Loading/Storing Procedure Part 1 (Start a 16-bit Load of a 16-bit
+  Instruction or the high 16 bits of a 32-bit Instruction).
+
+
+32-bit instructions that DON'T do an 8-bit load or store:
+  * Data Loading/Storing Procedure Part 2 is performed (Finish a 16-bit
+  Load of the HIGH 16 bits of a 32-bit instruction).
+  * Data Loading/Storing Procedure Part 1 is performed (Start a 16-bit Load
+  of the LOW 16 bits of a 32-bit instruction).
+  * Data Loading/Storing Procedure Part 2 is performed (Finish a 16-bit Load
+  of the LOW 16 bits of a 32-bit instruction).  On the same cycle, the
+  instruction is executed.  Also, perform Data Loading/Storing Procedure
+  Part 1 (Start a 16-bit Load of a 16-bit Instruction or the high 16 bits
+  of a 32-bit Instruction).
+
+
+
+32-bit instructions that DO do an 8-bit load or store:
+  * Data Loading/Storing Procedure Part 2 is performed (Finish a 16-bit
+  Load of the HIGH 16 bits of a 32-bit instruction).
+  * Data Loading/Storing Procedure Part 1 is performed (Start a 16-bit Load
+  of the LOW 16 bits of a 32-bit instruction).
+  * Data Loading/Storing Procedure Part 2 is performed (Finish a 16-bit Load
+  of the LOW 16 bits of a 32-bit instruction).
+  * Start executing the instruction:  Data Loading/Storing Procedure Part 1 
+  is performed (Start an 8-bit Load or Store).
+  * Finish executing the instruction:  Data Loading/Storing Procedure Part 2
+  is performed (Finish an 8-bit Load or Store).  Also, perform Data
+  Loading/Storing Procedure Part 1 (Start a 16-bit Load of a 16-bit
+  Instruction or the high 16 bits of a 32-bit Instruction).
+
+
