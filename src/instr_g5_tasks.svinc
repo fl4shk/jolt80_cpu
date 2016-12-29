@@ -158,8 +158,12 @@ task prep_alu_instr_grp_5_generic;
 	case (opcode)
 		pkg_instr_dec::instr_g5_op_ldrxi:
 		begin
-			do_alu_op_addp_no_flags
-				( `make_reg_pair_w_pi(rbp_index),
+			//do_alu_op_addp_no_flags
+			//	( `make_reg_pair_w_pi(rbp_index),
+			//	imm_value_16[ `cpu_imm_value_16_msb_pos
+			//	: `cpu_imm_value_8_width ],
+			//	imm_value_16[`cpu_imm_value_8_msb_pos:0] );
+			do_alu_op_addp_no_flags( rbp_index,
 				imm_value_16[ `cpu_imm_value_16_msb_pos
 				: `cpu_imm_value_8_width ],
 				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
@@ -167,8 +171,12 @@ task prep_alu_instr_grp_5_generic;
 		
 		pkg_instr_dec::instr_g5_op_strxi:
 		begin
-			do_alu_op_addp_no_flags
-				( `make_reg_pair_w_pi(rbp_index),
+			//do_alu_op_addp_no_flags
+			//	( `make_reg_pair_w_pi(rbp_index),
+			//	imm_value_16[ `cpu_imm_value_16_msb_pos
+			//	: `cpu_imm_value_8_width ],
+			//	imm_value_16[`cpu_imm_value_8_msb_pos:0] );
+			do_alu_op_addp_no_flags( rbp_index,
 				imm_value_16[ `cpu_imm_value_16_msb_pos
 				: `cpu_imm_value_8_width ],
 				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
