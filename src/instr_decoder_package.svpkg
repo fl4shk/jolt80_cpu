@@ -558,7 +558,7 @@ package pkg_instr_dec;
 			//
 			//|| ( ( test_ig2_opcode >= instr_g2_op_addp )
 			//&& ( test_ig2_opcode <= instr_g2_op_swp ) ) );
-			= ( ig2_get_op_in_range( test_ig2_opcode, instr_g2_op_inv,
+			= ( ig2_get_op_in_range( test_ig2_opcode, instr_g2_op_invp,
 			instr_g2_op_cpypira )
 			|| ig2_get_op_in_range( test_ig2_opcode, instr_g2_op_addpb,
 			instr_g2_op_rorp )
