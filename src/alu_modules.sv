@@ -115,40 +115,40 @@ module adder_subtractor
 			//end
 			pkg_alu::addsub_op_add:
 			begin
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
-				//	= { 1'b0, a_in_lo } + { 1'b0, b_in_lo };
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
-					= a_in_lo + b_in_lo;
+					= { 1'b0, a_in_lo } + { 1'b0, b_in_lo };
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
+				//	= a_in_lo + b_in_lo;
 				{ proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
 			end
 			
 			pkg_alu::addsub_op_adc:
 			begin
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
-				//	= { 1'b0, a_in_lo } + { 1'b0, b_in_lo } 
-				//	+ { 8'b0, proc_flags_in[pkg_pflags::pf_slot_c] };
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
-					= a_in_lo + b_in_lo 
-					+ proc_flags_in[pkg_pflags::pf_slot_c];
+					= { 1'b0, a_in_lo } + { 1'b0, b_in_lo } 
+					+ { 8'b0, proc_flags_in[pkg_pflags::pf_slot_c] };
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
+				//	= a_in_lo + b_in_lo 
+				//	+ proc_flags_in[pkg_pflags::pf_slot_c];
 				{ proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
 			end
 			
 			pkg_alu::addsub_op_addpb:
 			begin
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-				//	= { 1'b0, a_in_hi, a_in_lo } + { 9'h0, b_in_lo };
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { a_in_hi, a_in_lo } + b_in_lo;
+					= { 1'b0, a_in_hi, a_in_lo } + { 9'h0, b_in_lo };
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+				//	= { a_in_hi, a_in_lo } + b_in_lo;
 				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
 			end
 			
 			pkg_alu::addsub_op_addp:
 			begin
-				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-				//	= { 1'b0, a_in_hi, a_in_lo } 
-				//	+ { 1'b0, b_in_hi, b_in_lo };
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { a_in_hi, a_in_lo } + { b_in_hi, b_in_lo };
+					= { 1'b0, a_in_hi, a_in_lo } 
+					+ { 1'b0, b_in_hi, b_in_lo };
+				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+				//	= { a_in_hi, a_in_lo } + { b_in_hi, b_in_lo };
 				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
 			end
 			

@@ -91,10 +91,9 @@ module quartus_ii_test_memory
 	
 	wire [`cpu_data_inout_8_msb_pos:0] internal_write_data_in_a,
 		internal_write_data_in_b;
-	bit [`cpu_data_inout_8_msb_pos:0] internal_read_data_out_a,
-		internal_read_data_out_b;
-	
 	wire internal_write_data_we_a, internal_write_data_we_b;
+	wire [`cpu_data_inout_8_msb_pos:0] internal_read_data_out_a,
+		internal_read_data_out_b;
 	
 	assign addr_in_2 = ( addr_in + 1 );
 	
@@ -107,6 +106,13 @@ module quartus_ii_test_memory
 	assign internal_write_data_in_b
 		= write_data_in_16[`cpu_data_inout_8_msb_pos:0];
 	
+	assign internal_write_data_we_a
+		= ( ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
+		? write_data_we_8 : write_data_we_16 );
+	assign internal_write_data_we_b
+		= ( ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_16 )
+		? write_data_we_16 : 0 );
+	
 	
 	assign read_data_out_8
 		= ( ( data_acc_sz == pkg_cpu::cpu_data_acc_sz_8 )
@@ -118,7 +124,7 @@ module quartus_ii_test_memory
 	
 	
 	initial data_ready = 0;
-	initial can_rdwr = 0;
+	initial can_rdwr = 1;
 	
 	
 	true_dual_port_ram internal_ram( .clk(clk), 

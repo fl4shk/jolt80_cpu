@@ -145,10 +145,26 @@ module spcpu_test_bench;
 	//	.data_out2(test_mem_read_data_out_16) );
 	
 	
+	//`ifdef use_half_clock
+	//tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset), 
+	//`else
+	//tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
+	//`endif
+	//	.req_rdwr(test_cpu_req_rdwr),
+	//	.addr_in(test_cpu_data_inout_addr),
+	//	.write_data_in_8(test_mem_write_data_in_8),
+	//	.write_data_in_16(test_mem_write_data_in_16),
+	//	.data_acc_sz(test_cpu_data_acc_sz),
+	//	.write_data_we_8(test_mem_write_data_we_8),
+	//	.write_data_we_16(test_mem_write_data_we_16),
+	//	.read_data_out_8(test_mem_read_data_out_8),
+	//	.read_data_out_16(test_mem_read_data_out_16),
+	//	.data_ready(test_mem_data_ready) );
+	
 	`ifdef use_half_clock
-	tb_memory test_mem( .clk(tb_mem_clk), .reset(test_mem_reset), 
+	quartus_ii_test_memory test_mem( .clk(tb_mem_clk), 
 	`else
-	tb_memory test_mem( .clk(tb_clk), .reset(test_mem_reset), 
+	quartus_ii_test_memory test_mem( .clk(tb_clk),
 	`endif
 		.req_rdwr(test_cpu_req_rdwr),
 		.addr_in(test_cpu_data_inout_addr),
