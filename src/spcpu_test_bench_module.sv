@@ -200,14 +200,9 @@ module spcpu_test_bench;
 		clk_gen_reset = 1'b1;
 		test_cpu_reset = 1'b0;
 		test_cpu_interrupt = 1'b0;
-		//$display(test_cpu_reset);
 		
 		#4
 		test_cpu_reset = 1'b1;
-		//$display(test_cpu_reset);
-		
-		//{ mem_inputs.write_addr_in, mem_inputs.write_data_in,
-		//	mem_inputs.write_data_acc_sz, mem_inputs.write_data_we } = 0;
 		
 		#4
 		test_cpu_reset = 1'b0;

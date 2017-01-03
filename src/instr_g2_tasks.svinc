@@ -1784,7 +1784,7 @@ task start_exec_instr_from_grp_2;
 		// (two's complement of rA)
 		pkg_instr_dec::instr_g2_op_neg:
 		begin
-			finish_alu_op_with_dest_rpair();
+			finish_alu_op_with_dest_reg();
 		end
 		// (Clear reg rA, then CoPY FRom Flags to reg rA)
 		pkg_instr_dec::instr_g2_op_cpyfrf:

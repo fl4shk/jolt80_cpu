@@ -642,6 +642,7 @@ module alu
 						do_not_change_z_flag, out_hi, out_lo } 
 						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 						a_in_hi, a_in_lo };
+					//$display("alu_op_asr:  Don't change ANYTHING");
 				end
 				
 				else

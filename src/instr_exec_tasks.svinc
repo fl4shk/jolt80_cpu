@@ -22,10 +22,6 @@
 
 
 
-//task write_reg_after_alu_op;
-//	
-//endtask
-
 task set_reg;
 	input [`all_regs_index_msb_pos:0] reg_index;
 	input [`cpu_reg_msb_pos:0] val;
@@ -105,27 +101,12 @@ endtask
 //	end
 //endtask
 
-//task start_exec_shared_non_ldst_suffix;
-//	if (!non_bc_instr_possibly_changes_pc)
-//	begin
-//		prep_load_instr_hi_generic();
-//	end
-//	
-//	else // if (non_bc_instr_possibly_changes_pc)
-//	begin
-//		prep_update_pc_etc_after_ipc();
-//	end
-//endtask
-
 task exec_any_call;
 	input [`cpu_imm_value_16_msb_pos:0] next_pc_and_dio_addr;
 	//$display( "exec_any_call:  second_prev_pc, third_prev_pc:  %h %h",
 	//	second_prev_pc, third_prev_pc );
 	//`get_cpu_rp_lr <= `get_cpu_rp_pc;
 	
-	//`get_cpu_rp_lr <= prev_pc + ( !final_instr_is_32_bit ? 2 : 4 );
-	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
-	//	: third_prev_pc );
 	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc 
 	//	: second_prev_pc );
 	`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
@@ -133,19 +114,6 @@ task exec_any_call;
 	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc
 	//	: second_prev_pc );
 	
-	//`get_cpu_rp_lr <= third_prev_pc + 2;
-	//`get_cpu_rp_lr <= prev_pc + 4;
-	//if (!final_instr_is_32_bit)
-	//begin
-	//	`get_cpu_rp_lr <= second_prev_pc;
-	//end
-	//else // if (final_instr_is_32_bit)
-	//begin
-	//	`get_cpu_rp_lr <= third_prev_pc;
-	//end
-	//`get_cpu_rp_lr <= second_prev_pc;
-	
-	//$display(
 	set_pc_and_dio_addr(next_pc_and_dio_addr);
 endtask
 
