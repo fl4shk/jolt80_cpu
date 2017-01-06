@@ -65,12 +65,12 @@ Group 2 (The instruction group with the most opcodes):
     Arithmetic instructions (rA and rB):
       add
       adc
-      addpb (ADD register rB to reg Pair rAp)
+      //addpb (ADD register rB to reg Pair rAp) (removed)
       addp ([16-bit] ADD reg Pair rBp to reg Pair rAp)
       
       sub
       sbc
-      subpb (SuBtract 8-bit register rB from reg Pair rAp)
+      //subpb (SuBtract 8-bit register rB from reg Pair rAp) (removed)
       subp ([16-bit] SuBtract reg Pair rBp from reg Pair rAp)
       
       cmp
@@ -102,18 +102,18 @@ Group 2 (The instruction group with the most opcodes):
       absp (store the absolute of rAp to rAp)
     
     
-    Bitshifting (and rotating) instructions that use the value of rB as the
-    number of bits to shift by:
-      lsl
-      lsr
-      asr
-      rol
-      ror
-    
-    Bit rotating instructions that use carry as bit 8 for a 9-bit rotate
-    of { carry, rA } by one bit:
-      rolc
-      rorc
+    //Bitshifting (and rotating) instructions that use the value of rB as
+    //the number of bits to shift by (these have been removed):
+    //  lsl (removed)
+    //  lsr (removed)
+    //  asr (removed)
+    //  rol (removed)
+    //  ror (removed)
+    //
+    //Bit rotating instructions that use carry as bit 8 for a 9-bit rotate
+    //of { carry, rA } by one bit (these have been removed):
+    //  rolc (removed)
+    //  rorc (removed)
     
     Bitshifting (and rotating) instructions that do a 16-bit shift or
     rotate on the reg pair rAp, using rB as the number of bits to shift by:

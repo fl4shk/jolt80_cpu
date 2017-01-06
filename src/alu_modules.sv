@@ -584,162 +584,162 @@ module alu
 					proc_flags_in[pkg_pflags::pf_slot_c] };
 			end
 			
-			// 8-bit Bitshifting operations (number of bits specified by
-			// b_in_lo)
-			pkg_alu::alu_op_lsl:
-			begin
-				oper_cat = `alu_op_lsl_cat;
-				
-				init_addsub_oper_8( 0, 0, 0, 0 );
-				if ( b_in_lo == `alu_inout_width'h0 )
-				begin
-					// Don't change ANYTHING
-					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
-						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-						a_in_hi, a_in_lo };
-				end
-				
-				else
-				begin
-					{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
-						= { 1'b0, a_in_lo } << b_in_lo;
-					out_hi = 0;
-				end
-			end
-			
-			pkg_alu::alu_op_lsr:
-			begin
-				oper_cat = `alu_op_lsr_cat;
-				
-				init_addsub_oper_8( 0, 0, 0, 0 );
-				if ( b_in_lo == `alu_inout_width'h0 )
-				begin
-					// Don't change ANYTHING
-					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
-						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-						a_in_hi, a_in_lo };
-				end
-				
-				else
-				begin
-					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-						= { a_in_lo, 1'b0 } >> b_in_lo;
-					out_hi = 0;
-				end
-			end
-			
-			pkg_alu::alu_op_asr:
-			begin
-				oper_cat = `alu_op_asr_cat;
-				
-				init_addsub_oper_8( 0, 0, 0, 0 );
-				if ( b_in_lo == `alu_inout_width'h0 )
-				begin
-					// Don't change ANYTHING
-					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
-						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-						a_in_hi, a_in_lo };
-					//$display("alu_op_asr:  Don't change ANYTHING");
-				end
-				
-				else
-				begin
-					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-						= $signed({ a_in_lo, 1'b0 }) >>> b_in_lo;
-					out_hi = 0;
-				end
-				
-			end
-			
-			// 8-bit Bit rotation operations (number of bits specified by
-			// [b_in_lo % inout_width])
-			pkg_alu::alu_op_rol:
-			begin
-				oper_cat = `alu_op_rol_cat;
-				
-				init_addsub_oper_8( 0, 0, 0, 0 );
-				if ( b_in_lo == `alu_inout_width'h0 )
-				begin
-					// Don't change ANYTHING
-					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
-						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-						a_in_hi, a_in_lo };
-				end
-				
-				else
-				begin
-					// Don't change carry
-					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-						= { rot_temp[ ( `alu_inout_width 
-						- ( b_in_lo & rot_mod_thing ) ) 
-						+: `alu_inout_width ],
-						proc_flags_in[pkg_pflags::pf_slot_c] };
-					out_hi = 0;
-					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
-					//	= { rot_temp[ ( `alu_inout_width 
-					//	- ( b_in_lo % `alu_inout_width ) ) 
-					//	+: ``alu_inout_width ],
-					//	proc_flags_in[pkg_pflags::pf_slot_c] };
-				end
-				
-			end
-			
-			pkg_alu::alu_op_ror:
-			begin
-				oper_cat = `alu_op_ror_cat;
-				
-				init_addsub_oper_8( 0, 0, 0, 0 );
-				if ( b_in_lo == `alu_inout_width'h0 )
-				begin
-					// Don't change ANYTHING
-					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
-						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
-						a_in_hi, a_in_lo };
-				end
-				
-				else
-				begin
-					// Don't change carry
-					{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-						= { rot_temp[ ( b_in_lo & rot_mod_thing ) 
-						+: `alu_inout_width ],
-						proc_flags_in[pkg_pflags::pf_slot_c] };
-					out_hi = 0;
-					//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-					//	= { rot_temp[ ( b_in_lo % `alu_inout_width ) 
-					//	+: `alu_inout_width ],
-					//	proc_flags_in[pkg_pflags::pf_slot_c] };
-				end
-				
-			end
-			
-			
-			// Bit rotating instructions that use carry as bit 8 for a
-			// 9-bit rotate of { carry, a_in_lo } by one bit:
-			pkg_alu::alu_op_rolc:
-			begin
-				oper_cat = `alu_op_rolc_cat;
-				
-				init_addsub_oper_8( 0, 0, 0, 0 );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
-					= { a_in_lo, proc_flags_in[pkg_pflags::pf_slot_c] };
-				out_hi = 0;
-			end
-			
-			pkg_alu::alu_op_rorc:
-			begin
-				oper_cat = `alu_op_rorc_cat;
-				
-				init_addsub_oper_8( 0, 0, 0, 0 );
-				{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
-					= { proc_flags_in[pkg_pflags::pf_slot_c], a_in_lo };
-				out_hi = 0;
-			end
+			//// 8-bit Bitshifting operations (number of bits specified by
+			//// b_in_lo)
+			//pkg_alu::alu_op_lsl:
+			//begin
+			//	oper_cat = `alu_op_lsl_cat;
+			//	
+			//	init_addsub_oper_8( 0, 0, 0, 0 );
+			//	if ( b_in_lo == `alu_inout_width'h0 )
+			//	begin
+			//		// Don't change ANYTHING
+			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
+			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+			//			a_in_hi, a_in_lo };
+			//	end
+			//	
+			//	else
+			//	begin
+			//		{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
+			//			= { 1'b0, a_in_lo } << b_in_lo;
+			//		out_hi = 0;
+			//	end
+			//end
+			//
+			//pkg_alu::alu_op_lsr:
+			//begin
+			//	oper_cat = `alu_op_lsr_cat;
+			//	
+			//	init_addsub_oper_8( 0, 0, 0, 0 );
+			//	if ( b_in_lo == `alu_inout_width'h0 )
+			//	begin
+			//		// Don't change ANYTHING
+			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
+			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+			//			a_in_hi, a_in_lo };
+			//	end
+			//	
+			//	else
+			//	begin
+			//		{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+			//			= { a_in_lo, 1'b0 } >> b_in_lo;
+			//		out_hi = 0;
+			//	end
+			//end
+			//
+			//pkg_alu::alu_op_asr:
+			//begin
+			//	oper_cat = `alu_op_asr_cat;
+			//	
+			//	init_addsub_oper_8( 0, 0, 0, 0 );
+			//	if ( b_in_lo == `alu_inout_width'h0 )
+			//	begin
+			//		// Don't change ANYTHING
+			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
+			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+			//			a_in_hi, a_in_lo };
+			//		//$display("alu_op_asr:  Don't change ANYTHING");
+			//	end
+			//	
+			//	else
+			//	begin
+			//		{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+			//			= $signed({ a_in_lo, 1'b0 }) >>> b_in_lo;
+			//		out_hi = 0;
+			//	end
+			//	
+			//end
+			//
+			//// 8-bit Bit rotation operations (number of bits specified by
+			//// [b_in_lo % inout_width])
+			//pkg_alu::alu_op_rol:
+			//begin
+			//	oper_cat = `alu_op_rol_cat;
+			//	
+			//	init_addsub_oper_8( 0, 0, 0, 0 );
+			//	if ( b_in_lo == `alu_inout_width'h0 )
+			//	begin
+			//		// Don't change ANYTHING
+			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
+			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+			//			a_in_hi, a_in_lo };
+			//	end
+			//	
+			//	else
+			//	begin
+			//		// Don't change carry
+			//		{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+			//			= { rot_temp[ ( `alu_inout_width 
+			//			- ( b_in_lo & rot_mod_thing ) ) 
+			//			+: `alu_inout_width ],
+			//			proc_flags_in[pkg_pflags::pf_slot_c] };
+			//		out_hi = 0;
+			//		//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] } 
+			//		//	= { rot_temp[ ( `alu_inout_width 
+			//		//	- ( b_in_lo % `alu_inout_width ) ) 
+			//		//	+: ``alu_inout_width ],
+			//		//	proc_flags_in[pkg_pflags::pf_slot_c] };
+			//	end
+			//	
+			//end
+			//
+			//pkg_alu::alu_op_ror:
+			//begin
+			//	oper_cat = `alu_op_ror_cat;
+			//	
+			//	init_addsub_oper_8( 0, 0, 0, 0 );
+			//	if ( b_in_lo == `alu_inout_width'h0 )
+			//	begin
+			//		// Don't change ANYTHING
+			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
+			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
+			//			a_in_hi, a_in_lo };
+			//	end
+			//	
+			//	else
+			//	begin
+			//		// Don't change carry
+			//		{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
+			//			= { rot_temp[ ( b_in_lo & rot_mod_thing ) 
+			//			+: `alu_inout_width ],
+			//			proc_flags_in[pkg_pflags::pf_slot_c] };
+			//		out_hi = 0;
+			//		//{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
+			//		//	= { rot_temp[ ( b_in_lo % `alu_inout_width ) 
+			//		//	+: `alu_inout_width ],
+			//		//	proc_flags_in[pkg_pflags::pf_slot_c] };
+			//	end
+			//	
+			//end
+			//
+			//
+			//// Bit rotating instructions that use carry as bit 8 for a
+			//// 9-bit rotate of { carry, a_in_lo } by one bit:
+			//pkg_alu::alu_op_rolc:
+			//begin
+			//	oper_cat = `alu_op_rolc_cat;
+			//	
+			//	init_addsub_oper_8( 0, 0, 0, 0 );
+			//	{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo }
+			//		= { a_in_lo, proc_flags_in[pkg_pflags::pf_slot_c] };
+			//	out_hi = 0;
+			//end
+			//
+			//pkg_alu::alu_op_rorc:
+			//begin
+			//	oper_cat = `alu_op_rorc_cat;
+			//	
+			//	init_addsub_oper_8( 0, 0, 0, 0 );
+			//	{ out_lo, proc_flags_out[pkg_pflags::pf_slot_c] }
+			//		= { proc_flags_in[pkg_pflags::pf_slot_c], a_in_lo };
+			//	out_hi = 0;
+			//end
 			
 			// 16-bit Bitshifting operations that shift 
 			// { a_in_hi, a_in_lo } by b_in_lo bits

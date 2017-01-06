@@ -52,6 +52,7 @@ package pkg_alu;
 		// Addition operations
 		alu_op_add,
 		alu_op_adc,
+		
 		alu_op_addpb,
 		alu_op_addp,
 		
@@ -84,20 +85,20 @@ package pkg_alu;
 		
 		
 		
-		// 8-bit Bitshifting operations (number of bits specified by b_in)
-		alu_op_lsl,
-		alu_op_lsr,
-		alu_op_asr,
-		
-		// 8-bit Bit rotation operations (number of bits specified by
-		// [b_in % inout_width])
-		alu_op_rol,
-		alu_op_ror,
-		
-		// Bit rotating instructions that use carry as bit 8 for a 9-bit
-		// rotate of { carry, a_in_lo } by one bit:
-		alu_op_rolc,
-		alu_op_rorc,
+		//// 8-bit Bitshifting operations (number of bits specified by b_in)
+		//alu_op_lsl,
+		//alu_op_lsr,
+		//alu_op_asr,
+		//
+		//// 8-bit Bit rotation operations (number of bits specified by
+		//// [b_in % inout_width])
+		//alu_op_rol,
+		//alu_op_ror,
+		//
+		//// Bit rotating instructions that use carry as bit 8 for a 9-bit
+		//// rotate of { carry, a_in_lo } by one bit:
+		//alu_op_rolc,
+		//alu_op_rorc,
 		
 		
 		

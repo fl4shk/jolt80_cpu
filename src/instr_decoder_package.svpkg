@@ -245,18 +245,18 @@ package pkg_instr_dec;
 		instr_g2_op_orr,
 		instr_g2_op_xor,
 		
-		// Bitshifting (and rotating) instructions that use the value of rB
-		// as the number of bits to shift by:
-		instr_g2_op_lsl,
-		instr_g2_op_lsr,
-		instr_g2_op_asr,
-		instr_g2_op_rol,
-		instr_g2_op_ror,
-		
-		// Bit rotating instructions that use carry as bit 8 for a 9-bit
-		// rotate of { carry, rA } by one bit:
-		instr_g2_op_rolc,
-		instr_g2_op_rorc,
+		//// Bitshifting (and rotating) instructions that use the value of 
+		//// rB as the number of bits to shift by:
+		//instr_g2_op_lsl,
+		//instr_g2_op_lsr,
+		//instr_g2_op_asr,
+		//instr_g2_op_rol,
+		//instr_g2_op_ror,
+		//
+		//// Bit rotating instructions that use carry as bit 8 for a 9-bit
+		//// rotate of { carry, rA } by one bit:
+		//instr_g2_op_rolc,
+		//instr_g2_op_rorc,
 		
 		// Copy instructions:
 		// (CoPY from reg rB to reg rA)
@@ -311,9 +311,9 @@ package pkg_instr_dec;
 		
 		// -- rAp, rB --
 		
-		// Arithmetic instructions:
-		instr_g2_op_addpb,
-		instr_g2_op_subpb,
+		//// Arithmetic instructions:
+		//instr_g2_op_addpb,
+		//instr_g2_op_subpb,
 		
 		// Bitshifting (and rotating) instructions that do a 16-bit shift
 		// or rotate on the reg pair rAp, using rB as the number of bits to
@@ -560,7 +560,7 @@ package pkg_instr_dec;
 			//&& ( test_ig2_opcode <= instr_g2_op_swp ) ) );
 			= ( ig2_get_op_in_range( test_ig2_opcode, instr_g2_op_invp,
 			instr_g2_op_cpypira )
-			|| ig2_get_op_in_range( test_ig2_opcode, instr_g2_op_addpb,
+			|| ig2_get_op_in_range( test_ig2_opcode, instr_g2_op_lslp,
 			instr_g2_op_rorp )
 			|| ig2_get_op_in_range( test_ig2_opcode, instr_g2_op_addp, 
 			instr_g2_op_swp ) );

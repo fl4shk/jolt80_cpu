@@ -68,15 +68,15 @@
 `define alu_op_inv_cat (alu_op_cat_8_no_ci)
 `define alu_op_neg_cat (alu_op_cat_8_no_ci)
 
-// 8-bit Bitshifting operations (number of bits specified by b_in)
-`define alu_op_lsl_cat (alu_op_cat_8_no_ci)
-`define alu_op_lsr_cat (alu_op_cat_8_no_ci)
-`define alu_op_asr_cat (alu_op_cat_8_no_ci)
-
-// 8-bit Bit rotation operations (number of bits specified by [b_in %
-// inout_width])
-`define alu_op_rol_cat (alu_op_cat_8_no_ci)
-`define alu_op_ror_cat (alu_op_cat_8_no_ci)
+//// 8-bit Bitshifting operations (number of bits specified by b_in)
+//`define alu_op_lsl_cat (alu_op_cat_8_no_ci)
+//`define alu_op_lsr_cat (alu_op_cat_8_no_ci)
+//`define alu_op_asr_cat (alu_op_cat_8_no_ci)
+//
+//// 8-bit Bit rotation operations (number of bits specified by [b_in %
+//// inout_width])
+//`define alu_op_rol_cat (alu_op_cat_8_no_ci)
+//`define alu_op_ror_cat (alu_op_cat_8_no_ci)
 
 
 
@@ -88,11 +88,11 @@
 // Subtraction operations
 `define alu_op_sbc_cat (alu_op_cat_8_ci)
 
-// Bitwise operations
-// Bit rotating instructions that use carry as bit 8 for a 9-bit rotate of
-// { carry, a_in_lo } by one bit:
-`define alu_op_rolc_cat (alu_op_cat_8_ci)
-`define alu_op_rorc_cat (alu_op_cat_8_ci)
+//// Bitwise operations
+//// Bit rotating instructions that use carry as bit 8 for a 9-bit rotate of
+//// { carry, a_in_lo } by one bit:
+//`define alu_op_rolc_cat (alu_op_cat_8_ci)
+//`define alu_op_rorc_cat (alu_op_cat_8_ci)
 
 
 

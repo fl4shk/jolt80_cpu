@@ -266,60 +266,60 @@ endtask
 
 
 
-// 8-bit Bitshifting operations (number of bits specified by b_in_lo)
-task do_alu_op_lsl;
-	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
-	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
-	
-	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
-	set_more_alu_config( pkg_alu::alu_op_lsl, 1 );
-endtask
-task do_alu_op_lsr;
-	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
-	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
-	
-	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
-	set_more_alu_config( pkg_alu::alu_op_lsr, 1 );
-endtask
-task do_alu_op_asr;
-	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
-	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
-	
-	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
-	set_more_alu_config( pkg_alu::alu_op_asr, 1 );
-endtask
-
-// 8-bit Bit rotation operations (number of bits specified by
-// [b_in_lo % inout_width])
-task do_alu_op_rol;
-	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
-	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
-	
-	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
-	set_more_alu_config( pkg_alu::alu_op_rol, 1 );
-endtask
-task do_alu_op_ror;
-	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
-	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
-	
-	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
-	set_more_alu_config( pkg_alu::alu_op_ror, 1 );
-endtask
-
-// Bit rotating instructions that use carry as bit 8 for a 9-bit
-// rotate of { carry, a_in_lo } by one bit:
-task do_alu_op_rolc;
-	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
-	
-	set_alu_dest_reg( some_ra_index, 1 );
-	set_more_alu_config( pkg_alu::alu_op_rolc, 1 );
-endtask
-task do_alu_op_rorc;
-	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
-	
-	set_alu_dest_reg( some_ra_index, 1 );
-	set_more_alu_config( pkg_alu::alu_op_rorc, 1 );
-endtask
+//// 8-bit Bitshifting operations (number of bits specified by b_in_lo)
+//task do_alu_op_lsl;
+//	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
+//	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
+//	
+//	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
+//	set_more_alu_config( pkg_alu::alu_op_lsl, 1 );
+//endtask
+//task do_alu_op_lsr;
+//	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
+//	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
+//	
+//	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
+//	set_more_alu_config( pkg_alu::alu_op_lsr, 1 );
+//endtask
+//task do_alu_op_asr;
+//	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
+//	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
+//	
+//	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
+//	set_more_alu_config( pkg_alu::alu_op_asr, 1 );
+//endtask
+//
+//// 8-bit Bit rotation operations (number of bits specified by
+//// [b_in_lo % inout_width])
+//task do_alu_op_rol;
+//	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
+//	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
+//	
+//	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
+//	set_more_alu_config( pkg_alu::alu_op_rol, 1 );
+//endtask
+//task do_alu_op_ror;
+//	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
+//	input [`cpu_imm_value_8_msb_pos:0] some_b_in_lo;
+//	
+//	set_alu_inputs_a8_b8( some_ra_index, some_b_in_lo, 1 );
+//	set_more_alu_config( pkg_alu::alu_op_ror, 1 );
+//endtask
+//
+//// Bit rotating instructions that use carry as bit 8 for a 9-bit
+//// rotate of { carry, a_in_lo } by one bit:
+//task do_alu_op_rolc;
+//	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
+//	
+//	set_alu_dest_reg( some_ra_index, 1 );
+//	set_more_alu_config( pkg_alu::alu_op_rolc, 1 );
+//endtask
+//task do_alu_op_rorc;
+//	input [`cpu_reg_arr_msb_pos:0] some_ra_index;
+//	
+//	set_alu_dest_reg( some_ra_index, 1 );
+//	set_more_alu_config( pkg_alu::alu_op_rorc, 1 );
+//endtask
 
 
 
