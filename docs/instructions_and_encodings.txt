@@ -76,18 +76,18 @@ Group 2 (The instruction group with the most opcodes):
       orr
       xor
     
-    ;Bitshifting (and rotating) instructions that use the value of rB
-    ;as the number of bits to shift by (these have been removed):
-    ;  lsl (removed)
-    ;  lsr (removed)
-    ;  asr (removed)
-    ;  rol (removed)
-    ;  ror (removed)
-    ;
-    ;Bit rotating instructions that use carry as bit 8 for a 9-bit
-    ;rotate of { carry, rA } by one bit (these have been removed):
-    ;  rolc (removed)
-    ;  rorc (removed)
+    //Bitshifting (and rotating) instructions that use the value of rB
+    //as the number of bits to shift by (these have been removed):
+    //  lsl (removed)
+    //  lsr (removed)
+    //  asr (removed)
+    //  rol (removed)
+    //  ror (removed)
+    //
+    //Bit rotating instructions that use carry as bit 8 for a 9-bit
+    //rotate of { carry, rA } by one bit (these have been removed):
+    //  rolc (removed)
+    //  rorc (removed)
     
     Copy instructions:
     (CoPY from reg rB to reg rA)
@@ -132,9 +132,9 @@ Group 2 (The instruction group with the most opcodes):
     
     -- rAp, rB --
     
-    ;Arithmetic instructions (these have been removed):
-    ;  addpb (removed)
-    ;  subpb (removed)
+    //Arithmetic instructions (these have been removed):
+    //  addpb (removed)
+    //  subpb (removed)
     
     Bitshifting (and rotating) instructions that do a 16-bit shift
     or rotate on the reg pair rAp, using rB as the number of bits to
