@@ -81,6 +81,55 @@ task disassemble_grp_4_instr;
 		$display( "bhi $%h", final_ig4_imm_value_8 );
 	end
 	
+	
+	// (branch when N == 0)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bpl )
+	begin
+		$display( "bpl $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when N == 1)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bmi )
+	begin
+		$display( "bmi $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when V == 0)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bvc )
+	begin
+		$display( "bvc $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when V == 1)
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bvs )
+	begin
+		$display( "bvs $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when N == V [signed greater than or equal])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bge )
+	begin
+		$display( "bge $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when N != V [signed less than])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_blt )
+	begin
+		$display( "blt $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when ( N == V and Z == 0 ) [signed greater than])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bgt )
+	begin
+		$display( "bgt $%h", final_ig4_imm_value_8 );
+	end
+	
+	// (branch when ( N != V or Z == 1 ) [signed less than or equal])
+	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_ble )
+	begin
+		$display( "ble $%h", final_ig4_imm_value_8 );
+	end
+	
 	else
 	begin
 		$display("Unknown group 4 instruction!");

@@ -918,7 +918,7 @@ package pkg_instr_dec;
 			|| ( test_ig4_opcode == instr_g4_op_ble
 			&& ( ( test_proc_flags[pkg_pflags::pf_slot_n]
 			!= test_proc_flags[pkg_pflags::pf_slot_v] )
-			&& test_proc_flags[pkg_pflags::pf_slot_z] ) ) );
+			|| test_proc_flags[pkg_pflags::pf_slot_z] ) ) );
 	endfunction
 	
 	

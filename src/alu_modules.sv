@@ -52,8 +52,11 @@ module sign_extend_adder
 		input some_a_in_msb, some_b_in_msb, some_result_in_msb;
 		output some_proc_flag_v_out;
 		
-		some_proc_flag_v_out = ( ( some_a_in_msb == some_b_in_msb ) 
-			&& ( some_a_in_msb != some_result_in_msb ) );
+		//some_proc_flag_v_out = ( ( some_a_in_msb == some_b_in_msb ) 
+		//	&& ( some_a_in_msb != some_result_in_msb ) );
+		
+		some_proc_flag_v_out = ( ( some_a_in_msb ^ some_b_in_msb )
+			& ( some_a_in_msb ^ some_result_in_msb ) );
 	endtask
 	
 	
@@ -120,8 +123,11 @@ module adder_subtractor
 		input some_a_in_msb, some_b_in_msb, some_result_in_msb;
 		output some_proc_flag_v_out;
 		
-		some_proc_flag_v_out = ( ( some_a_in_msb == some_b_in_msb ) 
-			&& ( some_a_in_msb != some_result_in_msb ) );
+		//some_proc_flag_v_out = ( ( some_a_in_msb == some_b_in_msb ) 
+		//	&& ( some_a_in_msb != some_result_in_msb ) );
+		
+		some_proc_flag_v_out = ( ( some_a_in_msb ^ some_b_in_msb )
+			& ( some_a_in_msb ^ some_result_in_msb ) );
 	endtask
 	
 	
@@ -555,10 +561,13 @@ module alu
 				init_addsub_oper_8( pkg_alu::addsub_op_sub, proc_flags_in,
 					a_in_lo, b_in_lo );
 				{ proc_flags_out[pkg_pflags::pf_slot_v],
-					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					proc_flags_out[pkg_pflags::pf_slot_c], 
+					out_hi, 
+					out_lo }
 					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
 					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
-					addsub_out_hi, addsub_out_lo };
+					addsub_out_hi, 
+					addsub_out_lo };
 			end
 			
 			pkg_alu::alu_op_sbc:
