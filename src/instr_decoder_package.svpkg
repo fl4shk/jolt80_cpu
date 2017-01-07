@@ -429,12 +429,35 @@ package pkg_instr_dec;
 		// (branch when C == 1 [unsigned greater than or equal])
 		instr_g4_op_bcs,
 		
-		// (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
-		// [unsigned less than or equal])
+		// (branch when C == 0 or Z == 1 [unsigned less than or equal])
 		instr_g4_op_bls,
 		
-		// (branch when C == 0 and Z == 0 [unsigned greater than])
-		instr_g4_op_bhi
+		// (branch when C == 1 and Z == 0 [unsigned greater than])
+		instr_g4_op_bhi,
+		
+		// (branch when N == 0)
+		instr_g4_op_bpl,
+		
+		// (branch when N == 1)
+		instr_g4_op_bmi,
+		
+		// (branch when V == 0)
+		instr_g4_op_bvc,
+		
+		// (branch when V == 1)
+		instr_g4_op_bvs,
+		
+		// (branch when N == V [signed greater than or equal])
+		instr_g4_op_bge,
+		
+		// (branch when N != V [signed less than])
+		instr_g4_op_blt,
+		
+		// (branch when ( N == V and Z == 0 ) [signed greater than])
+		instr_g4_op_bgt,
+		
+		// (branch when ( N != V or Z == 1 ) [signed less than or equal])
+		instr_g4_op_ble
 		
 	} instr_grp_4_oper;
 	
@@ -828,28 +851,74 @@ package pkg_instr_dec;
 		input [`proc_flags_msb_pos:0] test_proc_flags;
 		
 		ig4_get_branch_was_taken
+			// (branch always)
 			= ( ( test_ig4_opcode == instr_g4_op_bra )
 			
+			// (branch when Z == 0)
 			|| ( test_ig4_opcode == instr_g4_op_bne
 			&& !test_proc_flags[pkg_pflags::pf_slot_z] )
 			
+			// (branch when Z == 1)
 			|| ( test_ig4_opcode == instr_g4_op_beq
 			&& test_proc_flags[pkg_pflags::pf_slot_z] )
 			
+			// (branch when C == 0 [unsigned less than])
 			|| ( test_ig4_opcode == instr_g4_op_bcc
 			&& !test_proc_flags[pkg_pflags::pf_slot_c] )
 			
+			// (branch when C == 1 [unsigned greater than or equal])
 			|| ( test_ig4_opcode == instr_g4_op_bcs
 			&& test_proc_flags[pkg_pflags::pf_slot_c] )
 			
-			|| ( test_ig4_opcode == instr_g4_op_bls 
-			&& ( ( test_proc_flags[pkg_pflags::pf_slot_c]
-			&& !test_proc_flags[pkg_pflags::pf_slot_z] )
+			// (branch when C == 0 or Z == 1 [unsigned less than or equal])
+			|| ( test_ig4_opcode == instr_g4_op_bls
+			&& ( !test_proc_flags[pkg_pflags::pf_slot_c]
 			|| test_proc_flags[pkg_pflags::pf_slot_z] ) )
 			
+			// (branch when C == 1 and Z == 0 [unsigned greater than])
 			|| ( test_ig4_opcode == instr_g4_op_bhi 
-			&& ( !test_proc_flags[pkg_pflags::pf_slot_c]
-			&& !test_proc_flags[pkg_pflags::pf_slot_z] ) ) );
+			&& ( test_proc_flags[pkg_pflags::pf_slot_c]
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] ) ) 
+			
+			
+			// (branch when N == 0)
+			|| ( test_ig4_opcode == instr_g4_op_bpl
+			&& ( !test_proc_flags[pkg_pflags::pf_slot_n] ) )
+			
+			// (branch when N == 1)
+			|| ( test_ig4_opcode == instr_g4_op_bmi
+			&& ( test_proc_flags[pkg_pflags::pf_slot_n] ) )
+			
+			// (branch when V == 0)
+			|| ( test_ig4_opcode == instr_g4_op_bvc
+			&& ( !test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when V == 1)
+			|| ( test_ig4_opcode == instr_g4_op_bvs
+			&& ( test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when N == V [signed greater than or equal])
+			|| ( test_ig4_opcode == instr_g4_op_bge
+			&& ( test_proc_flags[pkg_pflags::pf_slot_n]
+			== test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when N != V [signed less than])
+			|| ( test_ig4_opcode == instr_g4_op_blt
+			&& ( test_proc_flags[pkg_pflags::pf_slot_n]
+			!= test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when ( N == V and Z == 0 ) [signed greater than])
+			|| ( test_ig4_opcode == instr_g4_op_bgt
+			&& ( ( test_proc_flags[pkg_pflags::pf_slot_n]
+			== test_proc_flags[pkg_pflags::pf_slot_v] )
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] ) )
+			
+			// (branch when ( N != V or Z == 1 ) [signed less than or
+			// equal])
+			|| ( test_ig4_opcode == instr_g4_op_ble
+			&& ( ( test_proc_flags[pkg_pflags::pf_slot_n]
+			!= test_proc_flags[pkg_pflags::pf_slot_v] )
+			&& test_proc_flags[pkg_pflags::pf_slot_z] ) ) );
 	endfunction
 	
 	

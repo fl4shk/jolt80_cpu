@@ -104,7 +104,7 @@ module spcpu
 	// (mainly for internal ALU usage)
 	bit [`cpu_reg_msb_pos:0] cpu_regs[0:`cpu_reg_arr_msb_pos];
 	
-	// Interrupt return address
+	// Interrupt return address (can be accessed by some instructions)
 	bit [`cpu_addr_msb_pos:0] int_ret_addr;
 	
 	// Whether interrupts are enabled or not

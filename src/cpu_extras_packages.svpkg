@@ -107,11 +107,22 @@ endpackage
 
 package pkg_pflags;
 	
-	// Two processor flags (for simplicity):  carry (c) and zero (z)
+	//// Two processor flags (for simplicity):  carry (c) and zero (z)
+	//typedef enum bit [`proc_flags_msb_pos:0] 
+	//{
+	//	pf_slot_z,
+	//	pf_slot_c
+	//} proc_flag_slot;
+	
+	
+	// Four processor flags (UPGRADE!):  
+	// negative (n), overflow (v), carry (c), and zero (z)
 	typedef enum bit [`proc_flags_msb_pos:0] 
 	{
 		pf_slot_z,
-		pf_slot_c
+		pf_slot_c,
+		pf_slot_v,
+		pf_slot_n
 	} proc_flag_slot;
 	
 endpackage

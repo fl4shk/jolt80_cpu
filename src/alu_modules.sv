@@ -45,6 +45,18 @@ module sign_extend_adder
 	
 	import pkg_pflags::*;
 	
+	
+	// This task is used by both adding and subtracting to update the V
+	// flag.
+	task update_v_flag_after_op;
+		input some_a_in_msb, some_b_in_msb, some_result_in_msb;
+		output some_proc_flag_v_out;
+		
+		some_proc_flag_v_out = ( ( some_a_in_msb == some_b_in_msb ) 
+			&& ( some_a_in_msb != some_result_in_msb ) );
+	endtask
+	
+	
 	always @ (*)
 	//always_comb
 	begin
@@ -53,12 +65,21 @@ module sign_extend_adder
 		begin
 			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
 				= { a_in_hi, a_in_lo } + { 8'hff, b_in_lo };
+			
+			update_v_flag_after_op( a_in_hi[`alu_inout_msb_pos], 1'b1,
+				out_hi[`alu_inout_msb_pos],
+				proc_flags_out[pkg_pflags::pf_slot_v] );
+			
 		end
 		
 		else // if (!b_in_lo[`cpu_imm_value_8_msb_pos])
 		begin
 			{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo } 
 				= { a_in_hi, a_in_lo } + { 8'h0, b_in_lo };
+			
+			update_v_flag_after_op( a_in_hi[`alu_inout_msb_pos], 1'b0,
+				out_hi[`alu_inout_msb_pos],
+				proc_flags_out[pkg_pflags::pf_slot_v] );
 		end
 	end
 	
@@ -93,6 +114,17 @@ module adder_subtractor
 		.proc_flags_out(snx_adder_proc_flags_out) );
 	
 	
+	// This task is used by both adding and subtracting to update the V
+	// flag.
+	task update_v_flag_after_op;
+		input some_a_in_msb, some_b_in_msb, some_result_in_msb;
+		output some_proc_flag_v_out;
+		
+		some_proc_flag_v_out = ( ( some_a_in_msb == some_b_in_msb ) 
+			&& ( some_a_in_msb != some_result_in_msb ) );
+	endtask
+	
+	
 	always @ (*)
 	//always_comb
 	begin
@@ -119,7 +151,12 @@ module adder_subtractor
 					= { 1'b0, a_in_lo } + { 1'b0, b_in_lo };
 				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
 				//	= a_in_lo + b_in_lo;
-				{ proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n], 
+					proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
+				update_v_flag_after_op( a_in_lo[`alu_inout_msb_pos], 
+					b_in_lo[`alu_inout_msb_pos], 
+					out_lo[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			pkg_alu::addsub_op_adc:
@@ -130,7 +167,12 @@ module adder_subtractor
 				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
 				//	= a_in_lo + b_in_lo 
 				//	+ proc_flags_in[pkg_pflags::pf_slot_c];
-				{ proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n], 
+					proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
+				update_v_flag_after_op( a_in_lo[`alu_inout_msb_pos], 
+					b_in_lo[`alu_inout_msb_pos], 
+					out_lo[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			pkg_alu::addsub_op_addpb:
@@ -139,7 +181,12 @@ module adder_subtractor
 					= { 1'b0, a_in_hi, a_in_lo } + { 9'h0, b_in_lo };
 				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
 				//	= { a_in_hi, a_in_lo } + b_in_lo;
-				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n],
+					proc_flags_out[pkg_pflags::pf_slot_z] } = 0;
+				update_v_flag_after_op( a_in_hi[`alu_inout_msb_pos], 
+					b_in_hi[`alu_inout_msb_pos], 
+					out_hi[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			pkg_alu::addsub_op_addp:
@@ -149,7 +196,12 @@ module adder_subtractor
 					+ { 1'b0, b_in_hi, b_in_lo };
 				//{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
 				//	= { a_in_hi, a_in_lo } + { b_in_hi, b_in_lo };
-				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n],
+					proc_flags_out[pkg_pflags::pf_slot_z] } = 0;
+				update_v_flag_after_op( a_in_hi[`alu_inout_msb_pos], 
+					b_in_hi[`alu_inout_msb_pos], 
+					out_hi[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			pkg_alu::addsub_op_addpsnx:
@@ -192,7 +244,13 @@ module adder_subtractor
 					
 				{ out_hi, out_lo } = { snx_adder_out_hi, 
 					snx_adder_out_lo };
-				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
+				//proc_flags_out[pkg_pflags::pf_slot_z] = 0;
+				//proc_flags_out = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n],
+					proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c],
+					proc_flags_out[pkg_pflags::pf_slot_z] }
+					= { 1'b0, proc_flags_in[pkg_pflags::pf_slot_v], 2'b0 };
 			end
 			
 			// Subtraction operations
@@ -205,7 +263,12 @@ module adder_subtractor
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
 					= { 1'b0, a_in_lo } + { 1'b0, (~b_in_lo) } + 9'b1;
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n], 
+					proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
+				update_v_flag_after_op( a_in_lo[`alu_inout_msb_pos], 
+					b_in_lo[`alu_inout_msb_pos], 
+					out_lo[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			pkg_alu::addsub_op_sbc:
@@ -217,8 +280,12 @@ module adder_subtractor
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_lo } 
 					= { 1'b0, a_in_lo } + { 1'b0, (~b_in_lo) } 
 					+ { 8'h0, proc_flags_in[pkg_pflags::pf_slot_c] };
-				{ proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
-				
+				{ proc_flags_out[pkg_pflags::pf_slot_n], 
+					proc_flags_out[pkg_pflags::pf_slot_z], out_hi } = 0;
+				update_v_flag_after_op( a_in_lo[`alu_inout_msb_pos], 
+					b_in_lo[`alu_inout_msb_pos], 
+					out_lo[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			pkg_alu::addsub_op_subpb:
@@ -230,7 +297,12 @@ module adder_subtractor
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
 					= { 1'b0, a_in_hi, a_in_lo } 
 					+ { 1'b0, ~{ 8'h0, b_in_lo } } + 17'b1;
-				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n],
+					proc_flags_out[pkg_pflags::pf_slot_z] } = 0;
+				update_v_flag_after_op( a_in_hi[`alu_inout_msb_pos], 
+					b_in_hi[`alu_inout_msb_pos], 
+					out_hi[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			pkg_alu::addsub_op_subp:
@@ -242,7 +314,12 @@ module adder_subtractor
 				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
 					= { 1'b0, a_in_hi, a_in_lo } 
 					+ { 1'b0, ~{ b_in_hi, b_in_lo } } + 17'b1;
-				proc_flags_out[pkg_pflags::pf_slot_z] = 0;
+				{ proc_flags_out[pkg_pflags::pf_slot_n], 
+					proc_flags_out[pkg_pflags::pf_slot_z] } = 0;
+				update_v_flag_after_op( a_in_hi[`alu_inout_msb_pos], 
+					b_in_hi[`alu_inout_msb_pos], 
+					out_hi[`alu_inout_msb_pos],
+					proc_flags_out[pkg_pflags::pf_slot_v] );
 			end
 			
 			default:
@@ -344,7 +421,7 @@ module alu
 	// import alu_oper_cat;
 	alu_oper_cat oper_cat;
 	
-	bit do_not_change_z_flag;
+	bit do_not_change_nz_flags;
 	
 	//import pkg_alu::get_alu_oper_cat;
 	
@@ -385,13 +462,18 @@ module alu
 		//	rot_temp, rot_c_temp );
 		//get_alu_oper_cat( oper, oper_cat );
 		
-		do_not_change_z_flag = 1'b0;
+		do_not_change_nz_flags = 1'b0;
 		//{ oper_cat, proc_flags_out, out_hi, out_lo } 
 		//	= { `alu_op_add_cat, proc_flags_in, a_in_hi, a_in_lo };
 		//{ test_addsub_oper, addsub_proc_flags_in, addsub_a_in_hi, 
 		//	addsub_a_in_lo, addsub_b_in_hi, addsub_b_in_lo }
 		//	= { pkg_alu::addsub_op_add, proc_flags_in, a_in_hi, a_in_lo, 
 		//	b_in_hi, b_in_lo };
+		
+		
+		// Not all ALU instructions affect the V flag
+		proc_flags_out[pkg_pflags::pf_slot_v] 
+			= proc_flags_in[pkg_pflags::pf_slot_v];
 		
 		
 		case (oper)
@@ -403,8 +485,10 @@ module alu
 				
 				init_addsub_oper_8( pkg_alu::addsub_op_add, proc_flags_in,
 					a_in_lo, b_in_lo );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -416,8 +500,10 @@ module alu
 					a_in_lo, b_in_lo );
 				
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -428,8 +514,10 @@ module alu
 				init_addsub_oper_16( pkg_alu::addsub_op_addpb, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
 				
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -439,8 +527,10 @@ module alu
 				
 				init_addsub_oper_16( pkg_alu::addsub_op_addp, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -450,8 +540,10 @@ module alu
 				
 				init_addsub_oper_16( pkg_alu::addsub_op_addpsnx, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -462,8 +554,10 @@ module alu
 				
 				init_addsub_oper_8( pkg_alu::addsub_op_sub, proc_flags_in,
 					a_in_lo, b_in_lo );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -473,8 +567,10 @@ module alu
 				
 				init_addsub_oper_8( pkg_alu::addsub_op_sbc, proc_flags_in,
 					a_in_lo, b_in_lo );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -484,8 +580,10 @@ module alu
 				
 				init_addsub_oper_16( pkg_alu::addsub_op_subpb, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -495,8 +593,10 @@ module alu
 				
 				init_addsub_oper_16( pkg_alu::addsub_op_subp, 
 					proc_flags_in, a_in_hi, a_in_lo, b_in_hi, b_in_lo );
-				{ proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
-					= { addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
+				{ proc_flags_out[pkg_pflags::pf_slot_v],
+					proc_flags_out[pkg_pflags::pf_slot_c], out_hi, out_lo }
+					= { addsub_proc_flags_out[pkg_pflags::pf_slot_v],
+					addsub_proc_flags_out[pkg_pflags::pf_slot_c], 
 					addsub_out_hi, addsub_out_lo };
 			end
 			
@@ -595,7 +695,7 @@ module alu
 			//	begin
 			//		// Don't change ANYTHING
 			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
-			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			do_not_change_nz_flags, out_hi, out_lo } 
 			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 			//			a_in_hi, a_in_lo };
 			//	end
@@ -617,7 +717,7 @@ module alu
 			//	begin
 			//		// Don't change ANYTHING
 			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
-			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			do_not_change_nz_flags, out_hi, out_lo } 
 			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 			//			a_in_hi, a_in_lo };
 			//	end
@@ -639,7 +739,7 @@ module alu
 			//	begin
 			//		// Don't change ANYTHING
 			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
-			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			do_not_change_nz_flags, out_hi, out_lo } 
 			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 			//			a_in_hi, a_in_lo };
 			//		//$display("alu_op_asr:  Don't change ANYTHING");
@@ -665,7 +765,7 @@ module alu
 			//	begin
 			//		// Don't change ANYTHING
 			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
-			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			do_not_change_nz_flags, out_hi, out_lo } 
 			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 			//			a_in_hi, a_in_lo };
 			//	end
@@ -697,7 +797,7 @@ module alu
 			//	begin
 			//		// Don't change ANYTHING
 			//		{ proc_flags_out[pkg_pflags::pf_slot_c], 
-			//			do_not_change_z_flag, out_hi, out_lo } 
+			//			do_not_change_nz_flags, out_hi, out_lo } 
 			//			= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 			//			a_in_hi, a_in_lo };
 			//	end
@@ -752,7 +852,7 @@ module alu
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
+						do_not_change_nz_flags, out_hi, out_lo } 
 						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 						a_in_hi, a_in_lo };
 				end
@@ -775,7 +875,7 @@ module alu
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
+						do_not_change_nz_flags, out_hi, out_lo } 
 						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 						a_in_hi, a_in_lo };
 				end
@@ -798,7 +898,7 @@ module alu
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
+						do_not_change_nz_flags, out_hi, out_lo } 
 						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 						a_in_hi, a_in_lo };
 				end
@@ -825,7 +925,7 @@ module alu
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
+						do_not_change_nz_flags, out_hi, out_lo } 
 						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 						a_in_hi, a_in_lo };
 				end
@@ -852,7 +952,7 @@ module alu
 				begin
 					// Don't change ANYTHING
 					{ proc_flags_out[pkg_pflags::pf_slot_c], 
-						do_not_change_z_flag, out_hi, out_lo } 
+						do_not_change_nz_flags, out_hi, out_lo } 
 						= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 						a_in_hi, a_in_lo };
 				end
@@ -897,7 +997,7 @@ module alu
 				init_addsub_oper_8( 0, 0, 0, 0 );
 				// Don't change ANYTHING
 				{ proc_flags_out[pkg_pflags::pf_slot_c], 
-					do_not_change_z_flag, out_hi, out_lo } 
+					do_not_change_nz_flags, out_hi, out_lo } 
 					= { proc_flags_in[pkg_pflags::pf_slot_c], 1'b1, 
 					a_in_hi, a_in_lo };
 			end
@@ -905,25 +1005,31 @@ module alu
 		endcase
 		
 		
-		if (!do_not_change_z_flag)
+		if (!do_not_change_nz_flags)
 		begin
 			if ( ( oper_cat == alu_op_cat_8_no_ci )
 				|| ( oper_cat == alu_op_cat_8_ci ) )
 			begin
 				proc_flags_out[pkg_pflags::pf_slot_z] = ( out_lo == 0 );
+				proc_flags_out[pkg_pflags::pf_slot_n] 
+					= ( out_lo[`alu_inout_msb_pos] );
 			end
 			
 			else
 			begin
 				proc_flags_out[pkg_pflags::pf_slot_z] 
 					= ( { out_hi, out_lo } == 0 );
+				proc_flags_out[pkg_pflags::pf_slot_n]
+					= ( out_hi[`alu_inout_msb_pos] );
 			end
 		end
 		
-		else // if (do_not_change_z_flag)
+		else // if (do_not_change_nz_flags)
 		begin
-			proc_flags_out[pkg_pflags::pf_slot_z] 
-				= proc_flags_in[pkg_pflags::pf_slot_z];
+			{ proc_flags_out[pkg_pflags::pf_slot_z],
+				proc_flags_out[pkg_pflags::pf_slot_n] }
+				= { proc_flags_in[pkg_pflags::pf_slot_z],
+				proc_flags_in[pkg_pflags::pf_slot_n] };
 		end
 	end
 	

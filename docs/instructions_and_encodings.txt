@@ -225,9 +225,19 @@ Group 4 (Branching instructions):
       4. beq (branch when Z == 1)
       5. bcc (branch when C == 0 [unsigned less than])
       6. bcs (branch when C == 1 [unsigned greater than or equal])
-      7. bls (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
+      7. bls (branch when ( C == 0 or Z == 1 ) 
       [unsigned less than or equal])
-      8. bhi (branch when C == 0 and Z == 0 [unsigned greater than])
+      8. bhi (branch when ( C == 1 and Z == 0 ) 
+      [unsigned greater than])
+      9. bpl (branch when N == 0)
+      10. bmi (branch when N == 1)
+      11. bvc (branch when V == 0)
+      12. bvs (branch when V == 1)
+      13. bge (branch when N == V [signed greater than or equal])
+      14. blt (branch when N != V [signed less than])
+      15. bgt (branch when ( N == V and Z == 0 ) [signed greater than])
+      16. ble (branch when ( N != V or Z == 1 ) 
+      [signed less than or equal])
 
 
 Group 5 (Instructions encoded with four bytes instead of two so that there

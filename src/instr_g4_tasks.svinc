@@ -69,14 +69,13 @@ task disassemble_grp_4_instr;
 		$display( "bcs $%h", final_ig4_imm_value_8 );
 	end
 	
-	// (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
-	// [unsigned less than or equal])
+	// (branch when C == 0 or Z == 1 [unsigned less than or equal])
 	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bls )
 	begin
 		$display( "bls $%h", final_ig4_imm_value_8 );
 	end
 	
-	// (branch when C == 0 and Z == 0 [unsigned greater than])
+	// (branch when C == 1 and Z == 0 [unsigned greater than])
 	else if ( final_ig4_opcode == pkg_instr_dec::instr_g4_op_bhi )
 	begin
 		$display( "bhi $%h", final_ig4_imm_value_8 );
@@ -124,92 +123,95 @@ task start_exec_instr_from_grp_4;
 	// integer):
 	
 	// (branch always)
-	case (final_ig4_opcode)
-		pkg_instr_dec::instr_g4_op_bra:
-		begin
-			finish_ig4_branch();
-		end
-		
-		// (branch never, a form of NOP)
-		pkg_instr_dec::instr_g4_op_bnv:
-		begin
-			// Wait a cycle
-			if (final_branch_was_taken)
-			begin
-				finish_ig4_branch();
-			end
-		end
-		
-		// (branch when Z == 0)
-		pkg_instr_dec::instr_g4_op_bne:
-		begin
-			//if (!true_proc_flags[pkg_pflags::pf_slot_z])
-			if (final_branch_was_taken)
-			begin
-				finish_ig4_branch();
-			end
-		end
-		
-		// (branch when Z == 1)
-		pkg_instr_dec::instr_g4_op_beq:
-		begin
-			//if (true_proc_flags[pkg_pflags::pf_slot_z])
-			if (final_branch_was_taken)
-			begin
-				finish_ig4_branch();
-			end
-		end
-		
-		// (branch when C == 0 [unsigned greater than or equal])
-		pkg_instr_dec::instr_g4_op_bcc:
-		begin
-			//if (!true_proc_flags[pkg_pflags::pf_slot_c])
-			if (final_branch_was_taken)
-			begin
-				finish_ig4_branch();
-			end
-		end
-		
-		// (branch when C == 1 [unsigned less than])
-		pkg_instr_dec::instr_g4_op_bcs:
-		begin
-			//if (true_proc_flags[pkg_pflags::pf_slot_c])
-			if (final_branch_was_taken)
-			begin
-				finish_ig4_branch();
-			end
-		end
-		
-		// (branch when ( ( C == 1 and Z == 0 ) or ( Z == 1 ) )
-		// [unsigned less than or equal])
-		pkg_instr_dec::instr_g4_op_bls:
-		begin
-			//if ( ( true_proc_flags[pkg_pflags::pf_slot_c]
-			//	&& !true_proc_flags[pkg_pflags::pf_slot_z] )
-			//	|| true_proc_flags[pkg_pflags::pf_slot_z] )
-			if (final_branch_was_taken)
-			begin
-				finish_ig4_branch();
-			end
-		end
-		
-		// (branch when C == 0 and Z == 0 [unsigned greater than])
-		pkg_instr_dec::instr_g4_op_bhi:
-		begin
-			//if ( !true_proc_flags[pkg_pflags::pf_slot_c]
-			//	&& !true_proc_flags[pkg_pflags::pf_slot_z] )
-			if (final_branch_was_taken)
-			begin
-				finish_ig4_branch();
-			end
-		end
-		
-		default:
-		begin
-			$display("Illegal Group 4 Instruction!");
-		end
-		
-	endcase
+	//case (final_ig4_opcode)
+	//	pkg_instr_dec::instr_g4_op_bra:
+	//	begin
+	//		finish_ig4_branch();
+	//	end
+	//	
+	//	// (branch never, a form of NOP)
+	//	pkg_instr_dec::instr_g4_op_bnv:
+	//	begin
+	//		// Wait a cycle
+	//		if (final_branch_was_taken)
+	//		begin
+	//			finish_ig4_branch();
+	//		end
+	//	end
+	//	
+	//	// (branch when Z == 0)
+	//	pkg_instr_dec::instr_g4_op_bne:
+	//	begin
+	//		//if (!true_proc_flags[pkg_pflags::pf_slot_z])
+	//		if (final_branch_was_taken)
+	//		begin
+	//			finish_ig4_branch();
+	//		end
+	//	end
+	//	
+	//	// (branch when Z == 1)
+	//	pkg_instr_dec::instr_g4_op_beq:
+	//	begin
+	//		//if (true_proc_flags[pkg_pflags::pf_slot_z])
+	//		if (final_branch_was_taken)
+	//		begin
+	//			finish_ig4_branch();
+	//		end
+	//	end
+	//	
+	//	// (branch when C == 0 [unsigned less than])
+	//	pkg_instr_dec::instr_g4_op_bcc:
+	//	begin
+	//		//if (!true_proc_flags[pkg_pflags::pf_slot_c])
+	//		if (final_branch_was_taken)
+	//		begin
+	//			finish_ig4_branch();
+	//		end
+	//	end
+	//	
+	//	// (branch when C == 1 [unsigned greater than or equal])
+	//	pkg_instr_dec::instr_g4_op_bcs:
+	//	begin
+	//		//if (true_proc_flags[pkg_pflags::pf_slot_c])
+	//		if (final_branch_was_taken)
+	//		begin
+	//			finish_ig4_branch();
+	//		end
+	//	end
+	//	
+	//	// (branch when C == 0 or Z == 1 [unsigned less than or equal])
+	//	pkg_instr_dec::instr_g4_op_bls:
+	//	begin
+	//		//if ( !true_proc_flags[pkg_pflags::pf_slot_c]
+	//		//	|| true_proc_flags[pkg_pflags::pf_slot_z] )
+	//		if (final_branch_was_taken)
+	//		begin
+	//			finish_ig4_branch();
+	//		end
+	//	end
+	//	
+	//	// (branch when C == 1 and Z == 0 [unsigned greater than])
+	//	pkg_instr_dec::instr_g4_op_bhi:
+	//	begin
+	//		//if ( true_proc_flags[pkg_pflags::pf_slot_c]
+	//		//	&& !true_proc_flags[pkg_pflags::pf_slot_z] )
+	//		if (final_branch_was_taken)
+	//		begin
+	//			finish_ig4_branch();
+	//		end
+	//	end
+	//	
+	//	default:
+	//	begin
+	//		$display("Illegal Group 4 Instruction!");
+	//	end
+	//	
+	//endcase
+	
+	if (final_branch_was_taken)
+	begin
+		finish_ig4_branch();
+	end
 	
 	
 	if (!final_ig4_instr_is_ldst)
