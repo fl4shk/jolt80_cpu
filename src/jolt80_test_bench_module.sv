@@ -1,19 +1,19 @@
-// This file is part of Spark80 CPU.
+// This file is part of Jolt80 CPU.
 // 
 // Copyright 2016 by Andrew Clark (FL4SHK).
 // 
-// Spark80 CPU is free software: you can redistribute it and/or
+// Jolt80 CPU is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License, or (at
 // your option) any later version.
 // 
-// Spark80 CPU is distributed in the hope that it will be useful,
+// Jolt80 CPU is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
 // 
 // You should have received a copy of the GNU General Public License along
-// with Spark80 CPU.  If not, see <http://www.gnu.org/licenses/>.
+// with Jolt80 CPU.  If not, see <http://www.gnu.org/licenses/>.
 
 
 `include "src/alu_defines.svinc"
@@ -26,7 +26,7 @@
 // use_half_clock is intended to be used for simulation only
 `define use_half_clock
 
-module spark80_test_bench;
+module jolt80_test_bench;
 	
 	`ifdef use_half_clock
 	bit clk_gen_reset, tb_half_clk, tb_mem_clk;
@@ -132,7 +132,7 @@ module spark80_test_bench;
 	
 	
 	//// This needs to have a wrapper put around it when I actually use 
-	//// Spark80 in my FPGA board
+	//// Jolt80 in my FPGA board
 	//mixed_width_true_dual_port_ram #(8,16,15) dedotated_wam
 	//	( .addr1(test_cpu_data_inout_addr),
 	//	.addr2(test_mem_addr_2),
@@ -179,9 +179,9 @@ module spark80_test_bench;
 	
 	
 	`ifdef use_half_clock
-	spark80 test_cpu( .clk(tb_half_clk), 
+	jolt80 test_cpu( .clk(tb_half_clk), 
 	`else
-	spark80 test_cpu( .clk(tb_clk),
+	jolt80 test_cpu( .clk(tb_clk),
 	`endif
 		.reset(test_cpu_reset), .interrupt(test_cpu_interrupt),
 		.data_ready(test_cpu_data_ready),

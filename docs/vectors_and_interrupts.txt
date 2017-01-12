@@ -39,5 +39,5 @@ pointer), so the interrupt routine should do that if it is so desired.
 There are no extra registers OR FLAGS for dealing with interrupts more
 quickly, which is a bit of a weakness of the CPU, though it did make the
 hardware implementation of interrupts extremely simple.  I MAY add another
-set of registers AND FLAGS in a future revision of Spark80.
+set of registers AND FLAGS in a future revision of Jolt80.
 
