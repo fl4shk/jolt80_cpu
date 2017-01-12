@@ -1,0 +1,43 @@
+-- VECTORS AND INTERRUPTS --
+
+There are two hardcoded vectors for where code should start for two
+different situations.
+
+Each vector consists of a big-endian, 16-bit address, which specifies what
+address the PC will be set to.
+
+
+Address 0x8000 (hexadecimal):  Reset Vector.  The CPU jumps here at the
+start the program.
+
+Address 0x8002 (hexadecimal):  Interrupt Vector.  The CPU jumps here when
+an interrupt happens.
+
+
+INTERRUPT PROCESS
+
+When the CPU begins executing an interrupt, it disables interrupts during
+the same process.  
+
+In the best case (that is, when the CPU doesn't have to wait for memory),
+the CPU uses only one cycle to change the PC to the interrupt vector and
+simultaneously disable interrupts.  Also, simultaneously, the old PC is
+stored in a special register called the Interrupt Return Address (IRA for
+short).  The "reti" instruction copies the IRA to the PC and enables
+interrupts.  There are a few other instructions that can be use to
+manipulate the IRA.  
+
+There is not a true "in an interrupt" mode of the CPU.  It is simply
+implied that the CPU is in interrupts mode if the CPU is executing the
+interrupt service routine.
+
+
+No registers OR FLAGS are pushed to the stack automatically upon beginning
+an interrupt (especially since there is no hardware-enforced stack 
+pointer), so the interrupt routine should do that if it is so desired.
+
+There are no extra registers OR FLAGS for dealing with interrupts more
+quickly, which is a bit of a weakness of the CPU, though it did make the
+hardware implementation of interrupts extremely simple.  I MAY add another
+set of registers AND FLAGS in a future revision of Spark80.
+
