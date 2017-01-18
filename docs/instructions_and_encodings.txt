@@ -111,7 +111,7 @@ Group 2 (The instruction group with the most opcodes):
     
     Complement instructions with one register operand (rB ignored):
       invp (one's complement of rAp)
-      negp (two's complement of rA)
+      negp (two's complement of rAp)
     
     Bit rotating instructions that use carry as bit 16 for a 17-bit
     rotate of { carry, rAp } by one bit:
