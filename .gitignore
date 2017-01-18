@@ -11,4 +11,3 @@ preprocs*/*
 *.txt.ignore
 *.vvp
 testing/*
-open_all_source_files_in_vim.sh

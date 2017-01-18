@@ -1,6 +1,6 @@
 // This file is part of Jolt80 CPU.
 // 
-// Copyright 2016 by Andrew Clark (FL4SHK).
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
 // 
 // Jolt80 CPU is free software: you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as published
