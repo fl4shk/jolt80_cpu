@@ -163,12 +163,13 @@ Group 2 (The instruction group with the most opcodes):
       rBp, then Subtract 1 from the reg pair rBp)
       
       
-      ldfab (Add 1 to the reg pair rBp, then LoaD a byte containing
-      processor Flags (other bits cleared) into the processor flags)
+      ldfab (Add 1 to the reg pair rAp, then LoaD a byte, from the updated
+      address in rAp, containing processor Flags (other bits cleared) into
+      the processor flags)
       
       stfsa (STore a byte containing the current processor flags (other
-      bits cleared) to memory at address contained in reg pair rBp, then
-      Add 1 the reg pair rBp)
+      bits cleared) to memory at address contained in reg pair rAp, then
+      Subtract 1 from the reg pair rAp)
       
     
     16-bit Load/store instructions:
